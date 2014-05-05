@@ -1,0 +1,21 @@
+Package: comp
+Type: Package
+Title: Compositional Data Analysis.
+Version: 0.0.1
+Date: 2014-05-05
+Depends: R (>= 3.0.0), utils, robustbase, rrcov, car (>= 2.0-0), MASS, pls
+Author: Matthias Templ, Karel Hron, Peter Filzmoser, Paul Curcean
+Maintainer: Matthias Templ <matthias.templ@gmail.com>
+  Description: The package includes methods for imputation 
+of compositional data including robust methods, methods to impute rounded zeros, 
+(robust) outlier detection for compositional data, 
+(robust) principal component
+analysis for compositional data, (robust) factor analysis for compositional 
+data, (robust) discriminant analysis for compositional data (Fisher rule), robust regression with compositional predictors and (robust) 
+Anderson-Darling normality tests
+for compositional data as well as popular log-ratio transformations (addLR, cenLR, isomLR, 
+                                                                     and their inverse transformations).
+In addition, visualisation and diagnostic tools are implemented as well as high and low-level plot functions for the 
+ternary diagram. 
+License: MIT
+LazyLoad: yes
