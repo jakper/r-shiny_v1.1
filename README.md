@@ -7,3 +7,11 @@ package
 library(sdcMicroGUI)
 sdcGUI()
 ```
+
+For the class structure, have a look at the sdcMicro package. Maybe I can help here, but I'm very busy this month.
+A certain class structure will help for GUI development.
+Each slot of the defined class should include information about the data.
+
+```R
+library(sdcMicro)
+```
