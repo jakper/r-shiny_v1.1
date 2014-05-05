@@ -1,3 +1,10 @@
+## package installation
+
+```R
+install_bitbucket("comp", username="matthias-da",  auth_user="yourBitbucketUserName", password="deinpasswd")
+```
+
+
 ## data import facilities
 
 use data import facilities from sdcMicroGUI. This is written partly with Gtk2 but the basics principle should be copied from the sdcMicroGUI
