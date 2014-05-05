@@ -7,7 +7,7 @@ setClassUnion('logicalOrNULL', c('logical', 'NULL'))
 setClassUnion('matrixOrNULL', c('matrix', 'NULL'))
 setClassUnion('listOrNULL', c('list', 'NULL'))
 setClassUnion('factorOrNULL', c('factor', 'NULL'))
-setClassUnion('sdcmicroOrNULL', c('NULL'))
+setClassUnion('compOrNULL', c('NULL'))
 
 #' S4 class describing a comp-object
 #'
@@ -23,7 +23,7 @@ setClassUnion('sdcmicroOrNULL', c('NULL'))
 #' @note objects of class \code{dataObj} are input for slot \code{dataObj} in class \code{sdcProblem}
 #' @author Matthias Templ \email{matthias.templ@@gmail.com}
 setClass(
-  Class='sdcMicroObj', 
+  Class='compObj', 
   representation=representation(			
     origData='dataframeOrNULL',
     compVars1='numericOrNULL',
