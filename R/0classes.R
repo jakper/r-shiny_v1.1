@@ -29,6 +29,9 @@ setClass(
     compVars1='numericOrNULL',
     compVars2='numericOrNULL',
     compVars3='numericOrNULL',
+    tranCompVars1='numericOrNULL',
+    tranCompVars2='numericOrNULL',
+    tranCompVars3='numericOrNULL',
     coordinates='numericOrNULL',
     external='numericOrNULL',
     subset='numericOrNULL'
@@ -38,6 +41,9 @@ setClass(
     compVars1=NULL,
     compVars2=NULL,
     compVars3=NULL,
+    tranCompVars1=NULL,
+    tranCompVars2=NULL,
+    tranCompVars3=NULL,
     coordinates=NULL,
     external=NULL,
     subset=NULL
