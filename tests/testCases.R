@@ -57,6 +57,20 @@ M <- mvrnorm(n, mu=m, Sigma=v)
 colnames(M) <- paste(colnames(M),"2",sep="")
 x9 <- cbind(x8, M)
 
-save(x1,x2,x3,x4,x5,x6,x7,x8,x9, file="testdata.RData")
+## missing values as other characters:
+x10 <- x9
+x10[is.na(x9)] <- "."
+
+save(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10, file="data/testdata.RData")
+write.csv(x1, file="inst/doc/x1.csv")
+write.csv(x2, file="inst/doc/x2.csv")
+write.csv(x3, file="inst/doc/x3.csv")
+write.csv(x4, file="inst/doc/x4.csv")
+write.csv(x5, file="inst/doc/x5.csv")
+write.csv(x6, file="inst/doc/x6.csv")
+write.csv(x7, file="inst/doc/x7.csv")
+write.csv(x8, file="inst/doc/x8.csv")
+write.csv(x9, file="inst/doc/x9.csv")
+write.csv(x10, file="inst/doc/x10.csv")
 
 
