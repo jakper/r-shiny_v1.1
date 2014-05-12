@@ -1,0 +1,83 @@
+$(document).call(function(){
+    
+    /*recives an array with the names of the data-variables
+      creates a panel with checkButtons 
+      user chooses which variables he wants to use
+      sends back to the server the variable-names, that have been choosed by the user
+    */
+    Shiny.addCustomMessageHandler('createVariableDialog',
+            function(names){
+                cleanVariableDialog();
+                $('div.variableDialog').show();
+                createVariableDialog(names);
+    });
+
+    createVariableDialog = function(names){
+        
+        var dialog = document.getElementById('variableDialog');
+        
+        var title = document.createElement('div');
+        title.innerHTML = 'Choose the needed variables';
+        title.setAttribute('class', 'dialogInfo');
+        dialog.appendChild(title);
+
+        for(var i = 0; i < names.length; i++){
+             var br = document.createElement('br');
+             
+             var name = document.createElement('div');
+             name.setAttribute('class', 'names')
+             name.innerHTML = names[i];
+
+             var check = document.createElement('input');
+             check.setAttribute('type','checkbox');
+             check.setAttribute('class', 'check');
+             
+             dialog.appendChild(name);
+             dialog.appendChild(check);
+             dialog.appendChild(br);
+        }
+
+       var okButton = document.createElement('input');
+       okButton.setAttribute('value','OK');
+       okButton.setAttribute('type','button');
+       okButton.setAttribute('class','button');
+       okButton.setAttribute('onclick','getCheckedBoxes()');
+       dialog.appendChild(okButton);
+
+       var cancelButton = document.createElement('input');
+       cancelButton.setAttribute('value','Cancel');
+       cancelButton.setAttribute("type","button");
+       cancelButton.setAttribute('onclick', 'cancelButtonFunction()');
+       cancelButton.setAttribute('class', 'button');
+       dialog.appendChild(cancelButton);
+    }
+
+    getCheckedBoxes = function(){
+        var checkBoxes = document.getElementsByClassName('check');
+        var checked = [];
+
+        for(var i = 0; i < checkBoxes.length; i++){
+            checked[i] = checkBoxes[i].checked;
+        }
+        $('div.variableDialog').hide();
+        Shiny.onInputChange("choosedVar", checked);
+    }
+
+    cleanVariableDialog = function(){
+        var dialog = document.getElementById('variableDialog');
+        if(dialog.hasChildNodes()){
+            dialog.innerHTML = '';
+        }
+    }
+
+    cancelButtonFunction = function(){
+        $('div.variableDialog').hide();
+        Shiny.onInputChange("choosedVar", null);
+    }
+
+    Shiny.addCustomMessageHandler('done',
+            function(message){
+                alert(message);
+            });
+
+});

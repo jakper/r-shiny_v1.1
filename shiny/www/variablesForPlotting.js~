@@ -1,0 +1,87 @@
+$(document).ready(function(){
+    
+    var xr = false;
+    var yr = false;
+    var xval = "";
+    var yval = "";
+
+    Shiny.addCustomMessageHandler('createVariablesForPlotting', 
+        function(names){
+            cleanVariablesForPlottingDialog();
+            $('div.well#variablesForPlotting').show();
+            createVariablesForPlottingDialog(names);
+        });
+
+    createVariablesForPlottingDialog = function(names){
+        var dialog = document.getElementById('variablesForPlotting');
+     
+        var title = document.createElement('div');
+        title.innerHTML = 'Choose the variables you want to plot';
+        title.setAttribute('class', 'dialogInfo');
+        dialog.appendChild(title);
+
+        var coordinates = document.createElement('div');
+        coordinates.setAttribute("class", "coord");
+        var x = document.createElement('text');
+        x.setAttribute("id","x");
+        x.innerHTML = "X";
+        coordinates.appendChild(x);
+
+        var y = document.createElement('text');
+        y.setAttribute("id","y");
+        y.innerHTML = "Y";
+        coordinates.appendChild(y);
+
+        dialog.appendChild(coordinates);
+
+        for(var i = 0; i < names.length; i++){
+             
+             var name = document.createElement('div');
+             name.setAttribute('class', 'names')
+             name.innerHTML = names[i];
+
+             var xRadio = document.createElement('input');
+             xRadio.setAttribute("type", "radio");
+             xRadio.setAttribute("class", "xRadio");
+             xRadio.setAttribute("name", "xR");
+             xRadio.setAttribute("value", names[i]);
+             xRadio.setAttribute("onclick", "getCheckedRadios(this)");
+
+             var yRadio = document.createElement('input');
+             yRadio.setAttribute("type", "radio");
+             yRadio.setAttribute("class", "yRadio");
+             yRadio.setAttribute("name", "yR");
+             yRadio.setAttribute("value", names[i]);
+             yRadio.setAttribute("onclick", "getCheckedRadios(this)");
+
+             dialog.appendChild(name);
+             dialog.appendChild(xRadio);
+             dialog.appendChild(yRadio);
+             dialog.appendChild(document.createElement("br"));
+        }
+    
+    }
+
+    cleanVariablesForPlottingDialog = function(){
+         var dialog = document.getElementById('variablesForPlotting');
+        if(dialog.hasChildNodes()){
+            dialog.innerHTML = '';
+        }
+    }
+
+    getCheckedRadios = function(radio){  
+        if(radio.name == 'xR'){
+            xr = true;
+            xval = radio.value
+        }
+        else{
+            yr = true;
+            yval = radio.value;
+        }
+
+        if(xr && yr){
+           Shiny.onInputChange("choosedVariablesForPlotting", [xval,yval]);
+        }
+    }
+
+});

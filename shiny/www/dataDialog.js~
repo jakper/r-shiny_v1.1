@@ -1,0 +1,43 @@
+
+    
+    /* recives an array with the available data
+     * user chooses wich data he wants to edit
+     * the new data is sent to the server
+     */
+    Shiny.addCustomMessageHandler('createDataDialog',
+        function(names){
+              $('div.well#dataDialog').show();
+            createDataDialog(names);
+        });
+
+    createDataDialog = function(names){
+       var dialog = document.getElementById('dataDialog');
+     
+
+        var title = document.createElement('div');
+        title.innerHTML = 'Choose the needed variables';
+        title.setAttribute('class', 'dialogInfo');
+        dialog.appendChild(title);
+
+        for(var i = 0; i < names.length; i++){
+             var br = document.createElement('br');
+             
+             var name = document.createElement('div');
+             name.setAttribute('class', 'names')
+             name.innerHTML = names[i];
+
+             var check = document.createElement('input');
+             check.setAttribute('type','checkbox');
+             check.setAttribute('class', 'check');
+             
+             dialog.appendChild(name);
+             dialog.appendChild(check);
+             dialog.appendChild(br);
+        }
+    }
+
+    hideDialog = function(){
+        $('div.well#dataDialog').hide();
+    }
+
+

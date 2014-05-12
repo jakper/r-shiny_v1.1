@@ -1,0 +1,151 @@
+div.busy { 
+  position:absolute;
+  top: 40%;
+  left: 50%;
+  margin-top: -100px;
+  margin-left: -50px;
+  display:none;
+  background: rgba(230, 230, 230, .8);
+  text-align: center;
+  padding-top: 20px;
+  padding-left: 30px;
+  padding-bottom: 40px;
+  padding-right: 30px;
+  border-radius: 5px;
+}
+
+.logoR{
+    padding-top: 20px;
+    width: 150px;
+    height: 150px;
+}
+
+div.modalDialog {
+  position: fixed;
+  position: absolute;
+  background-color: #F0F0F0; 
+  top: 10%;
+  left: 50%;
+  z-index: 1050;
+  min-width: 300px;
+  margin-left: -200px;
+  background-color: #ffffff;
+  border: 1px solid #999;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  *border: 1px solid #999;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+  outline: none;
+  -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+     -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  -webkit-background-clip: padding-box;
+     -moz-background-clip: padding-box;
+          background-clip: padding-box;
+}
+
+div.dialogInfo{
+    text-align:center;
+    color: #66CCFF;
+    font-size:120%;
+    padding-bottom:4px;
+    padding-top:4px;
+}
+
+div.names{
+    float:left;
+    width:100px;
+    padding-left: 35px;
+}
+
+input.checkbox{
+    margin-left: 75px;
+}
+
+input#buttonVariable{
+    width:100px;
+    float:right;
+    margin-top:10px;
+}
+
+input#buttonData{
+    width:70px;
+    float:right;
+}
+
+div.coord{
+    text-align:center;
+    color: #66CCFF;
+    padding-top:5px;
+    padding-bottom:5px;
+}
+
+text#x{
+    width:40px;
+    padding-right:60px;
+    padding-left:55px;
+}
+
+text#y{
+    width:30px;
+}
+
+div.well#variablesForPlotting{
+    width: 300px;
+}
+
+input.radio{
+    margin-left: 75px;
+}
+
+div.well{
+    width:500px;
+}
+
+div#modalPopUp{
+    position: fixed;
+    position: absolute;
+    background-color: #F0F0F0;
+    top: 10%;
+    left: 50%;
+    z-index: 1050;
+    width: 300px;
+    min-height: 50px;
+    margin-left: -200px;
+    background-color: #ffffff;
+    border: 1px solid #999;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    *border: 1px solid #999;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    outline: none;
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+}
+
+div#dataSelector{
+    width: 250px;
+}
+
+input#editTableDialogButton{
+    width:125px;
+    margin-left:20px;
+    margin-right:20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+h4{
+    color:#66CCFF;
+    text-align:center;
+}
+
+input.textField{
+    margin-left: 40px;
+}

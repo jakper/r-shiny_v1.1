@@ -1,0 +1,829 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="f38561bb-9a48-4c72-b38a-99dac2df5aef" name="Default" comment="" />
+    <ignored path="shiny.iws" />
+    <ignored path=".idea/workspace.xml" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="DaemonCodeAnalyzer">
+    <disable_hints />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FavoritesManager">
+    <favorites_list name="shiny" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="ui.R" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ui.R">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="28" column="19" selection-start="997" selection-end="997" vertical-scroll-proportion="0.0" vertical-offset="54" max-vertical-offset="990">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="server.R" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/server.R">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="106" column="0" selection-start="3304" selection-end="3304" vertical-scroll-proportion="3.153719" vertical-offset="0" max-vertical-offset="2016">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="app.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/www/app.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="29" column="11" selection-start="582" selection-end="582" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="6372">
+              <folding>
+                <element signature="e#4928#4988#0" expanded="false" />
+                <element signature="e#5051#5209#0" expanded="false" />
+                <element signature="e#5254#5416#0" expanded="false" />
+                <element signature="e#5447#5814#0" expanded="false" />
+                <element signature="e#7106#7432#0" expanded="false" />
+                <element signature="e#11423#11521#0" expanded="false" />
+                <element signature="e#11564#11667#0" expanded="false" />
+                <element signature="e#11698#11766#0" expanded="false" />
+                <element signature="e#11822#12604#0" expanded="false" />
+                <element signature="e#12636#12726#0" expanded="false" />
+                <element signature="e#12755#12842#0" expanded="false" />
+                <element signature="e#12872#13232#0" expanded="false" />
+                <element signature="e#13280#13310#0" expanded="false" />
+                <element signature="e#13653#13719#0" expanded="false" />
+                <element signature="e#13917#14007#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="style.css" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/www/style.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="149" column="18" selection-start="2717" selection-end="2717" vertical-scroll-proportion="0.0" vertical-offset="1866" max-vertical-offset="2826">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindManager">
+    <FindUsagesManager>
+      <setting name="OPEN_NEW_TAB" value="false" />
+    </FindUsagesManager>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="changedFiles">
+      <list>
+        <option value="$PROJECT_DIR$/www/main.ts" />
+        <option value="$PROJECT_DIR$/www/createTable.js" />
+        <option value="$PROJECT_DIR$/www/createTable.ts" />
+        <option value="$PROJECT_DIR$/www/dataDialog.js" />
+        <option value="$PROJECT_DIR$/www/main.js" />
+        <option value="$PROJECT_DIR$/www/busy.js" />
+        <option value="$PROJECT_DIR$/server.R" />
+        <option value="$PROJECT_DIR$/www/style.css" />
+        <option value="$PROJECT_DIR$/ui.R" />
+        <option value="$PROJECT_DIR$/www/app.js" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-1366" />
+    <option name="y" value="24" />
+    <option name="width" value="1366" />
+    <option name="height" value="744" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>File Watchers</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>TaskProblemsInspection</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
+    <OptionsSetting value="true" id="Add" />
+    <OptionsSetting value="true" id="Remove" />
+    <OptionsSetting value="true" id="Checkout" />
+    <OptionsSetting value="true" id="Update" />
+    <OptionsSetting value="true" id="Status" />
+    <OptionsSetting value="true" id="Edit" />
+    <ConfirmationsSetting value="0" id="Add" />
+    <ConfirmationsSetting value="0" id="Remove" />
+  </component>
+  <component name="ProjectReloadState">
+    <option name="STATE" value="0" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1" splitterProportion="0.5">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="shiny" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="shiny" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="shiny" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="options.lastSelected" value="settings.nodejs" />
+    <property name="options.splitter.main.proportions" value="0.3" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="FullScreen" value="false" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/www" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="DartUnitRunConfigurationType" factoryName="DartUnit">
+      <option name="VMOptions" />
+      <option name="arguments" />
+      <option name="filePath" />
+      <option name="scope" value="ALL" />
+      <option name="testName" />
+      <method />
+    </configuration>
+    <configuration default="true" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
+      <option name="VMOptions" />
+      <option name="arguments" />
+      <option name="filePath" />
+      <option name="name" value="Dart" />
+      <option name="saveOutputToFile" value="false" />
+      <option name="showConsoleOnStdErr" value="false" />
+      <option name="showConsoleOnStdOut" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
+      <setting name="configLocationType" value="CONFIG_FILE" />
+      <setting name="settingsFile" value="" />
+      <setting name="serverType" value="INTERNAL" />
+      <setting name="preferredDebugBrowser" value="CHROME" />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavaScriptTestRunnerKarma" factoryName="Karma" singleton="true" config-file="">
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="true">
+      <method />
+    </configuration>
+    <configuration default="true" type="NodeJSConfigurationType" factoryName="Node.js" working-dir="">
+      <browser start="false" url="" with-js-debugger="false" />
+      <method />
+    </configuration>
+    <list size="0" />
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f38561bb-9a48-4c72-b38a-99dac2df5aef" name="Default" comment="" />
+      <created>1398163090796</created>
+      <updated>1398163090796</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-1366" y="24" width="1366" height="744" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="SvgViewer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5493827" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+    </layout>
+    <layout-to-restore>
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18827161" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="SvgViewer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+    </layout-to-restore>
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USERS">
+      <collection />
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="myTodoPanelSettings">
+      <TodoPanelSettings />
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <option name="time" value="7" />
+    </breakpoint-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="19" selection-start="997" selection-end="997" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="990">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="106" column="0" selection-start="3304" selection-end="3304" vertical-scroll-proportion="0.0" vertical-offset="1908" max-vertical-offset="2016">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="11" selection-start="582" selection-end="582" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="6372">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="149" column="18" selection-start="2717" selection-end="2717" vertical-scroll-proportion="0.0" vertical-offset="1866" max-vertical-offset="2826">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="19" selection-start="997" selection-end="997" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="990">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="106" column="0" selection-start="3303" selection-end="3303" vertical-scroll-proportion="0.0" vertical-offset="1398" max-vertical-offset="2016">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="337" column="51" selection-start="11166" selection-end="11166" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="6372">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="149" column="18" selection-start="2717" selection-end="2717" vertical-scroll-proportion="0.0" vertical-offset="1866" max-vertical-offset="2826">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="16" column="84" selection-start="591" selection-end="591" vertical-scroll-proportion="0.0" vertical-offset="162" max-vertical-offset="810">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="89" column="68" selection-start="2745" selection-end="2766" vertical-scroll-proportion="0.0" vertical-offset="1602" max-vertical-offset="2016">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="446" column="22" selection-start="13613" selection-end="13613" vertical-scroll-proportion="0.0" vertical-offset="4140" max-vertical-offset="4140">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="149" column="18" selection-start="2717" selection-end="2717" vertical-scroll-proportion="0.0" vertical-offset="2136" max-vertical-offset="2826">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="44" column="8" selection-start="2876" selection-end="2876" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1188">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="42" column="97" selection-start="998" selection-end="998" vertical-scroll-proportion="0.0" vertical-offset="756" max-vertical-offset="1962">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="91" column="40" selection-start="2551" selection-end="2551" vertical-scroll-proportion="0.0" vertical-offset="1638" max-vertical-offset="5958">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="113" column="14" selection-start="1912" selection-end="1912" vertical-scroll-proportion="0.0" vertical-offset="1794" max-vertical-offset="2520">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="46" column="105" selection-start="3065" selection-end="3065" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1350">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="67" column="20" selection-start="2100" selection-end="2100" vertical-scroll-proportion="0.0" vertical-offset="1206" max-vertical-offset="1458">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="39" column="0" selection-start="905" selection-end="905" vertical-scroll-proportion="0.0" vertical-offset="702" max-vertical-offset="5634">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="112" column="12" selection-start="1892" selection-end="1892" vertical-scroll-proportion="0.0" vertical-offset="1704" max-vertical-offset="2448">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/busy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="0" selection-start="251" selection-end="251" vertical-scroll-proportion="0.0" vertical-offset="198" max-vertical-offset="306" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="46" column="116" selection-start="3076" selection-end="3076" vertical-scroll-proportion="0.0" vertical-offset="360" max-vertical-offset="1350">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="52" column="46" selection-start="1478" selection-end="1503" vertical-scroll-proportion="0.0" vertical-offset="936" max-vertical-offset="1116">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="256" column="18" selection-start="7995" selection-end="7995" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2448">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="98" column="18" selection-start="1703" selection-end="1703" vertical-scroll-proportion="0.0" vertical-offset="336" max-vertical-offset="1980">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="46" column="116" selection-start="3076" selection-end="3076" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1350">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="52" column="46" selection-start="1478" selection-end="1503" vertical-scroll-proportion="0.0" vertical-offset="936" max-vertical-offset="1116">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="218" column="44" selection-start="6704" selection-end="6704" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2430">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="98" column="18" selection-start="1703" selection-end="1703" vertical-scroll-proportion="0.0" vertical-offset="336" max-vertical-offset="1980">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/busy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="0" selection-start="251" selection-end="251" vertical-scroll-proportion="0.0" vertical-offset="198" max-vertical-offset="306" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="45" column="40" selection-start="3045" selection-end="3045" vertical-scroll-proportion="0.0" vertical-offset="432" max-vertical-offset="1314">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="62" selection-start="519" selection-end="519" vertical-scroll-proportion="0.0" vertical-offset="450" max-vertical-offset="918">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="156" column="34" selection-start="5012" selection-end="5012" vertical-scroll-proportion="0.0" vertical-offset="2563" max-vertical-offset="3276">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="39" column="12" selection-start="776" selection-end="776" vertical-scroll-proportion="0.0" vertical-offset="696" max-vertical-offset="1908">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="35" selection-start="228" selection-end="228" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1296">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="48" selection-start="505" selection-end="505" vertical-scroll-proportion="0.0" vertical-offset="450" max-vertical-offset="918">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="138" column="29" selection-start="4234" selection-end="4234" vertical-scroll-proportion="0.0" vertical-offset="2484" max-vertical-offset="2610">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="39" column="12" selection-start="776" selection-end="776" vertical-scroll-proportion="0.0" vertical-offset="696" max-vertical-offset="1908">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="63" column="69" selection-start="3930" selection-end="3930" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1296">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="36" column="81" selection-start="893" selection-end="893" vertical-scroll-proportion="0.0" vertical-offset="648" max-vertical-offset="846">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="29" selection-start="277" selection-end="277" vertical-scroll-proportion="0.0" vertical-offset="180" max-vertical-offset="360">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="62" column="2" selection-start="3809" selection-end="3809" vertical-scroll-proportion="0.0" vertical-offset="547" max-vertical-offset="1242">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="52" column="8" selection-start="1152" selection-end="1450" vertical-scroll-proportion="0.0" vertical-offset="936" max-vertical-offset="3150">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="62" column="2" selection-start="3809" selection-end="3809" vertical-scroll-proportion="0.0" vertical-offset="547" max-vertical-offset="1242">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="52" column="8" selection-start="1152" selection-end="1450" vertical-scroll-proportion="0.0" vertical-offset="936" max-vertical-offset="3150">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2106">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/busy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="0" selection-start="251" selection-end="251" vertical-scroll-proportion="0.4099379" vertical-offset="0" max-vertical-offset="483" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="149" column="18" selection-start="2717" selection-end="2717" vertical-scroll-proportion="0.0" vertical-offset="1164" max-vertical-offset="2826">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="19" selection-start="997" selection-end="997" vertical-scroll-proportion="0.0" vertical-offset="54" max-vertical-offset="990">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/www/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="11" selection-start="582" selection-end="582" vertical-scroll-proportion="0.0" vertical-offset="522" max-vertical-offset="6372">
+          <folding>
+            <element signature="e#4928#4988#0" expanded="false" />
+            <element signature="e#5051#5209#0" expanded="false" />
+            <element signature="e#5254#5416#0" expanded="false" />
+            <element signature="e#5447#5814#0" expanded="false" />
+            <element signature="e#7106#7432#0" expanded="false" />
+            <element signature="e#11423#11521#0" expanded="false" />
+            <element signature="e#11564#11667#0" expanded="false" />
+            <element signature="e#11698#11766#0" expanded="false" />
+            <element signature="e#11822#12604#0" expanded="false" />
+            <element signature="e#12636#12726#0" expanded="false" />
+            <element signature="e#12755#12842#0" expanded="false" />
+            <element signature="e#12872#13232#0" expanded="false" />
+            <element signature="e#13280#13310#0" expanded="false" />
+            <element signature="e#13653#13719#0" expanded="false" />
+            <element signature="e#13917#14007#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="106" column="0" selection-start="3304" selection-end="3304" vertical-scroll-proportion="3.153719" vertical-offset="0" max-vertical-offset="2016">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
+
