@@ -115,6 +115,7 @@ shinyServer(function(input, output, session) {
         if(!is.null(input$dataSelectorChosenData)){
             if(input$dataSelectorChosenData != ""){
                 variablesEnv$currentData <- variablesEnv$dataList[as.character(input$dataSelectorChosenData)]
+                print(class(variablesEnv$currentData))
                 session$sendCustomMessage(type = 'createTable', message = variablesEnv$currentData)
             }
         }
