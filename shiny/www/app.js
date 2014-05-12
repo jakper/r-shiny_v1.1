@@ -25,14 +25,15 @@ $(document).ready(function(){
     Shiny.addCustomMessageHandler('createTable',
         function(data){
             currentData = data;
-            cleanTable();
-            createTable(data);
+            currentDataVariablesNames = getNames(currentData);
+            cleanTable('dataTable');
+            createTable('dataTable', data);
         });
 
-    Shiny.addCustomMessageHandler('createSingleCheckboxDialog',
+    Shiny.addCustomMessageHandler('createChooseVariableDialog',
         function(names){
             cleanModalDialog();
-            createSingleCheckboxDialog(names, 'getChosenVariables()');
+            createChooseVariableDialog(names);
         }
     );
 
@@ -69,16 +70,31 @@ $(document).ready(function(){
     Shiny.addCustomMessageHandler('allData',
         function(message){
             allData = message;
-
-            console.log(allData);
         }
     );
 
     Shiny.addCustomMessageHandler('allDataNames',
         function(message){
             allDataNames = message;
+        }
+    );
 
-            console.log(allDataNames);
+    Shiny.addCustomMessageHandler('createCSVFileOptionDialog',
+        function(message){
+            createFileOptionDialog(message, true);
+        }
+    );
+
+    Shiny.addCustomMessageHandler('createFileOptionDialog',
+        function(message){
+            createFileOptionDialog(message, false);
+        }
+    );
+
+    Shiny.addCustomMessageHandler('createPreviewTable',
+        function(message){
+            console.log(message);
+            createPreviewTable(message);
         }
     );
 });
@@ -87,8 +103,9 @@ init = function(){
     body = document.getElementsByTagName('body')[0];
     modalDialog = document.createElement('div');
     modalDialog.setAttribute('class', 'modalDialog');
+    modalDialog.setAttribute('id', 'modalDialog');
     body.appendChild(modalDialog);
-    hideModalDialog();
+    hideModalDialog('div#modalDialog');
 
     modalPopUp = document.createElement('div');
     modalPopUp.setAttribute('class', 'modal');
@@ -107,7 +124,20 @@ init = function(){
     cancelButton.setAttribute('type', 'button');
     cancelButton.setAttribute('id', 'buttonVariable');
     cancelButton.setAttribute('class', 'btn');
-    cancelButton.setAttribute('onclick', 'hideModalDialog()');
+
+    body = document.getElementsByTagName('body')[0];
+    previewTable = document.createElement('div');
+    previewTable.setAttribute('class', 'modalDialog table table-bordered table-condensed');
+    previewTable.setAttribute('id', 'previewTable');
+    body.appendChild(previewTable);
+    $('div#previewTable').hide();
+
+    var img = document.createElement('img');
+    img.setAttribute('src', 'xButton.png');
+    img.setAttribute('id', 'xButton');
+    img.setAttribute('onclick', '$("div#previewTable").hide(); $("img#xButton").hide();');
+    body.appendChild(img);
+    $("img#xButton").hide();
 
     var dataSelector = $('div#dataSelector')[0];
     dataSelector.contentEditable = false;
@@ -116,9 +146,40 @@ init = function(){
 /*
  create a modalDialog with checkboxes
  */
-createSingleCheckboxDialog = function(names, okFunction){
+createChooseVariableDialog = function(names){
 
-    modalDialog.setAttribute('id', 'checkboxDialog');
+    modalDialog.setAttribute('id', 'chooseVariableDialog');
+    modalDialog.setAttribute('style', 'width: 600px');
+
+    var title = document.createElement('h4');
+    title.innerHTML = "Choose Variables";
+    modalDialog.appendChild(title);
+    modalDialog.appendChild(document.createElement('br'));
+
+    var coordVar = document.createElement('div');
+    coordVar.setAttribute('class', 'variablesType');
+    coordVar.setAttribute('id', 'coordVar');
+    coordVar.innerHTML = 'CoordVariable';
+    modalDialog.appendChild(coordVar);
+
+    var externVar = document.createElement('div');
+    externVar.setAttribute('class', 'variablesType');
+    externVar.setAttribute('id', 'externVar');
+    externVar.innerHTML = 'ExternVariable';
+    modalDialog.appendChild(externVar);
+
+    var internVar = document.createElement('div');
+    internVar.setAttribute('class', 'variablesType');
+    internVar.setAttribute('id', 'coordVar');
+    internVar.innerHTML = 'InternVariable';
+    modalDialog.appendChild(internVar);
+
+    var compVar = document.createElement('div');
+    compVar.setAttribute('class', 'variablesType');
+    compVar.setAttribute('id', 'coordVar');
+    compVar.innerHTML = 'CompVariable';
+    modalDialog.appendChild(compVar);
+    modalDialog.appendChild(document.createElement('br'));
 
     for(var i = 0; i < names.length; i++){
         var br = document.createElement('br');
@@ -127,75 +188,97 @@ createSingleCheckboxDialog = function(names, okFunction){
         name.setAttribute('class', 'names');
         name.innerHTML = names[i];
 
-        var check = document.createElement('input');
-        check.setAttribute('type','checkbox');
-        check.setAttribute('class', 'checkbox');
-        check.setAttribute('value', names[i]);
-        check.setAttribute('name', 'data');
+        var coordCheck = document.createElement('input');
+        coordCheck.setAttribute('type','checkbox');
+        coordCheck.setAttribute('class', 'variableChooserCheckbox coordCheck');
+        coordCheck.setAttribute('value', names[i]);
+        coordCheck.setAttribute('id', 'coordCheck');
+
+        var internCheck = document.createElement('input');
+        internCheck.setAttribute('type','checkbox');
+        internCheck.setAttribute('class', 'variableChooserCheckbox internCheck');
+        internCheck.setAttribute('value', names[i]);
+        internCheck.setAttribute('id', 'internCheck');
+
+        var externCheck = document.createElement('input');
+        externCheck.setAttribute('type','checkbox');
+        externCheck.setAttribute('class', 'variableChooserCheckbox externCheck');
+        externCheck.setAttribute('value', names[i]);
+        externCheck.setAttribute('id', 'externCheck');
+
+        var compCheck = document.createElement('input');
+        compCheck.setAttribute('type','checkbox');
+        compCheck.setAttribute('class', 'variableChooserCheckbox compCheck');
+        compCheck.setAttribute('value', names[i]);
+        compCheck.setAttribute('id', 'compCheck');
 
         modalDialog.appendChild(name);
-        modalDialog.appendChild(check);
+        modalDialog.appendChild(coordCheck);
+        modalDialog.appendChild(externCheck);
+        modalDialog.appendChild(internCheck);
+        modalDialog.appendChild(compCheck);
         modalDialog.appendChild(br);
     }
 
-    var selectAllButton = document.createElement('input');
-    selectAllButton.setAttribute('value', 'Select All');
-    selectAllButton.setAttribute('type', 'button');
-    selectAllButton.setAttribute('id', 'buttonVariable');
-    selectAllButton.setAttribute('class', 'btn');
-    selectAllButton.setAttribute('onclick', 'changeAllCheckboxesState(true)');
-    modalDialog.appendChild(selectAllButton);
-
-    var selectNoneButton = document.createElement('input');
-    selectNoneButton.setAttribute('value', 'Select None');
-    selectNoneButton.setAttribute('type', 'button');
-    selectNoneButton.setAttribute('id', 'buttonVariable');
-    selectNoneButton.setAttribute('class', 'btn');
-    selectNoneButton.setAttribute('onclick', 'changeAllCheckboxesState(false)')
-    modalDialog.appendChild(selectNoneButton);
-
     modalDialog.appendChild(document.createElement('br'));
     modalDialog.appendChild(document.createElement('br'));
 
-    okButton.setAttribute('onclick', okFunction);
+    okButton.setAttribute('onclick', 'getChooseVariableDialogCheckedBoxes()');
+    cancelButton.setAttribute('onclick', 'hideModalDialog("div#chooseVariableDialog")');
     modalDialog.appendChild(okButton);
     modalDialog.appendChild(cancelButton);
-    $('div.modalDialog').show();
+    $('div#chooseVariableDialog').show();
 };
 
 /*
  hides the modalDialog
  */
-hideModalDialog = function(){
-    $('div.modalDialog').hide();
-    cleanModalDialog();
+hideModalDialog = function(dialogID){
+    $(dialogID).hide();
 };
 
 /*
  cleans the modalDialog
  */
-cleanModalDialog = function(){
-    var dialog = document.getElementsByClassName('modalDialog')[0];
+cleanModalDialog = function(dialogID){
+    var dialog = document.getElementById(dialogID);
     if(dialog != null && dialog.hasChildNodes()){
         dialog.innerHTML = '';
     }
 };
 
-changeAllCheckboxesState = function(state){
-    var checkboxes = document.getElementsByClassName("checkbox");
-    for(var i = 0; i < checkboxes.length; i++){
-        checkboxes[i].checked = state;
-    }
+showModalDialog = function(){
+    $('div#modalDialog').show();
 };
 
-getCheckedBoxes = function(){
+getChooseVariableDialogCheckedBoxes = function(){
     $('div.modalDialog').hide();
-    var checkBoxes = document.getElementsByClassName('checkbox');
-    var checked = [];
+    var compCheckBoxes = document.getElementsByClassName('compCheck');
+    var externCheckBoxes = document.getElementsByClassName('externCheck');
+    var internCheckBoxes = document.getElementsByClassName('internCheck');
+    var coordCheckBoxes = document.getElementsByClassName('coordCheck');
 
-    for(var i = 0; i < checkBoxes.length; i++){
-        if(!checkBoxes[i].checked){
-            checked.push(i+1);
+    var unchecked = [];
+    var checkedCompVar = [];
+    var checkedInternVar = [];
+    var checkedExternVar = [];
+    var checkedCoordVar = [];
+
+    for(var i = 0; i < compCheckBoxes.length; i++){
+        if(compCheckBoxes[i].checked){
+            checkedCompVar.push(i+1);
+        }
+        if(externCheckBoxes[i].checked){
+            checkedExternVar.push(i+1);
+        }
+        if(internCheckBoxes[i].checked){
+            checkedInternVar.push(i+1);
+        }
+        if(coordCheckBoxes[i].checked){
+            checkedCoordVar.push(i+1);
+        }
+        if(!(compCheckBoxes[i].checked || externCheckBoxes[i].checked || internCheckBoxes[i].checked || coordCheckBoxes[i].checked)){
+            unchecked.push(i+1);
         }
     }
 
@@ -203,27 +286,41 @@ getCheckedBoxes = function(){
     hideModalDialog();
     removeAllElementByClass('.checkbox');
 
-    return checked;
+    var variables = {
+        unchecked: unchecked,
+        compVar: checkedCompVar,
+        coordVar: checkedCoordVar,
+        internVar: checkedInternVar,
+        externVar: checkedExternVar
+    };
+
+    Shiny.onInputChange('chosenVariables', variables);
 };
 
-createTable = function(){
-    currentDataVariablesNames = getNames(currentData);
-    var table = document.getElementById('dataTable');
+createTable = function(tableId, data){
+    cleanTable(tableId);
+    dataVariablesNames = getNames(data);
+    var table = document.getElementById(tableId);
     var columnNames = document.createElement('tr');
 
-    for(var i = 0; i < currentDataVariablesNames.length; i++){
+    for(var i = 0; i < dataVariablesNames.length; i++){
         var name = document.createElement('th');
         name.setAttribute('class', 'cell');
-        name.innerHTML = currentDataVariablesNames[i];
+        name.innerHTML = dataVariablesNames[i];
         columnNames.appendChild(name);
     }
     table.appendChild(columnNames);
-    for(var i = 0; i < currentData[currentDataVariablesNames[0]].length; i++){
+    for(var i = 0; i < data[dataVariablesNames[0]].length; i++){
         var row = document.createElement('tr');
         row.setAttribute('id','dataRow');
-        for(var j = 0; j < currentDataVariablesNames.length; j++){
+        for(var j = 0; j < dataVariablesNames.length; j++){
             var cell = document.createElement('td');
-            cell.innerHTML = currentData[currentDataVariablesNames[j]][i];
+            if(data[dataVariablesNames[j]][i] != null){
+                cell.innerHTML = data[dataVariablesNames[j]][i];
+            }
+            else{
+                cell.innerHTML = "NA";
+            }
             cell.setAttribute('class', 'cell');
             cell.setAttribute('value', '['+j+']['+i+']');
             row.appendChild(cell);
@@ -312,10 +409,12 @@ createEditTableMenuDialog = function(){
     $('div.modalDialog').show();
 };
 
-cleanTable = function(){
-    var table = document.getElementById('dataTable');
-    table.innerHTML = '';
-    removeAllElementByClass('.cell')
+cleanTable = function(tableId){
+    var table = document.getElementById(tableId);
+    if(table != null){
+        table.innerHTML = '';
+        removeAllElementByClass('.cell')
+    }
 };
 
 createTextFieldDialog = function(message){
@@ -339,7 +438,7 @@ createTextFieldDialog = function(message){
     modalDialog.appendChild(okButton);
     modalDialog.appendChild(cancelButton);
 
-    $('div.modalDialog').show();
+    $('div#textFieldDialog').show();
 };
 
 removeRow = function(){
@@ -370,6 +469,8 @@ importDataFromR = function(){
 
 createSingleRadioDialog = function(names, okFunction){
     modalDialog.setAttribute('id', 'radioDialog');
+    cleanModalDialog('radioDialog');
+    modalDialog.setAttribute('style', 'width: 300px');
 
     for(var i = 0; i < names.length; i++){
 
@@ -390,18 +491,23 @@ createSingleRadioDialog = function(names, okFunction){
 
     okButton.setAttribute('onclick', okFunction);
     modalDialog.appendChild(okButton);
+    cancelButton.setAttribute('onclick', '$("div#radioDialog").hide();');
     modalDialog.appendChild(cancelButton);
 
-    $('div.modalDialog').show();
+    $('div#radioDialog').show();
 };
 
 getChosenPackage = function(){
     var checked = getChosenRadio();
+    cleanModalDialog('radioDialog');
+    hideModalDialog('div#radioDialog');
     Shiny.onInputChange('chosenPackage', checked);
 };
 
 getChosenData = function(){
     var checked = getChosenRadio();
+    cleanModalDialog('radioDialog');
+    hideModalDialog('div#radioDialog');
     Shiny.onInputChange('chosenData', checked);
 };
 
@@ -440,7 +546,7 @@ popUpMessage = function(messageText){
 };
 
 getChosenVariables = function(){
-    Shiny.onInputChange('chosenVariables', getCheckedBoxes());
+    Shiny.onInputChange('chosenVariables', getChooseVariableDialogCheckedBoxes());
 };
 
 getInsertedName = function(){
@@ -454,6 +560,216 @@ resetUploadFile = function(){
     uploadFile.value = '';
 };
 
-plotsNumberSelected = function(value){
-  console.log(value);
+createFileOptionDialog = function(message, fromFile){
+    modalDialog.setAttribute('id', 'textFieldDialog');
+    cleanModalDialog('textFieldDialog');
+    modalDialog.setAttribute('style', 'width:500px;');
+
+    var title = document.createElement('h4');
+    title.innerHTML = "Upload File - Options";
+    modalDialog.appendChild(title);
+    modalDialog.appendChild(document.createElement('br'));
+
+    var fileName = document.createElement('div');
+    fileName.setAttribute('class', 'csvFileDialogDiv');
+    fileName.innerHTML = "Filename:";
+    modalDialog.appendChild(fileName);
+
+    var fileNameTextField = document.createElement('input');
+    fileNameTextField.setAttribute('type', 'text');
+    fileNameTextField.setAttribute('class', 'textField');
+    fileNameTextField.setAttribute('value', message);
+    fileNameTextField.setAttribute('id', 'fileNameTextField');
+    modalDialog.appendChild(fileNameTextField);
+    modalDialog.appendChild(document.createElement('hr'));
+
+    if(fromFile){
+        var separator = document.createElement('div');
+        separator.setAttribute('class', 'csvFileDialogDiv');
+        separator.innerHTML = "Separator:";
+        modalDialog.appendChild(separator);
+
+        var separatorTextField = document.createElement('input');
+        separatorTextField.setAttribute('type', 'text');
+        separatorTextField.setAttribute('class', 'textField');
+        separatorTextField.setAttribute('value', ';');
+        separatorTextField.setAttribute('id', 'separatorTextField');
+        modalDialog.appendChild(separatorTextField);
+        modalDialog.appendChild(document.createElement('br'));
+
+        var decimal = document.createElement('div');
+        decimal.setAttribute('class', 'csvFileDialogDiv');
+        decimal.innerHTML = "Decimal:";
+        modalDialog.appendChild(decimal);
+
+        var decimalTextField = document.createElement('input');
+        decimalTextField.setAttribute('type', 'text');
+        decimalTextField.setAttribute('class', 'textField');
+        decimalTextField.setAttribute('value', '.');
+        decimalTextField.setAttribute('id', 'decimalTextField');
+        modalDialog.appendChild(decimalTextField);
+
+        var quotes = document.createElement('div');
+        quotes.setAttribute('class', 'csvFileDialogDiv');
+        quotes.innerHTML = "Quotes:";
+        modalDialog.appendChild(quotes);
+
+        var quotesTextField = document.createElement('input');
+        quotesTextField.setAttribute('type', 'text');
+        quotesTextField.setAttribute('class', 'textField');
+        quotesTextField.setAttribute('value', '"');
+        quotesTextField.setAttribute('id', 'quotesTextField');
+        modalDialog.appendChild(quotesTextField);
+        modalDialog.appendChild(document.createElement('hr'));
+    }
+    var detectionLimit = document.createElement('div');
+    detectionLimit.setAttribute('class', 'csvFileDialogDiv');
+    detectionLimit.innerHTML = "Detection Limit:";
+    modalDialog.appendChild(detectionLimit);
+
+    var detectionLimitTextField = document.createElement('input');
+    detectionLimitTextField.setAttribute('type', 'text');
+    detectionLimitTextField.setAttribute('class', 'textField');
+    detectionLimitTextField.setAttribute('value', '0.05');
+    detectionLimitTextField.setAttribute('id', 'detectionLimitTextField');
+    modalDialog.appendChild(detectionLimitTextField);
+    modalDialog.appendChild(document.createElement('br'));
+
+    var valueUnderDetectionLimit = document.createElement('div');
+    valueUnderDetectionLimit.setAttribute('class', 'csvFileDialogDiv');
+    valueUnderDetectionLimit.innerHTML = "Value for uDL:";
+    modalDialog.appendChild(valueUnderDetectionLimit);
+
+    var valueUnderDetectionLimitTextField = document.createElement('input');
+    valueUnderDetectionLimitTextField.setAttribute('type', 'text');
+    valueUnderDetectionLimitTextField.setAttribute('class', 'textField');
+    valueUnderDetectionLimitTextField.setAttribute('value', '0');
+    valueUnderDetectionLimitTextField.setAttribute('id', 'valueUnderDetectionLimitTextField');
+    modalDialog.appendChild(valueUnderDetectionLimitTextField);
+
+    var skip = document.createElement('div');
+    skip.setAttribute('class', 'csvFileDialogDiv');
+    skip.innerHTML = "Skip:";
+    modalDialog.appendChild(skip);
+
+    var skipTextField = document.createElement('input');
+    skipTextField.setAttribute('type', 'text');
+    skipTextField.setAttribute('class', 'textField');
+    skipTextField.setAttribute('value', '0');
+    skipTextField.setAttribute('id', 'skipTextField');
+    modalDialog.appendChild(skipTextField);
+    modalDialog.appendChild(document.createElement('hr'));
+
+    if(fromFile){
+        var header = document.createElement('div');
+        header.setAttribute('class', 'csvFileDialogDiv');
+        header.innerHTML = "Header";
+        modalDialog.appendChild(header);
+
+        var headerCheckbox = document.createElement('input');
+        headerCheckbox.setAttribute('type', 'checkbox');
+        headerCheckbox.setAttribute('class', 'csvFileDialogCheckbox');
+        headerCheckbox.setAttribute('id', 'headerCheckbox');
+        modalDialog.appendChild(headerCheckbox);
+
+        var fill = document.createElement('div');
+        fill.setAttribute('class', 'csvFileDialogDiv');
+        fill.innerHTML = "Fill";
+        modalDialog.appendChild(fill);
+
+        var fillCheckbox = document.createElement('input');
+        fillCheckbox.setAttribute('type', 'checkbox');
+        fillCheckbox.setAttribute('id', 'fillCheckbox');
+        fillCheckbox.setAttribute('class', 'csvFileDialogCheckbox');
+        modalDialog.appendChild(fillCheckbox);
+        modalDialog.appendChild(document.createElement('br'));
+        modalDialog.appendChild(document.createElement('br'));
+
+        var stripWhite = document.createElement('div');
+        stripWhite.setAttribute('class', 'csvFileDialogDiv');
+        stripWhite.innerHTML = "Strip White";
+        modalDialog.appendChild(stripWhite);
+
+        var stripWhiteCheckbox = document.createElement('input');
+        stripWhiteCheckbox.setAttribute('type', 'checkbox');
+        stripWhiteCheckbox.setAttribute('id', 'stripWhiteCheckbox');
+        stripWhiteCheckbox.setAttribute('class', 'csvFileDialogCheckbox');
+        modalDialog.appendChild(stripWhiteCheckbox);
+
+        var stringAsFactors = document.createElement('div');
+        stringAsFactors.setAttribute('class', 'csvFileDialogDiv');
+        stringAsFactors.innerHTML = "String as factors";
+        modalDialog.appendChild(stringAsFactors);
+
+        var stringAsFactorsCheckbox = document.createElement('input');
+        stringAsFactorsCheckbox.setAttribute('type', 'checkbox');
+        stringAsFactorsCheckbox.setAttribute('id', 'stringAsFactorCheckbox');
+        stringAsFactorsCheckbox.setAttribute('class', 'csvFileDialogCheckbox');
+        modalDialog.appendChild(stringAsFactorsCheckbox);
+        modalDialog.appendChild(document.createElement('br'));
+        modalDialog.appendChild(document.createElement('hr'));
+    }
+
+    okButton.setAttribute('onclick', 'uploadFile(' + fromFile +')');
+    cancelButton.setAttribute('onclick', 'hideModalDialog("div#textFieldDialog")');
+    modalDialog.appendChild(okButton);
+    modalDialog.appendChild(cancelButton);
+    var previewButton = document.createElement('input');
+    previewButton.setAttribute('value', 'Preview');
+    previewButton.setAttribute('type', 'button');
+    previewButton.setAttribute('id', 'buttonVariable');
+    previewButton.setAttribute('class', 'btn');
+    previewButton.setAttribute('onclick', 'previewFile(' + fromFile + ')');
+    modalDialog.appendChild(previewButton);
+
+    showModalDialog();
+};
+
+uploadFile = function(fromFile){
+    var options = getUploadOptions(fromFile);
+    Shiny.onInputChange('uploadChosenFile', options);
+    cleanModalDialog('textFieldDialog');
+    hideModalDialog('div#textFieldDialog');
+};
+
+previewFile = function(fromFile){
+    var options = getUploadOptions(fromFile);
+    Shiny.onInputChange('preview', options);
+};
+
+getUploadOptions = function(fromFile){
+
+    if(fromFile){
+        return options = {
+            name: document.getElementById('fileNameTextField').value,
+            separator: document.getElementById('separatorTextField').value,
+            decimal: document.getElementById('decimalTextField').value,
+            quotes: document.getElementById('quotesTextField').value,
+            detectionLimit: document.getElementById('detectionLimitTextField').value,
+            valueUnderDetectionLimit: document.getElementById('valueUnderDetectionLimitTextField').value,
+            skip: document.getElementById('skipTextField').value,
+            header: document.getElementById('headerCheckbox').checked,
+            fill: document.getElementById('fillCheckbox').checked,
+            stripWhite: document.getElementById('stripWhiteCheckbox').checked,
+            stringAsFactor: document.getElementById('stringAsFactorCheckbox').checked
+        };
+    }
+    else{
+        return options = {
+            name: document.getElementById('fileNameTextField').value,
+            detectionLimit: document.getElementById('detectionLimitTextField').value,
+            valueUnderDetectionLimit: document.getElementById('valueUnderDetectionLimitTextField').value,
+            skip: document.getElementById('skipTextField').value
+        };
+    }
+};
+
+createPreviewTable = function(data){
+
+    $("img#xButton").show();
+    cleanTable('previewTable');
+    createTable('previewTable', data);
+    $('div#previewTable').show();
+
+    Shiny.onInputChange('preview', null);
 };
