@@ -30,14 +30,16 @@ shinyUI(navbarPage("Shiny",
         ))),
     tabPanel("Plot",
          HTML(
-                '<select onclick="plotsNumberSelected(value)">
+                '<select onclick="plotSelectedNumber(value)">
                     <option value = "1">1</option>
                     <option value = "2">2</option>
                     <option value = "4">4</option>
                     <option value = "6">6</option>
                     <option value = "9">9</option>
                     <option value = "12">12</option>
-                </select>')
+                </select>
+                <label id="plotLabel">
+                </label>')
     ),
     tabPanel("Regression"),
 

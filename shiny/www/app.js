@@ -9,6 +9,12 @@ var allData;
 var allDataNames;
 var editable = false;
 var body;
+var addRowButton;
+var addColumnButton;
+var removeColumnButton;
+var removeRowButton;
+var editColumnButton;
+var editRowButton;
 
 /*
  contains all messageHandlers
@@ -143,6 +149,50 @@ init = function(){
 
     var dataSelector = $('div#dataSelector')[0];
     dataSelector.contentEditable = false;
+
+    addRowButton = document.createElement('input');
+    addRowButton.setAttribute('value', 'Add Row');
+    addRowButton.setAttribute('type', 'button');
+    addRowButton.setAttribute('class', 'btn');
+    addRowButton.setAttribute('id','editTableDialogButton');
+    addRowButton.setAttribute('onclick', 'createTextFieldDialog("Type in the formula for the new row")');
+
+    addColumnButton = document.createElement('input');
+    addColumnButton.setAttribute('value', 'Add Column');
+    addColumnButton.setAttribute('type', 'button');
+    addColumnButton.setAttribute('class', 'btn');
+    addColumnButton.setAttribute('id','editTableDialogButton');
+    addColumnButton.setAttribute('onclick', 'createTextFieldDialog("Type in the formula for the new column")'); //TODO insert nume
+
+    removeRowButton = document.createElement('input');
+    removeRowButton.setAttribute('value', 'Remove Row');
+    removeRowButton.setAttribute('type', 'button');
+    removeRowButton.setAttribute('class', 'btn');
+    removeRowButton.setAttribute('id','editTableDialogButton');
+    removeRowButton.setAttribute('onclick', 'createTextFieldDialog("Type in the row index(es)")');
+
+    removeColumnButton = document.createElement('input');
+    removeColumnButton.setAttribute('value', 'Remove Column');
+    removeColumnButton.setAttribute('type', 'button');
+    removeColumnButton.setAttribute('class', 'btn');
+    removeColumnButton.setAttribute('id','editTableDialogButton');
+    removeRowButton.setAttribute('onclick', 'createTextFieldDialog("Type in the column index(es)")');
+
+    editRowButton = document.createElement('input');
+    editRowButton.setAttribute('value', 'Edit Row');
+    editRowButton.setAttribute('type', 'button');
+    editRowButton.setAttribute('class', 'btn');
+    editRowButton.setAttribute('id','editTableDialogButton');
+    editRowButton.setAttribute('onclick', 'createTextFieldDialog("Type in the formula for editing this row")');
+
+    editColumnButton = document.createElement('input');
+    editColumnButton.setAttribute('value', 'Edit Column');
+    editColumnButton.setAttribute('type', 'button');
+    editColumnButton.setAttribute('class', 'btn');
+    editColumnButton.setAttribute('id','editTableDialogButton');
+    editColumnButton.setAttribute('onclick', 'createTextFieldDialog("Type in the formula for editing this column")');
+
+    $("div#uploadFile_progress").remove();
 };
 
 /*
@@ -226,7 +276,7 @@ createChooseVariableDialog = function(names){
     modalDialog.appendChild(document.createElement('br'));
 
     okButton.setAttribute('onclick', 'getChooseVariableDialogCheckedBoxes()');
-    cancelButton.setAttribute('onclick', 'hideModalDialog("div#chooseVariableDialog")');
+    cancelButton.setAttribute('onclick', 'hideModalDialog("div#chooseVariableDialog"); resetUploadFile();');
     modalDialog.appendChild(okButton);
     modalDialog.appendChild(cancelButton);
     $('div#chooseVariableDialog').show();
@@ -353,62 +403,19 @@ makeEditable = function(){
 };
 
 createEditTableMenuDialog = function(){
-    cleanModalDialog();
     modalDialog.setAttribute('id', 'editTableMenuDialog');
+    cleanModalDialog('editTableMenuDialog');
 
-    addRowButton = document.createElement('input');
-    addRowButton.setAttribute('value', 'Add Row');
-    addRowButton.setAttribute('type', 'button');
-    addRowButton.setAttribute('class', 'btn');
-    addRowButton.setAttribute('id','editTableDialogButton');
-    addRowButton.setAttribute('onclick', 'createTextFieldDialog("Type in the formula for the new row")');
+
     modalDialog.appendChild(addRowButton);
-
-    addColumnButton = document.createElement('input');
-    addColumnButton.setAttribute('value', 'Add Column');
-    addColumnButton.setAttribute('type', 'button');
-    addColumnButton.setAttribute('class', 'btn');
-    addColumnButton.setAttribute('id','editTableDialogButton');
-    addColumnButton.setAttribute('onclick', 'createTextFieldDialog("Type in the formula for the new column")'); //TODO insert nume
     modalDialog.appendChild(addColumnButton);
-
     modalDialog.appendChild(document.createElement('br'));
-
-    removeRowButton = document.createElement('input');
-    removeRowButton.setAttribute('value', 'Remove Row');
-    removeRowButton.setAttribute('type', 'button');
-    removeRowButton.setAttribute('class', 'btn');
-    removeRowButton.setAttribute('id','editTableDialogButton');
-    removeRowButton.setAttribute('onclick', 'createTextFieldDialog("Type in the row index(es)")');
     modalDialog.appendChild(removeRowButton);
-
-    removeColumnButton = document.createElement('input');
-    removeColumnButton.setAttribute('value', 'Remove Column');
-    removeColumnButton.setAttribute('type', 'button');
-    removeColumnButton.setAttribute('class', 'btn');
-    removeColumnButton.setAttribute('id','editTableDialogButton');
-    removeRowButton.setAttribute('onclick', 'createTextFieldDialog("Type in the column index(es)")');
     modalDialog.appendChild(removeColumnButton);
-
     modalDialog.appendChild(document.createElement('br'));
-
-    editRowButton = document.createElement('input');
-    editRowButton.setAttribute('value', 'Edit Row');
-    editRowButton.setAttribute('type', 'button');
-    editRowButton.setAttribute('class', 'btn');
-    editRowButton.setAttribute('id','editTableDialogButton');
-    editRowButton.setAttribute('onclick', 'createTextFieldDialog("Type in the formula for editing this row")');
     modalDialog.appendChild(editRowButton);
-
-    editColumnButton = document.createElement('input');
-    editColumnButton.setAttribute('value', 'Edit Column');
-    editColumnButton.setAttribute('type', 'button');
-    editColumnButton.setAttribute('class', 'btn');
-    editColumnButton.setAttribute('id','editTableDialogButton');
-    editColumnButton.setAttribute('onclick', 'createTextFieldDialog("Type in the formula for editing this column")');
     modalDialog.appendChild(editColumnButton);
-
-    $('div.modalDialog').show();
+    $('div#editTableMenuDialog').show();
 };
 
 cleanTable = function(tableId){
@@ -420,8 +427,8 @@ cleanTable = function(tableId){
 };
 
 createTextFieldDialog = function(message){
-    cleanModalDialog();
     modalDialog.setAttribute('id', 'textFieldDialog');
+    cleanModalDialog('textFieldDialog');
 
     var title = document.createElement('h4');
     title.innerHTML = message;
@@ -438,7 +445,16 @@ createTextFieldDialog = function(message){
     modalDialog.appendChild(document.createElement('br'));
 //    okButton.setAttribute('onclick', okFunction);
     modalDialog.appendChild(okButton);
+    cancelButton.setAttribute('onclick', '$("div#textFieldDialog").hide()');
     modalDialog.appendChild(cancelButton);
+
+    var goBackButton = document.createElement('input');
+    goBackButton.setAttribute('value', 'Go Back');
+    goBackButton.setAttribute('type', 'button');
+    goBackButton.setAttribute('class', 'btn');
+    goBackButton.setAttribute('onclick', 'createEditTableMenuDialog()');
+    goBackButton.setAttribute('id', 'buttonVariable');
+    modalDialog.appendChild(goBackButton);
 
     $('div#textFieldDialog').show();
 };
@@ -493,7 +509,7 @@ createSingleRadioDialog = function(names, okFunction){
 
     okButton.setAttribute('onclick', okFunction);
     modalDialog.appendChild(okButton);
-    cancelButton.setAttribute('onclick', '$("div#radioDialog").hide();');
+    cancelButton.setAttribute('onclick', '$("div#radioDialog").hide(); resetUploadFile();');
     modalDialog.appendChild(cancelButton);
 
     $('div#radioDialog').show();
@@ -549,6 +565,7 @@ popUpMessage = function(messageText){
 
 getChosenVariables = function(){
     Shiny.onInputChange('chosenVariables', getChooseVariableDialogCheckedBoxes());
+    resetUploadFile();
 };
 
 getInsertedName = function(){
@@ -560,6 +577,8 @@ getInsertedName = function(){
 resetUploadFile = function(){
     var uploadFile = document.getElementById('uploadFile');
     uploadFile.value = '';
+    Shiny.onInputChange('chosenData', null);
+    Shiny.onInputChange('chosenPackage', null);
 };
 
 createFileOptionDialog = function(message, fromFile){
@@ -713,7 +732,7 @@ createFileOptionDialog = function(message, fromFile){
     }
 
     okButton.setAttribute('onclick', 'uploadFile(' + fromFile +')');
-    cancelButton.setAttribute('onclick', 'hideModalDialog("div#textFieldDialog")');
+    cancelButton.setAttribute('onclick', 'hideModalDialog("div#textFieldDialog"); resetUploadFile();');
     modalDialog.appendChild(okButton);
     modalDialog.appendChild(cancelButton);
     var previewButton = document.createElement('input');
@@ -774,4 +793,12 @@ createPreviewTable = function(data){
     $('div#previewTable').show();
 
     Shiny.onInputChange('preview', null);
+};
+
+plotSelectedNumber = function(value){
+    label = document.getElementById('plotLabel');
+
+    plotimg = document.createElement('img');
+    plotimg.setAttribute('src', 'addPlot.png');
+    label.appendChild(plotimg);
 };
