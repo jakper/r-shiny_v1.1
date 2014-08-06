@@ -1,10 +1,9 @@
-div.busy {
+img#loading{
     position:absolute;
     top: 40%;
     left: 50%;
     margin-top: -100px;
     margin-left: -50px;
-    display:none;
     background: rgba(230, 230, 230, .8);
     text-align: center;
     padding-top: 20px;
@@ -27,7 +26,6 @@ div.modalDialog {
     top: 10%;
     left: 50%;
     z-index: 1050;
-    width: auto;
     min-width: 300px;
     margin-left: -200px;
     background-color: #ffffff;
@@ -57,27 +55,8 @@ div.dialogInfo{
 div.names{
     float:left;
     width:100px;
-    padding-left: 35px;
-}
-
-input.variableChooserCheckbox{
-    float: right;
-}
-
-input#coordCheck{
-    margin-right: 50px;
-}
-
-input#externCheck{
-    margin-right: 100px;
-}
-
-input#internCheck{
-    margin-right: 95px;
-}
-
-input#compCheck{
-    margin-right: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 input#buttonVariable{
@@ -136,9 +115,9 @@ div#dataSelector{
     width: 250px;
 }
 
-input#editTableDialogButton{
+input.editTableDialogButton{
     width:125px;
-    margin-left:20px;
+    margin-left:80px;
     margin-right:20px;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -160,6 +139,10 @@ input.textField{
     margin-left: 25px;
 }
 
+select.plotMenu{
+    margin-left: 25px;
+}
+
 hr{
     border-color: #66CCFF;
 }
@@ -169,7 +152,7 @@ input.csvFileDialogCheckbox{
 }
 
 div#previewTable{
-    overflow: scroll;
+    overflow: auto;
     position: fixed;
     position: absolute;
     background-color: #F0F0F0;
@@ -204,6 +187,151 @@ img#xButton{
 
 div.variablesType{
     color: #66CCFF;
-    float:right;
+    width: 60px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+input.variableChooserCheckbox, .variableGroupCheckbox{
+    width: 60px;
+}
+input.transformationVariablesCheckBox{
+    width: 108px;
+}
+
+div.variablesTypeAddButton{
+    float: left;
     padding-right: 15px;
+}
+
+input.variablesTypeTextField, .variablesGroupTextField, .observationsGroupTextField{
+    width: 50px;
+}
+
+div.selectorDiv{
+    float:left;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+select.variableTypeSelector{
+    width: 100px;
+}
+
+
+div.workingWell,  div#transformationsDiv{
+    margin-left: auto;
+    margin-right: auto;
+    width: 700px;
+    overflow: auto;
+}
+
+div#transformationsDiv{
+    display: block;
+    width:900px;
+}
+
+div#nasWell, #infoWell{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div#nasInfo, div#dLInfo{
+    float:left;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom:5px;
+    text-align: center;
+    width:70px;
+}
+
+div.nasInfoRow, div.dLInfoRow{
+    color:#66CCFF;
+    font-weight: bold;
+}
+
+div.variablesDiv, div.defineVariablesVariablesDiv, div.defineObservationsVariablesDiv{
+    float: left;
+    width: 70px;
+    height:auto;
+    text-align: center;
+    text-overflow: ellipsis;
+    align-content: center;
+    align-items: center;
+}
+
+div.variablesDiv#namesDiv, div.variablesDiv#typeDiv{
+    width: 150px;
+    padding-right: 15px;
+}
+
+div.variableChooserNameContainer, div.variableChooserCheckBoxContainer, div.variableChooserNameContainer{
+    height:20px;
+    width:60px;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+img.checkAll{
+    padding-right: 5px;
+}
+
+input.commandTextField{
+    width: 450px;
+}
+
+input#editDataTextField{
+    margin-left: 20px;
+}
+
+div.completeContainer{
+    margin-left: auto;
+    margin-right: auto;
+    width:920px;
+    height:230px;
+}
+
+div.plotContainer{
+    width: 850px;
+    height: 230px;
+    float:left;
+    align-content: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.minus{
+    width:2px;
+    height:2px;
+    float:left;
+}
+
+img#plus{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: auto;
+    margin-top: auto;
+    padding-top: 65px;
+}
+
+.plotDialogElement{
+    margin-left: 15px;
+}
+
+h1{
+    text-align: center;
+    color: #A8A8A8;
+}
+
+h5{
+    color: #A8A8A8;
+    font-size: 17px;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.capital{
+    color: #66CCFF;
 }

@@ -2,10 +2,10 @@ $(document).ready(function(){
   if ($('html').attr('class')=='shiny-busy') {
     setTimeout(function() {
       if ($('html').attr('class')=='shiny-busy') {
-        $('div.busy').show()
+        $('img#loading').show()
       }
     }, 1000)
   } else {
-    $('div.busy').hide();
+    $('img#loading').hide();
   }
 });
