@@ -2,7 +2,7 @@ tryCatch({library(shiny)}, error = function(cond){return(NULL)})
 tryCatch({library(shinyRGL)}, error = function(cond){return(NULL)})
 tryCatch({library(mvoutlier)}, error = function(cond){return(NULL)})
 tryCatch({library(robCompositions)}, error = function(cond){return(NULL)})
-tryCatch({library(VIN)}, error = function(cond){return(NULL)})
+tryCatch({library(VIM)}, error = function(cond){return(NULL)})
 tryCatch({library(StatDA)}, error = function(cond){return(NULL)})
 tryCatch({library(robustbase)}, error = function(cond){return(NULL)})
 tryCatch({library(MASS)}, error = function(cond){return(NULL)})
@@ -204,7 +204,7 @@ shinyServer(function(input, output, session) {
             return(as.vector(eval(parse(text = paste0('compositions$', variablesName))) + 1))
         }else if(variablesType == "externals"){
             externals <- data@externals
-            returm(as.vector(eval(parse(text = paste0('externals$', variablesName))) + 1))
+            return(as.vector(eval(parse(text = paste0('externals$', variablesName))) + 1))
         }else if(variablesType == "coords"){
             coords <- data@coords
             return(as.vector(eval(parse(text = paste0('coords$', variablesName))) + 1))
@@ -267,9 +267,16 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$preview)){
         options <- input$preview
         if(!is.null(variablesEnv$uploadPath)){
-            variablesEnv$tempData <- read.table(variablesEnv$uploadPath, nrows = 15, header = options$header,
-                sep = options$separator, dec = options$decimal,
-                quote = options$quotes)
+
+            try <- tryCatch({variablesEnv$tempData <- read.table(variablesEnv$uploadPath, nrows = 15, header = options$header,
+                                                                sep = options$separator, dec = options$decimal,
+                                                                quote = options$quotes)},
+                            error = function(cond){return(NULL)})
+
+            if(is.null(try)){
+                sendPopUpMessage('ERROR: corrupted file!')
+                return(NULL)
+            }
         }
 
             session$sendCustomMessage(type = 'createPreviewTable', message = variablesEnv$tempData)
@@ -342,13 +349,18 @@ shinyServer(function(input, output, session) {
   }
 
   importGemasCSV <- function(options){
-    tmp <- read.table(variablesEnv$uploadPath, header = T,
-                          sep = options$separator, dec = options$decimal,
-                          quote = options$quotes)
+
+    try <- tryCatch({tmp <- read.table(variablesEnv$uploadPath, header = T, sep = options$separator, dec = options$decimal, quote = options$quotes)},
+                          error = function(cond){return(NULL)})
+
+    if(is.null(try)){
+        sendPopUpMessage('ERROR: corrupted-file')
+        return(NULL);
+    }
 
     skip <- (1:length(tmp[,1]))[tmp[,1]==""][1]
 
-    tmp <- read.table(variablesEnv$uploadPath, header = T, sep = options$sep, dec = options$decimal, skip = skip)
+    tmp <- read.table(variablesEnv$uploadPath, header = T, sep = options$sep, dec = options$decimal, quote = options$quotes, skip = skip)
     colNames <- names(tmp["VARIABLE"==tmp[,1],])
 
     tmp <- read.table(variablesEnv$uploadPath, header = F,
@@ -483,13 +495,11 @@ shinyServer(function(input, output, session) {
             if(input$dataSelectorChosenData != ""){
                 if(!is.null(variablesEnv$currentDataName)){
                     eval(parse(text = paste0("variablesEnv$dataList$",variablesEnv$currentDataName ,"<-variablesEnv$currentData")))
-#                    eval(parse(text = paste0("detach(variablesEnv$dataList$",variablesEnv$currentDataName ,")")))
                 }
 
                 variablesEnv$currentDataName <- as.character(input$dataSelectorChosenData)
                 variablesEnv$currentData <- variablesEnv$dataList[as.character(input$dataSelectorChosenData)]
                 variablesEnv$currentData <- eval(parse(text = paste0("variablesEnv$currentData$", as.character(input$dataSelectorChosenData))))
-#                eval(parse(text = paste0("attach(variablesEnv$dataList$",variablesEnv$currentDataName ,")")))
                 renderDataInformation(createJSObject())
 
             }
@@ -1436,9 +1446,9 @@ observe({
                 }
             }
         }
-        names(results) <- uniqueFactors
-        names(upperOutliers) <- uniqueFactors
-        names(lowerOutliers) <- uniqueFactors
+        names(results) <- names
+        names(upperOutliers) <- names
+        names(lowerOutliers) <- names
 
         message <- list()
         message[['results']] <- results

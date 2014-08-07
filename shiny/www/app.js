@@ -5,9 +5,9 @@
  *********************************************************************************/
 var allData;
 var currentVariablesGroupName;
-var currentVariablesGroup;
+var currentVariablesGroup = [];
 var typeOfSelectedVariableGroup;
-var currentSubset;
+var currentSubset = [];
 var currentSubsetName;
 var currentData = {
     names: null,
@@ -267,7 +267,8 @@ initElements = function(){
     nasInfoWell = document.getElementById('nasWell');
     detectionLimitMethodContainer = document.getElementById('detectionLimitWell');
     detectionLimitInfoWell = document.getElementById('infoWell');
-    hideElement('#' + nrPlotId);
+    hideElement('#0');
+    hideElement('#plus0');
     createGlobalModals();
     createGlobalButtons();
     createGlobalImages();
@@ -2221,7 +2222,9 @@ getPCAOptions = function(){
  *********************************************************************************/
 
 var plotContainerParent = null;
-var nrPlotId = 1;
+var nrPlotId = 0;
+var dataInfo = [];
+var selectedPoints = [];
 
 createPlotContainer = function(){
     nrPlotId++;
@@ -2234,8 +2237,15 @@ createPlotContainer = function(){
     icon.setAttribute('class', 'icon-minus-sign');
     minDiv.appendChild(icon);
     genDiv.appendChild(minDiv);
+    var plusDiv = createDiv('plus', 'plus' + nrPlotId, '', 'createSubsetNameFieldFromPoints('+ nrPlotId +')');
+    var plusIcon = document.createElement('i');
+    plusIcon.setAttribute('class', 'icon-plus-sign');
+    plusDiv.appendChild(plusIcon);
+
+    genDiv.appendChild(plusDiv);
     plotContainerParent.appendChild(genDiv);
     hideElement('#' + nrPlotId);
+    hideElement('#plus' + nrPlotId);
 };
 
 deletePlot = function(id){
@@ -2270,7 +2280,7 @@ getDataFromTransformation = function(variable){
 
 createPlotDialog = function(){
     if(plotContainerParent == null){
-        plotContainerParent = document.getElementById('completeContainer1').parentNode;
+        plotContainerParent = document.getElementById('completeContainer0').parentNode;
     }
     if(currentData.data != null){
         modalDialog.setAttribute('id', 'plotDialog');
@@ -2457,6 +2467,8 @@ createVariablesBarPlotSeries = function(data){
 
 plotBarPlot = function(title, yAxis, data){
     showElement('#' + nrPlotId);
+    dataInfo.push([]);
+    selectedPoints.push([]);
     $('#plotContainer' + nrPlotId).highcharts({
         chart: {
             type: 'column',
@@ -2508,7 +2520,6 @@ plotBarPlot = function(title, yAxis, data){
 /********************************************************************************
  ********************************* GROUP BAR ************************************
  *******************************************************************************/
-
 createGroupBarPlotParameters = function(){
     var container = document.getElementById('plotTypeParameterContainer');
     var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
@@ -2605,6 +2616,8 @@ createGroupBarPlotSeries = function(data){
 
 plotGroupBarPlot = function(title, yAxis, xAxisCategories, series){
     showElement('#' + nrPlotId);
+    dataInfo.push([]);
+    selectedPoints.push([]);
     $('#plotContainer' + nrPlotId).highcharts({
         chart: {
             type: 'column',
@@ -2639,10 +2652,66 @@ plotGroupBarPlot = function(title, yAxis, xAxisCategories, series){
     });
 };
 
-
 /********************************************************************************
  ************************************ SCATTER ***********************************
  *******************************************************************************/
+
+createSubsetNameFieldFromPoints = function(index){
+
+    modalDialog.setAttribute('id', 'subsetNameTextFieldDialog');
+    modalDialog.setAttribute('style', 'width: 300px;');
+    cleanModalDialog('subsetNameTextFieldDialog');
+    modalDialog.appendChild(createBr());
+    var textField = createTextField('', 'fromPointsSubsetNameTextField', '');
+    textField.setAttribute('placeholder', 'Insert subset - name! eg: subset_1');
+    textField.setAttribute('style', 'margin-left:10px; width:250px;');
+    modalDialog.appendChild(textField);
+    modalDialog.appendChild(createBr());
+    okButton.setAttribute('onclick', 'createSubsetsFromPoints(' + index + ')');
+    modalDialog.appendChild(okButton);
+    cancelButton.setAttribute('onclick', 'hideElement("div#subsetNameTextFieldDialog")');
+    modalDialog.appendChild(cancelButton);
+
+    showElement('div#subsetNameTextFieldDialog');
+};
+
+createSubsetsFromPoints = function(index){
+    var name = document.getElementById('fromPointsSubsetNameTextField').value;
+    if(name == ''){
+        popUpMessage('ERROR: name-field is empty!');
+        return;
+    }
+
+    if(currentData.subsets.length == 0){
+        currentData.subsets = {};
+    }
+
+    currentData.subsets[name] = selectedPoints[index].slice(0);
+    var subset = {};
+    subset[name] = selectedPoints[index].slice(0);
+    createSubsetSelector();
+    setSelectorsValue(currentSubsetName);
+    Shiny.onInputChange('defineObservationsFactor', subset);
+
+    var chart = $('#plotContainer' + index).highcharts();
+    chart.getSelectedPoints()[0].select();
+    hideElement('div#subsetNameTextFieldDialog');
+};
+
+addSelectedPoint = function(selectedPointsIndex, pointIndex){
+    selectedPoints[selectedPointsIndex].push(pointIndex);
+    if($('#plus' + selectedPointsIndex + ':hidden').length > 0){
+        $('#plus' + selectedPointsIndex).show();
+    }
+};
+
+removeUnselectedPoint = function(selectedPointsIndex, pointIndex){
+    selectedPoints[selectedPointsIndex].splice(selectedPoints[selectedPointsIndex].indexOf(pointIndex), 1);
+    if(selectedPoints[selectedPointsIndex].length == 0){
+        $('#plus' + selectedPointsIndex).hide();
+    }
+};
+
 createScatterPlotParameters = function(){
     var container = document.getElementById('plotTypeParameterContainer');
     var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
@@ -2769,6 +2838,7 @@ createScatterPlotSeries = function(x, y, factor){
             yAxisTitle = x;
         }
         xAxisTitle = 'Index';
+        createSingleDataInfo(x, checked);
 
     }else if(y != ""){
         $('#completeContainer' + nrPlotId).height(550).width(630);
@@ -2836,6 +2906,7 @@ createScatterPlotSeries = function(x, y, factor){
                 }
             }
         }
+        createDoubleDataInfo(x, y, checked);
     }
 
     plotScatterPlot(title, xAxisTitle, yAxisTitle, series);
@@ -2843,8 +2914,73 @@ createScatterPlotSeries = function(x, y, factor){
     createPlotContainer();
 };
 
+getPointInfo = function(dataInfoIndex, index){
+    return dataInfo[dataInfoIndex][index];
+};
+
+addExtractionAndMethodToInfo = function(tmpInfo, nameIndex){
+    if(currentData.gemasInfo.EXTRACTION != null && currentData.gemasInfo.EXTRACTION != undefined){
+        tmpInfo += 'Extraction: ' + currentData.gemasInfo.EXTRACTION[nameIndex] + '<br>';
+    }
+    if(currentData.gemasInfo.METHOD != null && currentData.gemasInfo.METHOD != undefined){
+        tmpInfo += 'Method: ' + currentData.gemasInfo.METHOD[nameIndex] + '<br>';
+    }
+
+    return tmpInfo;
+};
+
+createSingleDataInfo = function(x, useOnlySubset){
+    var info = [];
+    var length = currentData.data[x].length;
+    var nameIndex = currentData.names.indexOf(x);
+    for(var i = 0; i < length; i++){
+        var tmpInfo = '<b>' + x + '</b> <br>';
+        if(useOnlySubset && currentSubset.length > 0){
+            if(currentSubset.indexOf(i) != -1){
+                tmpInfo += 'ID: ' + i + '<br>';
+                tmpInfo = addExtractionAndMethodToInfo(tmpInfo, nameIndex);
+                info.push(tmpInfo);
+            }
+        }else{
+            tmpInfo += 'ID: ' + i + '<br>';
+            tmpInfo = addExtractionAndMethodToInfo(tmpInfo, nameIndex);
+            info.push(tmpInfo);
+        }
+    }
+    dataInfo.push(info);
+};
+
+createDoubleDataInfo = function(x, y, useOnlySubset){
+    var info = [];
+    var length = currentData.data[x].length;
+    var nameIndexX = currentData.names.indexOf(x);
+    var nameIndexY = currentData.names.indexOf(y);
+
+    for(var i = 0; i < length; i++){
+        var tmpInfo = 'ID: ' + i + '<br> ';
+        var tmpInfoX = '<b>' + x + '</b> <br>';
+        var tmpInfoY = '<b>' + y + '</b> <br>';
+        if(useOnlySubset && currentSubset.length > 0){
+            if(currentSubset.indexOf(i) != -1){
+                tmpInfoX = addExtractionAndMethodToInfo(tmpInfoX, nameIndexX);
+                tmpInfoY = addExtractionAndMethodToInfo(tmpInfoY, nameIndexY);
+                tmpInfo += tmpInfoX + tmpInfoY;
+                info.push(tmpInfo);
+            }
+        }else{
+            tmpInfoX = addExtractionAndMethodToInfo(tmpInfoX, nameIndexX);
+            tmpInfoY = addExtractionAndMethodToInfo(tmpInfoY, nameIndexY);
+            tmpInfo += tmpInfoX + tmpInfoY;
+            info.push(tmpInfo);
+        }
+    }
+    dataInfo.push(info);
+};
+
 plotScatterPlot = function(title, xAxisTitle, yAxisTitle, series){
     showElement('#' + nrPlotId);
+    var dataInfoIndex = nrPlotId;
+    selectedPoints.push([]);
     $('#plotContainer' + nrPlotId).highcharts({
         chart: {
             type: 'scatter',
@@ -2874,7 +3010,25 @@ plotScatterPlot = function(title, xAxisTitle, yAxisTitle, series){
             backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
             borderWidth: 1
         },
+        tooltip: {
+            formatter: function(){
+                return getPointInfo(dataInfoIndex, this.series.data.indexOf( this.point ))
+            }
+        },
         plotOptions: {
+            series: {
+                allowPointSelect: true,
+                point: {
+                    events: {
+                        select: function () {
+                            addSelectedPoint(dataInfoIndex,this.series.data.indexOf( this ))
+                        },
+                        unselect: function(){
+                            removeUnselectedPoint(dataInfoIndex, this.series.data.indexOf( this ));
+                        }
+                    }
+                }
+            },
             scatter: {
                 marker: {
                     radius: 5,
@@ -2891,11 +3045,6 @@ plotScatterPlot = function(title, xAxisTitle, yAxisTitle, series){
                             enabled: false
                         }
                     }
-                },
-                tooltip: {
-                    animation: true,
-                    headerFormat: '<b>{series.name}</b><br/>',
-                    pointFormat: '{point.y}'
                 }
             }
         },
@@ -3038,6 +3187,8 @@ createBoxPlotSeries = function(data){
 
 plotBoxPlot = function(title, categories, data, outliers){
     showElement('#' + nrPlotId);
+    dataInfo.push([]);
+    selectedPoints.push([]);
     $('#plotContainer' + nrPlotId).highcharts({
 
         chart: {

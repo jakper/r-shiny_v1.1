@@ -10,7 +10,23 @@ shinyUI(navbarPage("i-CoDa",
             <h1> i-CoDa</h1>
             <br>
             <h5>
-                Welcome to <span class="capital">i</span>(nteractive) <span class="capital"> - Co</span>(mpositional) <span class="capital"> Da</span>(ta), an UI for compositioal data analysis.
+                Welcome to <span class="capital">i</span>(nteractive) <span class="capital"> - Co</span>(mpositional) <span class="capital"> Da</span>(ta),
+                 an userfriendly inerface for compositioal data analysis. <it>i-Coda</it> is the result of combining <i>R</i> with <i>JavaScript, JQuery, HTML and
+                 CSS.</i>
+                 <br>
+                 In order the use all features, that are provided by <i>i-Coda</i>, you need to have installed the following R-libraries:
+                 <i>
+                 <ul>
+                    <li>shiny</li>
+                    <li>mvoutlier</li>
+                    <li>robCompositions</li>
+                    <li>VIM</li>
+                    <li>StatDA</li>
+                    <li>robustbase</li>
+                    <li>MASS</li>
+                    <li>mclustc</li>
+                 </ul>
+                 </i>
             </h5>
         ')
     ),
@@ -115,12 +131,15 @@ shinyUI(navbarPage("i-CoDa",
     ),
     tabPanel("Plot",
          HTML('
-            <div class="completeContainer" id="completeContainer1">
-                <div class="well plotContainer" id = "plotContainer1">
+            <div class="completeContainer" id="completeContainer0">
+                <div class="well plotContainer" id = "plotContainer0">
                     <img id="plus" src="plus.png" onclick="createPlotDialog()"/>
                 </div>
-                <div class="minus" id = "1"  onclick="deletePlot(this.id)">
+                <div class="minus" id = "0"  onclick="deletePlot(this.id)">
                     <i class="icon-minus-sign" display="none"></i>
+                </div>
+                <div class="plus" id = "plus0" onclick="createSubsetNameFieldFromPoints(0)">
+                    <i class="icon-plus-sign" display="none"></i>
                 </div>
             </div>
          ')
