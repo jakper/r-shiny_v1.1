@@ -267,6 +267,9 @@ initElements = function(){
     nasInfoWell = document.getElementById('nasWell');
     detectionLimitMethodContainer = document.getElementById('detectionLimitWell');
     detectionLimitInfoWell = document.getElementById('infoWell');
+
+    body.appendChild(createDiv('backgroundDiv', '', ''));
+
     hideElement('#0');
     hideElement('#plus0');
     createGlobalModals();
@@ -334,6 +337,15 @@ getAllIndexes = function(arr, val) {
     return indexes;
 };
 
+getMaxHeight = function(){
+    var maxHeight = Math.max.apply(null, $("body").map(function ()
+    {
+        return $(this).height();
+    }).get());
+
+    return Math.max(window.innerHeight, maxHeight);
+};
+
 // this function inserts newNode after referenceNode
 insertAfter = function(referenceNode, newNode){
     referenceNode.parentNode.insertBefore( newNode, referenceNode.nextSibling );
@@ -385,8 +397,9 @@ popUpMessage = function(messageText){
 
     modalPopUp.appendChild(createH4Title(messageText));
     showElement('div#modalPopUp');
-
+    showElement('.backgroundDiv');
     setTimeout(function(){
+        hideElement('.backgroundDiv');
         hideElement('div#modalPopUp');
         modalPopUp.innerHTML = '';
     },3500);
@@ -734,7 +747,7 @@ createChooseVariableDialog = function(data, names){
     var id1Div = createDiv('variablesDiv', '', '');
 
     okButton.setAttribute('onclick', 'getChooseVariableDialogCheckedBoxes(); resetUploadFile();');
-    cancelButton.setAttribute('onclick', 'hideElement("div#chooseVariableDialog"); resetUploadFile();');
+    cancelButton.setAttribute('onclick', 'hideElement("div#chooseVariableDialog"); resetUploadFile(); $(".backgroundDiv").hide();');
 
     namesDiv.appendChild(createDiv('variablesType', 'variablesNames', 'Variables'));
     typeDiv.appendChild(createDiv('variablesType', 'variablesType', 'Type'));
@@ -823,6 +836,7 @@ createChooseVariableDialog = function(data, names){
 
     $('#variablesContainer').width(750);
     $('div#chooseVariableDialog').show();
+    $('.backgroundDiv').height(getMaxHeight()).show();
 
     nrComps = 1;
     nrCoords = 1;
@@ -943,6 +957,7 @@ getChooseVariableDialogCheckedBoxes = function(){
     removeAllElementByClass('.variableChooserCheckbox');
     removeAllElementByClass('.variablesTypeTextField');
     $('div.modalDialog').hide();
+    $('.backgroundDiv').hide();
 
     Shiny.onInputChange('chosenVariables', variables);
 };
@@ -1057,6 +1072,7 @@ createEditTableMenuDialog = function(){
     modalDialog.appendChild(document.createElement('br'));
     modalDialog.appendChild(createButton('btn editTableDialogButton', 'removeColumn', 'Remove Column', 'createTextFieldDialog("Remove Column(s)", "' + currentData.names[Math.ceil(currentData.names.length/2)] +'", "remove")'));
     $('div#editTableMenuDialog').show();
+    $('.backgroundDiv').height(getMaxHeight()).show();
 };
 
 createTextFieldDialog = function(title, eg, type){
@@ -1072,7 +1088,7 @@ createTextFieldDialog = function(title, eg, type){
     modalDialog.appendChild(createBr());
     okButton.setAttribute('onclick', 'editData("' + type + '")');
     modalDialog.appendChild(okButton);
-    cancelButton.setAttribute('onclick', '$("div#textFieldDialog").hide()');
+    cancelButton.setAttribute('onclick', '$("div#textFieldDialog").hide(); $(".backgroundDiv").hide();');
     modalDialog.appendChild(cancelButton);
 
     modalDialog.appendChild(createButton('btn','buttonVariable', 'Go Back', 'createEditTableMenuDialog()'));
@@ -1145,6 +1161,8 @@ editData = function(type){
 
         if(type == "add"){
             options['message'] = 'Column(s) successfully added!';
+            options['typeOfVariables'] = typeOfSelectedVariableGroup;
+            options['variables'] = currentVariablesGroupName;
             Shiny.onInputChange('addOrEditColumn', options)
         }else{
             for(i = 0; i < names.length; i++){
@@ -1160,6 +1178,7 @@ editData = function(type){
 
     cleanModalDialog('textFieldDialog');
     hideElement('div#textFieldDialog');
+    $('.backgroundDiv').hide();
 };
 
 getNames = function(data){
@@ -1193,16 +1212,18 @@ createSingleRadioDialog = function(names, okFunction){
 
     okButton.setAttribute('onclick', okFunction);
     modalDialog.appendChild(okButton);
-    cancelButton.setAttribute('onclick', '$("div#radioDialog").hide(); resetUploadFile();');
+    cancelButton.setAttribute('onclick', '$("div#radioDialog").hide(); resetUploadFile(); $("backgroundDiv").hide();');
     modalDialog.appendChild(cancelButton);
 
     showElement('div#radioDialog');
+    $('.backgroundDiv').height(getMaxHeight()).show();
 };
 
 getChosenPackage = function(){
     var checked = getChosenRadio();
     cleanModalDialog('radioDialog');
     hideElement('div#radioDialog');
+    $('.backgroundDiv').hide();
     Shiny.onInputChange('chosenPackage', checked);
 };
 
@@ -1210,6 +1231,7 @@ getChosenData = function(){
     var checked = getChosenRadio();
     cleanModalDialog('radioDialog');
     hideElement('div#radioDialog');
+    $('.backgroundDiv').hide();
     Shiny.onInputChange('chosenData', checked);
 };
 
@@ -1294,6 +1316,7 @@ createFileOptionDialog = function(message, fromFile){
         'previewFile(' + fromFile + ')'));
 
     showElement('div#textFieldDialog');
+    $('.backgroundDiv').height(getMaxHeight()).show();
 };
 
 uploadFile = function(fromFile){
@@ -1301,6 +1324,7 @@ uploadFile = function(fromFile){
     Shiny.onInputChange('uploadChosenFile', options);
     cleanModalDialog('textFieldDialog');
     hideElement('div#textFieldDialog');
+    $('.backgroundDiv').hide();
 };
 
 previewFile = function(fromFile){
@@ -1311,12 +1335,32 @@ previewFile = function(fromFile){
 getUploadOptions = function(fromFile){
     var options;
 
+    var name = document.getElementById('fileNameTextField').value;
+    var separator, decimal, quotes;
+
+    if(name == ''){
+        popUpMessage('ERROR: empty name-textField!');
+        resetUploadFile();
+        return;
+    }
+    if(fromFile){
+        separator = document.getElementById('separatorTextField').value;
+        decimal = document.getElementById('decimalTextField').value;
+        quotes = document.getElementById('quotesTextField').value;
+
+        if(separator == '' || decimal == '' || quotes == ''){
+            popUpMessage('ERROR: empty textField!');
+            resetUploadFile();
+            return;
+        }
+    }
+
     if(fromFile){
         options = {
-            name: document.getElementById('fileNameTextField').value,
-            separator: document.getElementById('separatorTextField').value,
-            decimal: document.getElementById('decimalTextField').value,
-            quotes: document.getElementById('quotesTextField').value,
+            name: name,
+            separator: separator,
+            decimal: decimal,
+            quotes: quotes,
             header: document.getElementById('headerCheckbox').checked,
             fill: document.getElementById('fillCheckbox').checked,
             stripWhite: document.getElementById('stripWhiteCheckbox').checked,
@@ -1338,6 +1382,7 @@ createPreviewTable = function(data){
     cleanTable('previewTable');
     createTable('previewTable', getNames(data), data);
     showElement('div#previewTable');
+    $('.backgroundDiv').height(getMaxHeight()).show();
 
     Shiny.onInputChange('preview', null);
 };
@@ -2307,9 +2352,10 @@ createPlotDialog = function(){
         modalDialog.appendChild(createHr());
         modalDialog.appendChild(okButton);
         modalDialog.appendChild(cancelButton);
-        cancelButton.setAttribute('onclick', 'hideElement("#plotDialog");');
+        cancelButton.setAttribute('onclick', 'hideElement("#plotDialog"); $(".backgroundDiv").hide();');
         createPlotParameters(selector.selectedOptions[0].value);
         showElement('#plotDialog');
+        $('.backgroundDiv').height(getMaxHeight()).show();
     }else{
         popUpMessage('There is no data available! <br> Please import a data-set!');
     }
@@ -2450,6 +2496,7 @@ createCountBarPlotSeries = function(xAxisDataName){
 
     plotBarPlot("Number of observations by " + xAxisDataName, 'Number of observations', data);
     hideElement('#plotDialog');
+    $('.backgroundDiv').hide();
     createPlotContainer();
 };
 
@@ -2462,6 +2509,7 @@ createVariablesBarPlotSeries = function(data){
     }
     plotBarPlot(data.title, data.yAxis, dataToPlot);
     hideElement('#plotDialog');
+    $('.backgroundDiv').hide();
     createPlotContainer();
 };
 
@@ -2611,6 +2659,7 @@ createGroupBarPlotSeries = function(data){
 
     plotGroupBarPlot(data.title, data.yAxis, categoriesNames, dataToPlot);
     hideElement('#plotDialog');
+    $('.backgroundDiv').hide();
     createPlotContainer();
 };
 
@@ -2669,10 +2718,11 @@ createSubsetNameFieldFromPoints = function(index){
     modalDialog.appendChild(createBr());
     okButton.setAttribute('onclick', 'createSubsetsFromPoints(' + index + ')');
     modalDialog.appendChild(okButton);
-    cancelButton.setAttribute('onclick', 'hideElement("div#subsetNameTextFieldDialog")');
+    cancelButton.setAttribute('onclick', 'hideElement("div#subsetNameTextFieldDialog"); $(".backgroundDiv").hide();');
     modalDialog.appendChild(cancelButton);
 
     showElement('div#subsetNameTextFieldDialog');
+    $('.backgroundDiv').height(getMaxHeight()).show();
 };
 
 createSubsetsFromPoints = function(index){
@@ -2696,6 +2746,7 @@ createSubsetsFromPoints = function(index){
     var chart = $('#plotContainer' + index).highcharts();
     chart.getSelectedPoints()[0].select();
     hideElement('div#subsetNameTextFieldDialog');
+    $('.backgroundDiv').hide();
 };
 
 addSelectedPoint = function(selectedPointsIndex, pointIndex){
@@ -2911,6 +2962,7 @@ createScatterPlotSeries = function(x, y, factor){
 
     plotScatterPlot(title, xAxisTitle, yAxisTitle, series);
     hideElement('#plotDialog');
+    $('.backgroundDiv').hide();
     createPlotContainer();
 };
 
@@ -3181,6 +3233,7 @@ createBoxPlotSeries = function(data){
 
     plotBoxPlot(data.title, data.categories, dataToPlot, outliers);
     hideElement('#plotDialog');
+    $('.backgroundDiv').height();
     createPlotContainer();
 
 };

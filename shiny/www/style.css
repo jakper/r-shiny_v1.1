@@ -23,8 +23,9 @@ div.modalDialog {
     position: fixed;
     position: absolute;
     background-color: #F0F0F0;
-    top: 10%;
+    top: 3%;
     left: 50%;
+    right: 50%;
     z-index: 1050;
     min-width: 300px;
     margin-left: -200px;
@@ -341,4 +342,17 @@ h5{
 
 .capital{
     color: #66CCFF;
+}
+
+.backgroundDiv{
+    position:absolute;
+    width: 100%;
+    height: 100%;
+    display:none;
+    color: #686868;
+    background-color: #686868;
+    left:0;
+    right:0;
+    top:0;
+    opacity: 0.75;
 }

@@ -216,6 +216,28 @@ shinyServer(function(input, output, session) {
         }
     }
 
+    updateVariables <- function(variablesType, variablesName, variables){
+        data <- variablesEnv$currentData
+        if(variablesType == "compositions"){
+             compositions <- data@compositions
+             compositions[[variablesName]] <- variables
+             data@compositions <- compositions
+        }else if(variablesType == "externals"){
+             externals <- data@externals
+             externals[[variablesName]] <- variables
+             data@externals <- externals
+        }else if(variablesType == "coords"){
+             coords <- data@coords
+             coords[[variablesName]] <- variables
+             data@coords <- coords
+        }else if(variablesType == "ids"){
+              ids <- data@ids
+              ids[[variablesName]] <- variables
+              data@ids <- ids
+        }
+        return(data)
+    }
+
     getVariableFromTransformation <- function(variableName){
         data <- variablesEnv$currentData
         data <- data@transformations
@@ -297,7 +319,12 @@ shinyServer(function(input, output, session) {
                         quote = options$quotes)
             }else{
                 variablesEnv$availableGemasInfo <- TRUE
-                importGemasCSV(options)
+                import <- importGemasCSV(options)
+
+                if(is.null(import)){
+                    resetConnector('uploadCSVFile')
+                    return(NULL)
+                }
             }
         }
         variablesEnv$name <- options$name
@@ -360,12 +387,27 @@ shinyServer(function(input, output, session) {
 
     skip <- (1:length(tmp[,1]))[tmp[,1]==""][1]
 
-    tmp <- read.table(variablesEnv$uploadPath, header = T, sep = options$sep, dec = options$decimal, quote = options$quotes, skip = skip)
+   try <- tryCatch({tmp <- read.table(variablesEnv$uploadPath, header = T, sep = options$sep, dec = options$decimal, quote = options$quotes, skip = skip)},
+                    error = function(cond){return(NULL)})
+
+
+    if(is.null(try)){
+        sendPopUpMessage('ERROR: corrupted-file')
+        return(NULL);
+    }
+
+
     colNames <- names(tmp["VARIABLE"==tmp[,1],])
 
-    tmp <- read.table(variablesEnv$uploadPath, header = F,
+    try <- tryCatch({tmp <- read.table(variablesEnv$uploadPath, header = F,
                       sep = options$separator, dec = options$decimal,
-                      quote = options$quotes)
+                      quote = options$quotes)}, error=function(cond){return(NULL)})
+
+
+    if(is.null(try)){
+        sendPopUpMessage('ERROR: corrupted-file')
+        return(NULL);
+    }
 
     tmp <- as.matrix(tmp)
 
@@ -482,7 +524,7 @@ shinyServer(function(input, output, session) {
         eval(parse(text = paste0("variablesEnv$dataList$",variablesEnv$name ,"<- data")))
         variablesEnv$uploadPath <- NULL
 
-        sendPopUpMessage('Chosen data was successfully upladed!')
+        sendPopUpMessage('Chosen data was successfully uploaded!')
         names <- as.list(names(variablesEnv$dataList))
         createDataSelector(names)
     }
@@ -670,6 +712,20 @@ observe({
             commands <- unlist(options$commands)
             attach(data)
 
+
+            method = NULL
+            unit = NULL
+            extraction = NULL
+
+            gemasInfo <- data@gemasInfo
+            if(!is.null(gemasInfo) && length(gemasInfo) > 1){
+                method <- gemasInfo@method
+                index <- ceiling(0.6 * length(method))
+                method <- method[index]
+                unit <- gemasInfo@unit[index]
+
+            }
+
             for(i in (1: length(commands))){
                 try <- tryCatch({eval(parse(text = commands[i]))}, error = function(cond){return(NULL)})
                 if(is.null(try)){
@@ -680,11 +736,23 @@ observe({
                     eval(parse(text = paste0('Data["', names[i], '"] <-', names[i])))
                 }
             }
-            
+
             detach(data)
             data@.Data <- Data
             names(data) <- names(Data)
             variablesEnv$currentData <- data
+
+            if(!is.null(options$typeOfVariables)){
+                if(options$typeOfVariables != 'allGroups'){
+                    variables <- getVariables(options$typeOfVariables, options$variables) - 1
+                    lengthData <- length(names(data)) - length(commands)
+                    newLength <- lengthData + (length(commands) -1)
+                    variables <- c(variables, (lengthData:newLength))
+
+                    variablesEnv$currentData <-  updateVariables(options$typeOfVariables, options$variables, variables)
+                }
+            }
+
             renderDataInformation(createJSObject())
             setDataAndGroup(variablesEnv$currentDataName, options$group, options$subset)
             sendPopUpMessage(options$message)

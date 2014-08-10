@@ -8,12 +8,12 @@ shinyUI(navbarPage("i-CoDa",
     tabPanel("StartPage",
         HTML('
             <h1> i-CoDa</h1>
-            <br>
+            <br/>
             <h5>
                 Welcome to <span class="capital">i</span>(nteractive) <span class="capital"> - Co</span>(mpositional) <span class="capital"> Da</span>(ta),
                  an userfriendly inerface for compositioal data analysis. <it>i-Coda</it> is the result of combining <i>R</i> with <i>JavaScript, JQuery, HTML and
                  CSS.</i>
-                 <br>
+                 <br/>
                  In order the use all features, that are provided by <i>i-Coda</i>, you need to have installed the following R-libraries:
                  <i>
                  <ul>
@@ -27,6 +27,11 @@ shinyUI(navbarPage("i-CoDa",
                     <li>mclustc</li>
                  </ul>
                  </i>
+                 <br/>
+                 <br/>
+                 <u><b>Features</b> </u><br/>
+                 <b>I. Data Import</b> <br/>
+
             </h5>
         ')
     ),
@@ -56,17 +61,18 @@ shinyUI(navbarPage("i-CoDa",
             '<div class="well">
             <input type="button" class="btn" id="import from R" value="Import from R" onclick="importDataFromR()"/>
             </div>'
-        )),
-        tabPanel("Export Data",
-            wellPanel(
-                HTML('
-                    <button type="button" class="btn" id="saveCSV" style="margin-bottom:15px; width:150px">Save .CSV</button>
-                    <br>
-                    <button type="button" class="btn" id="saveRData" style="margin-bottom:15px; width:150px">Save .RData</button>
-
-                ')
-            )
-        )),
+        ))
+#        tabPanel("Export Data",
+#            wellPanel(
+#                HTML('
+#                    <button type="button" class="btn" id="saveCSV" style="margin-bottom:15px; width:150px">Save .CSV</button>
+#                    <br>
+#                    <button type="button" class="btn" id="saveRData" style="margin-bottom:15px; width:150px">Save .RData</button>
+#
+#                ')
+#            )
+#        )
+        ),
     navbarMenu('Data Manipulation',
     tabPanel('Missing Values',
         HTML('<div class = "well workingWell", id = "missingValuesWell"></div>
@@ -127,8 +133,8 @@ shinyUI(navbarPage("i-CoDa",
             ')
         )
     ),
-    navbarMenu('Tests'
-    ),
+#    navbarMenu('Tests'
+#    ),
     tabPanel("Plot",
          HTML('
             <div class="completeContainer" id="completeContainer0">
@@ -148,6 +154,7 @@ shinyUI(navbarPage("i-CoDa",
     # importing the needed script and css files
           tags$head(
               tags$link(rel="stylesheet", type="text/css",href="style.css"),
+              tags$link(rel="icon", type="image/x-icon", href="icon.ico"),
               tags$script(type = "text/javascript", src = "app.js"),
               tags$script(type = "text/javascript", src = "busy.js"),
               tags$script(type = "text/javascript", src = "Highcharts-4.0.3/js/highcharts.js"),
