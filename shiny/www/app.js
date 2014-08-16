@@ -308,6 +308,16 @@ createGlobalImages = function(){
     body.appendChild(createImage('', 'loading', 'load.gif'));
     hideElement('img#loading');
 
+    $('body').bind('loading.start', function(ev){
+        showElement('img#loading');
+        $('.backgroundDiv').height(getMaxHeight()).show();
+    });
+
+    $('body').bind('loading.end', function(ev){
+        hideElement('img#loading');
+        $('.backgroundDiv').hide();
+    });
+
     body.appendChild(createImage('', 'xButton', 'xButton.png','hideElement("div#previewTable"); hideElement("img#xButton")'));
     hideElement('img#xButton');
 };
@@ -343,7 +353,7 @@ getMaxHeight = function(){
         return $(this).height();
     }).get());
 
-    return Math.max(window.innerHeight, maxHeight);
+    return Math.max(window.innerHeight, maxHeight, ($('.modalDialog').height() + 50));
 };
 
 // this function inserts newNode after referenceNode
@@ -358,39 +368,43 @@ renderDataInformation = function(){
 };
 
 renderDataMethodsInformation = function(){
-    createMissingValuesDialog();
-    createDetectionLimitDialog();
-    createTransformationsDialog();
-    createDefineObservationsGroupDialog();
-    createPCADialog();
-    if(currentVariablesGroupName == "allGroups"){
-        createTable('dataTable', currentData.names, currentData.data);
-        createNAsInfo(currentData.names, currentData.nas);
-        createDefineVariablesGroupDialog(currentData.names);
-        if(currentData.ldl != null && currentData.udl != null){createDetectionLimitInfoWell(currentData.names, currentData.udl, currentData.ldl);}
-        else if(currentData.udl != null){createDetectionLimitInfoWell(currentData.names, currentData.udl, null);}
-        else if(currentData.ldl != null){createDetectionLimitInfoWell(currentData.names, null, currentData.ldl);}
+    $('body').trigger('loading.start');
+    setTimeout(function(){
+        createMissingValuesDialog();
+        createDetectionLimitDialog();
+        createTransformationsDialog();
+        createDefineObservationsGroupDialog();
+        createPCADialog();
+        if(currentVariablesGroupName == "allGroups"){
+            createTable('dataTable', currentData.names, currentData.data);
+            createNAsInfo(currentData.names, currentData.nas);
+            createDefineVariablesGroupDialog(currentData.names);
+            if(currentData.ldl != null && currentData.udl != null){createDetectionLimitInfoWell(currentData.names, currentData.udl, currentData.ldl);}
+            else if(currentData.udl != null){createDetectionLimitInfoWell(currentData.names, currentData.udl, null);}
+            else if(currentData.ldl != null){createDetectionLimitInfoWell(currentData.names, null, currentData.ldl);}
 
-    }
-    else{
-        var tempNames;
-        var tempData;
-        if(typeOfSelectedVariableGroup == 'transformations'){
-            tempNames = getNames(currentVariablesGroup);
-            tempData = currentVariablesGroup;
-        }else{
-            tempData = currentData.data;
-            tempNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup);
         }
-        createDefineVariablesGroupDialog(tempNames);
-        createTable('dataTable', tempNames, tempData);
-        createNAsInfo(tempNames, getDataFromGivenIndexes(currentData.nas, currentVariablesGroup));
-        if(currentData.ldl != null && currentData.udl != null){createDetectionLimitInfoWell(tempNames,
-            getDataFromGivenIndexes(currentData.udl, currentVariablesGroup),
-            getDataFromGivenIndexes(currentData.ldl, currentVariablesGroup));}
-        else if(currentData.udl != null){createDetectionLimitInfoWell(tempNames, getDataFromGivenIndexes(currentData.udl, currentVariablesGroup), null);}
-        else if(currentData.ldl != null){createDetectionLimitInfoWell(tempNames, null, getDataFromGivenIndexes(currentData.ldl, currentVariablesGroup));}
-    }
+        else{
+            var tempNames;
+            var tempData;
+            if(typeOfSelectedVariableGroup == 'transformations'){
+                tempNames = getNames(currentVariablesGroup);
+                tempData = currentVariablesGroup;
+            }else{
+                tempData = currentData.data;
+                tempNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup);
+            }
+            createDefineVariablesGroupDialog(tempNames);
+            createTable('dataTable', tempNames, tempData);
+            createNAsInfo(tempNames, getDataFromGivenIndexes(currentData.nas, currentVariablesGroup));
+            if(currentData.ldl != null && currentData.udl != null){createDetectionLimitInfoWell(tempNames,
+                getDataFromGivenIndexes(currentData.udl, currentVariablesGroup),
+                getDataFromGivenIndexes(currentData.ldl, currentVariablesGroup));}
+            else if(currentData.udl != null){createDetectionLimitInfoWell(tempNames, getDataFromGivenIndexes(currentData.udl, currentVariablesGroup), null);}
+            else if(currentData.ldl != null){createDetectionLimitInfoWell(tempNames, null, getDataFromGivenIndexes(currentData.ldl, currentVariablesGroup));}
+        }
+        $('body').trigger('loading.end');
+    }, 5000);
 };
 
 popUpMessage = function(messageText){
@@ -733,115 +747,119 @@ getTypeOfDataSetVariable = function(variable){
 // creates a dialog from where the user chooses the variables from the data set
 createChooseVariableDialog = function(data, names){
 
-    modalDialog.setAttribute('id', 'chooseVariableDialog');
-    modalDialog.setAttribute('style', 'width: 750px; overflow:auto;');
-    modalDialog.appendChild(createH4Title('Choose Variables'));
+    $('body').trigger('loading.start');
+    setTimeout(function(){
+        modalDialog.setAttribute('id', 'chooseVariableDialog');
+        modalDialog.setAttribute('style', 'width: 750px; overflow:auto;');
+        modalDialog.appendChild(createH4Title('Choose Variables'));
 
-    var container = createDiv('','variablesContainer','');
+        var container = createDiv('','variablesContainer','');
 
-    var namesDiv = createDiv('variablesDiv', 'namesDiv', '');
-    var typeDiv = createDiv('variablesDiv', 'typeDiv', '');
-    var comp1Div = createDiv('variablesDiv', '', '');
-    var extern1Div = createDiv('variablesDiv', '', '');
-    var coord1Div = createDiv('variablesDiv', '', '');
-    var id1Div = createDiv('variablesDiv', '', '');
+        var namesDiv = createDiv('variablesDiv', 'namesDiv', '');
+        var typeDiv = createDiv('variablesDiv', 'typeDiv', '');
+        var comp1Div = createDiv('variablesDiv', '', '');
+        var extern1Div = createDiv('variablesDiv', '', '');
+        var coord1Div = createDiv('variablesDiv', '', '');
+        var id1Div = createDiv('variablesDiv', '', '');
 
-    okButton.setAttribute('onclick', 'getChooseVariableDialogCheckedBoxes(); resetUploadFile();');
-    cancelButton.setAttribute('onclick', 'hideElement("div#chooseVariableDialog"); resetUploadFile(); $(".backgroundDiv").hide();');
+        okButton.setAttribute('onclick', 'getChooseVariableDialogCheckedBoxes(); resetUploadFile();');
+        cancelButton.setAttribute('onclick', 'hideElement("div#chooseVariableDialog"); resetUploadFile(); $(".backgroundDiv").hide();');
 
-    namesDiv.appendChild(createDiv('variablesType', 'variablesNames', 'Variables'));
-    typeDiv.appendChild(createDiv('variablesType', 'variablesType', 'Type'));
-    comp1Div.appendChild(createDiv('variablesType', 'comp1', 'comp1'));
-    extern1Div.appendChild(createDiv('variablesType', 'extern1', 'extern1'));
-    coord1Div.appendChild(createDiv('variablesType', 'coord1', 'coord1'));
-    id1Div.appendChild(createDiv('variablesType', 'id1', 'id1'));
+        namesDiv.appendChild(createDiv('variablesType', 'variablesNames', 'Variables'));
+        typeDiv.appendChild(createDiv('variablesType', 'variablesType', 'Type'));
+        comp1Div.appendChild(createDiv('variablesType', 'comp1', 'comp1'));
+        extern1Div.appendChild(createDiv('variablesType', 'extern1', 'extern1'));
+        coord1Div.appendChild(createDiv('variablesType', 'coord1', 'coord1'));
+        id1Div.appendChild(createDiv('variablesType', 'id1', 'id1'));
 
-    container.appendChild(namesDiv);
-    container.appendChild(typeDiv);
-    container.appendChild(comp1Div);
-    container.appendChild(createAddButton('addCompButton', 'addNewVariableType("variablesContainer", "addCompButton", "comp");'));
-    container.appendChild(extern1Div);
-    container.appendChild(createAddButton('addExternButton', 'addNewVariableType("variablesContainer", "addExternButton", "extern");'));
-    container.appendChild(coord1Div);
-    container.appendChild(createAddButton('addCoordButton', 'addNewVariableType("variablesContainer", "addCoordButton", "coord");'));
-    container.appendChild(id1Div);
-    container.appendChild(createAddButton('addIdButton', 'addNewVariableType("variablesContainer", "addIdButton", "id");'));
+        container.appendChild(namesDiv);
+        container.appendChild(typeDiv);
+        container.appendChild(comp1Div);
+        container.appendChild(createAddButton('addCompButton', 'addNewVariableType("variablesContainer", "addCompButton", "comp");'));
+        container.appendChild(extern1Div);
+        container.appendChild(createAddButton('addExternButton', 'addNewVariableType("variablesContainer", "addExternButton", "extern");'));
+        container.appendChild(coord1Div);
+        container.appendChild(createAddButton('addCoordButton', 'addNewVariableType("variablesContainer", "addCoordButton", "coord");'));
+        container.appendChild(id1Div);
+        container.appendChild(createAddButton('addIdButton', 'addNewVariableType("variablesContainer", "addIdButton", "id");'));
 
-    modalDialog.appendChild(container);
-    modalDialog.appendChild(createBr());
-    modalDialog.appendChild(okButton);
-    modalDialog.appendChild(cancelButton);
+        modalDialog.appendChild(container);
+        modalDialog.appendChild(createBr());
+        modalDialog.appendChild(okButton);
+        modalDialog.appendChild(cancelButton);
 
-    for(var i = 0; i < names.length; i++){
-        var variableTypeSelector = createSelect('variableTypeSelector', names[i] + 'TypeSelector');
+        for(var i = 0; i < names.length; i++){
+            var variableTypeSelector = createSelect('variableTypeSelector', names[i] + 'TypeSelector');
 
-        variableTypeSelector.appendChild(createOption('', 'character', 'character'));
-        variableTypeSelector.appendChild(createOption('', 'numeric', 'numeric'));
-        variableTypeSelector.appendChild(createOption('', 'logical', 'logical'));
-        variableTypeSelector.appendChild(createOption('', 'factor', 'factor'));
+            variableTypeSelector.appendChild(createOption('', 'character', 'character'));
+            variableTypeSelector.appendChild(createOption('', 'numeric', 'numeric'));
+            variableTypeSelector.appendChild(createOption('', 'logical', 'logical'));
+            variableTypeSelector.appendChild(createOption('', 'factor', 'factor'));
 
-        var varType = getTypeOfDataSetVariable(data[names[i]][data[names[i]].length/2]);
-        if(varType == 'numeric'){
-            variableTypeSelector.selectedIndex = 1;
+            var varType = getTypeOfDataSetVariable(data[names[i]][data[names[i]].length/2]);
+            if(varType == 'numeric'){
+                variableTypeSelector.selectedIndex = 1;
+            }
+            else if(varType == 'logical'){
+                variableTypeSelector.selectedIndex = 2;
+            }
+
+            var nameCont = createDiv('variableChooserNameContainer', '', '');
+            nameCont.appendChild(createDiv('names', '',  names[i]));
+            namesDiv.appendChild(nameCont);
+            namesDiv.appendChild(createBr());
+
+            typeDiv.appendChild(variableTypeSelector);
+
+            var comp1Cont = createDiv('variableChooserCheckBoxContainer', '', '');
+            comp1Cont.appendChild(createCheckBox('variableChooserCheckbox comp1Check', 'comp1Check', names[i]));
+            comp1Div.appendChild(comp1Cont);
+            comp1Div.appendChild(createBr());
+
+            var extern1Cont = createDiv('variableChooserCheckBoxContainer', '', '');
+            extern1Cont.appendChild(createCheckBox('variableChooserCheckbox extern1Check', 'extern1Check', names[i]));
+            extern1Div.appendChild(extern1Cont);
+            extern1Div.appendChild(createBr());
+
+            var coord1Cont = createDiv('variableChooserCheckBoxContainer', '', '');
+            coord1Cont.appendChild(createCheckBox('variableChooserCheckbox coord1Check', 'coord1Check', names[i]));
+            coord1Div.appendChild(coord1Cont);
+            coord1Div.appendChild(createBr());
+
+            var id1Cont = createDiv('variableChooserCheckBoxContainer', '', '');
+            id1Cont.appendChild(createCheckBox('variableChooserCheckbox id1Check', 'id1Check', names[i]));
+            id1Div.appendChild(id1Cont);
+            id1Div.appendChild(createBr());
         }
-        else if(varType == 'logical'){
-            variableTypeSelector.selectedIndex = 2;
-        }
 
-        var nameCont = createDiv('variableChooserNameContainer', '', '');
-        nameCont.appendChild(createDiv('names', '',  names[i]));
-        namesDiv.appendChild(nameCont);
-        namesDiv.appendChild(createBr());
-
-        typeDiv.appendChild(variableTypeSelector);
-
-        var comp1Cont = createDiv('variableChooserCheckBoxContainer', '', '');
-        comp1Cont.appendChild(createCheckBox('variableChooserCheckbox comp1Check', 'comp1Check', names[i]));
-        comp1Div.appendChild(comp1Cont);
+        comp1Div.appendChild(createImage('checkAll', 'comp1CheckAll', 'checkAll.png', 'selectAllCheckBoxes("comp1Check")'));
         comp1Div.appendChild(createBr());
-
-        var extern1Cont = createDiv('variableChooserCheckBoxContainer', '', '');
-        extern1Cont.appendChild(createCheckBox('variableChooserCheckbox extern1Check', 'extern1Check', names[i]));
-        extern1Div.appendChild(extern1Cont);
+        comp1Div.appendChild(createBr());
+        extern1Div.appendChild(createImage('checkAll', 'extern1CheckAll', 'checkAll.png', 'selectAllCheckBoxes("extern1Check")'));
         extern1Div.appendChild(createBr());
-
-        var coord1Cont = createDiv('variableChooserCheckBoxContainer', '', '');
-        coord1Cont.appendChild(createCheckBox('variableChooserCheckbox coord1Check', 'coord1Check', names[i]));
-        coord1Div.appendChild(coord1Cont);
+        extern1Div.appendChild(createBr());
+        coord1Div.appendChild(createImage('checkAll', 'coord1CheckAll', 'checkAll.png', 'selectAllCheckBoxes("coord1Check")'));
         coord1Div.appendChild(createBr());
-
-        var id1Cont = createDiv('variableChooserCheckBoxContainer', '', '');
-        id1Cont.appendChild(createCheckBox('variableChooserCheckbox id1Check', 'id1Check', names[i]));
-        id1Div.appendChild(id1Cont);
+        coord1Div.appendChild(createBr());
+        id1Div.appendChild(createImage('checkAll', 'id1CheckAll', 'checkAll.png', 'selectAllCheckBoxes("id1Check")'));
         id1Div.appendChild(createBr());
-    }
+        id1Div.appendChild(createBr());
 
-    comp1Div.appendChild(createImage('checkAll', 'comp1CheckAll', 'checkAll.png', 'selectAllCheckBoxes("comp1Check")'));
-    comp1Div.appendChild(createBr());
-    comp1Div.appendChild(createBr());
-    extern1Div.appendChild(createImage('checkAll', 'extern1CheckAll', 'checkAll.png', 'selectAllCheckBoxes("extern1Check")'));
-    extern1Div.appendChild(createBr());
-    extern1Div.appendChild(createBr());
-    coord1Div.appendChild(createImage('checkAll', 'coord1CheckAll', 'checkAll.png', 'selectAllCheckBoxes("coord1Check")'));
-    coord1Div.appendChild(createBr());
-    coord1Div.appendChild(createBr());
-    id1Div.appendChild(createImage('checkAll', 'id1CheckAll', 'checkAll.png', 'selectAllCheckBoxes("id1Check")'));
-    id1Div.appendChild(createBr());
-    id1Div.appendChild(createBr());
+        comp1Div.appendChild(createTextField('variablesTypeTextField comp1TextField', 'comp1TextField', 'comp1'));
+        extern1Div.appendChild(createTextField('variablesTypeTextField extern1TextField', 'extern1TextField', 'extern1'));
+        coord1Div.appendChild(createTextField('variablesTypeTextField coord1TextField', 'coord1TextField', 'coord1'));
+        id1Div.appendChild(createTextField('variablesTypeTextField id1TextField', 'id1TextField', 'id1'));
 
-    comp1Div.appendChild(createTextField('variablesTypeTextField comp1TextField', 'comp1TextField', 'comp1'));
-    extern1Div.appendChild(createTextField('variablesTypeTextField extern1TextField', 'extern1TextField', 'extern1'));
-    coord1Div.appendChild(createTextField('variablesTypeTextField coord1TextField', 'coord1TextField', 'coord1'));
-    id1Div.appendChild(createTextField('variablesTypeTextField id1TextField', 'id1TextField', 'id1'));
+        $('#variablesContainer').width(750);
+        $('div#chooseVariableDialog').show();
+        $('.backgroundDiv').height(getMaxHeight()).show();
 
-    $('#variablesContainer').width(750);
-    $('div#chooseVariableDialog').show();
-    $('.backgroundDiv').height(getMaxHeight()).show();
-
-    nrComps = 1;
-    nrCoords = 1;
-    nrExterns = 1;
-    nrIDs = 1;
+        nrComps = 1;
+        nrCoords = 1;
+        nrExterns = 1;
+        nrIDs = 1;
+        $('body').trigger('loading.end');
+    },5000);
 };
 
 updateVariablesContainerWidth = function(){
@@ -963,6 +981,7 @@ getChooseVariableDialogCheckedBoxes = function(){
 };
 
 createTable = function(tableId, dataVariablesNames, data, info){
+
     cleanTable(tableId);
 
     var table = document.getElementById(tableId);
@@ -1057,7 +1076,6 @@ createTable = function(tableId, dataVariablesNames, data, info){
 
     var settings = document.getElementById('settings');
     settings.setAttribute('onclick', 'createEditTableMenuDialog()');
-
 };
 
 createEditTableMenuDialog = function(){
@@ -3287,3 +3305,9 @@ plotBoxPlot = function(title, categories, data, outliers){
 
     });
 };
+
+$(document).ready(function(){
+    if ($('html').attr('class')=='shiny-busy') {
+        console.log('IO');
+    }
+});
