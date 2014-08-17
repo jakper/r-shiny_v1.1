@@ -859,6 +859,7 @@ createChooseVariableDialog = function(data, names){
         nrExterns = 1;
         nrIDs = 1;
         $('body').trigger('loading.end');
+        $('.backgroundDiv').show();
     },5000);
 };
 
@@ -1327,7 +1328,7 @@ createFileOptionDialog = function(message, fromFile){
     }
 
     okButton.setAttribute('onclick', 'uploadFile(' + fromFile +')');
-    cancelButton.setAttribute('onclick', 'hideElement("div#textFieldDialog"); resetUploadFile();');
+    cancelButton.setAttribute('onclick', 'hideElement("div#textFieldDialog"); resetUploadFile(); $(".backgroundDiv").hide()');
     modalDialog.appendChild(okButton);
     modalDialog.appendChild(cancelButton);
     modalDialog.appendChild(createButton('btn', 'buttonVariable', 'Preview',

@@ -29,8 +29,38 @@ shinyUI(navbarPage("i-CoDa",
                  </i>
                  <br/>
                  <br/>
-                 <u><b>Features</b> </u><br/>
-                 <b>I. Data Import</b> <br/>
+                 <u><b>Features</b><br/><br/>
+                 <b>I Data</b> <br/>
+                 I.1 Data Import <br/></u>
+                 The first feature you would use, is "data import". <i>i-CoDa</i> gives you the possibility to import files (.csv and .RData),
+                 but also you can import a data set, directly from an installed R-package. <br>
+                 <u>I.1.1 CSV-File</u> <br/>
+                 When importign csv-files, you can either import a
+                 standard file or you can import an extended  csv-file. <br/><br/> <b>Example:</b><br/>
+                <img class="screenshots" src="screenshots/1.png"/> <br/> As we can see, this csv-file has an extra column, that contains information about the data. For example
+                the data inserted on the row with <i>"LDL"</i> will be used for imputation.
+                <br/><br/>
+                After choosing the desired file, you will see following screen: <br/>
+                <img class="screenshots" src="screenshots/2.png"/>
+                <br/><br/>
+                This is where you can define the upload-options. The <i>preview</i>-button shows you, how your data will be imported with
+                the current options. <br>
+                <img class="screenshots" src="screenshots/3.png" /> <br/><br/>
+
+                <u>I.1.2 RData-File</u> <br>
+                When importing a <i>RData</i>-file, there is not much to do. After choosing the file, that will be uploaded, you only have to
+                choose the name, under which the file will be imported. <br/>
+                <img class="screenshots" src="screenshots/4.png" /> <br/><br/>
+
+                <u>I.1.3 R-Packages</u><br>
+                When importing a data-set from a r-package, the first thing to do, you is choosing the desired package. <br>
+                <img class="screenshots" src="screenshots/5.png" /> <br/><br/>
+                Next step is, choosing the data-set from the chosen package. (in the example I chosed package "car") <br>
+                <img class="screenshots" src="screenshots/5.png" /> <br/><br/>
+                And than, you must chose a name for the data set or use the default one. (just like in importing RData-Files)
+                <br/><br/>
+                The file step of importing a data set, is the same for all kind of imports. When reaching the final step, you will see a dialog like this:
+                <br/>
 
             </h5>
         ')
