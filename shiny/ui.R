@@ -59,8 +59,18 @@ shinyUI(navbarPage("i-CoDa",
                 <img class="screenshots" src="screenshots/5.png" /> <br/><br/>
                 And than, you must chose a name for the data set or use the default one. (just like in importing RData-Files)
                 <br/><br/>
-                The file step of importing a data set, is the same for all kind of imports. When reaching the final step, you will see a dialog like this:
+                The file step of importing a data set, is the same for all kind of imports. When reaching the final step, you will see a dialog similar to this one: <br/>
+                <img class="screenshots" src="screenshots/7.png" /> <br/><br/>
                 <br/>
+                On the first column you will se the names of all variables available in the chosen data, while on the second column you will see their type.
+                There are 4 possible types to use:
+                <ul>
+                    <li>character</li>
+                    <li>numeric</li>
+                    <li>factor</li>
+                    <li>logical</li>
+                </ul>
+
 
             </h5>
         ')
