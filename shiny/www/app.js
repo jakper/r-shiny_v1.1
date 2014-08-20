@@ -119,7 +119,7 @@ var pfaCompositions = {
 };
 var pfaNonCompositions = {
     pfa: {
-        factors: ["factors"],
+        factors: ["Factors"],
         scores: ["Scores", "regression", "Bartlett", "none"],
         rotation: ["Rotation", "varimax", "none"]
     }
@@ -375,6 +375,7 @@ renderDataMethodsInformation = function(){
         createTransformationsDialog();
         createDefineObservationsGroupDialog();
         createPCADialog();
+        createPFADialog();
         if(currentVariablesGroupName == "allGroups"){
             createTable('dataTable', currentData.names, currentData.data);
             createNAsInfo(currentData.names, currentData.nas);
@@ -1740,7 +1741,7 @@ createTransformationsDialog = function(){
         createTransformationsVariablesDiv();
     }
     else if(typeOfSelectedVariableGroup == 'transformations'){
-        transformationsContainer.appendChild(createH4Title('Chosen data are already transformed!'));
+        transformationsContainer.appendChild(createH4Title('Chosen data were transformed!'));
     }else{
         transformationsContainer.appendChild(createH4Title('Transformation methods can\'t be applied on chosen (non compositional) data!'));
     }
@@ -2272,8 +2273,45 @@ getPCAOptions = function(){
     options["subset"] = currentSubset;
 };
 
+/**********************************************************************************
+********************************** PFA ********************************************
+**********************************************************************************/
+createPFADialog = function(){
+    cleanModalDialog('pfaWell');
+    var pfaContainer = document.getElementById('pfaWell');
+    if(typeOfSelectedVariableGroup == 'transformations'){
+        pfaContainer.appendChild(createH4Title('PFA can\'t be applied on transformed data!'));
+    }else{
+        pfaContainer.appendChild(createHr());
+        if(typeOfSelectedVariableGroup == 'compositions'){
+            var pfa = pfaCompositions['pfa'];
+        }else{
+            var pfa = pfaNonCompositions['pfa'];
+        }
 
+        for(var obj in pfa){
+            var param = pfa[obj];
+            pfaContainer.appendChild(createDiv('','', param[0], ''));
 
+            if(param.length == 1){
+                var textField = createTextField('','','');
+                textField.setAttribute('placeholder', 'Insert the number of factors!');
+                pfaContainer.appendChild(textField);
+            }else{
+                var select = createSelect('', '', '');
+                for(var i = 1; i < param.length; i++){
+                    select.appendChild(createOption('', param[i], param[i]));
+                }
+                pfaContainer.appendChild(select);
+            }
+        }
+        pfaContainer.appendChild(createHr());
+        pfaContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getPFAOptions()'));
+
+    }
+};
+
+getPFAOptions = function(){};
 
 
 

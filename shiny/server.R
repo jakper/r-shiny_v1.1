@@ -1,13 +1,10 @@
 tryCatch({library(shiny)}, error = function(cond){return(NULL)})
-tryCatch({library(shinyRGL)}, error = function(cond){return(NULL)})
 tryCatch({library(mvoutlier)}, error = function(cond){return(NULL)})
 tryCatch({library(robCompositions)}, error = function(cond){return(NULL)})
 tryCatch({library(VIM)}, error = function(cond){return(NULL)})
 tryCatch({library(StatDA)}, error = function(cond){return(NULL)})
 tryCatch({library(robustbase)}, error = function(cond){return(NULL)})
 tryCatch({library(MASS)}, error = function(cond){return(NULL)})
-tryCatch({library(ggplot2)}, error = function(cond){return(NULL)})
-tryCatch({library(rgl)}, error = function(cond){return(NULL)})
 tryCatch({library(mclust)}, error = function(cond){return(NULL)})
 
 # class gemasInfo

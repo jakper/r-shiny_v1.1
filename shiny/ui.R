@@ -1,8 +1,4 @@
-library(shiny)
-library(shinyAce)
-library(shinyRGL)
-library(rHighcharts)
-library(rCharts)
+tryCatch({library(shiny)}, error = function(cond){return(NULL)})
 
 shinyUI(navbarPage("i-CoDa",
     tabPanel("StartPage",
@@ -24,7 +20,7 @@ shinyUI(navbarPage("i-CoDa",
                     <li>StatDA</li>
                     <li>robustbase</li>
                     <li>MASS</li>
-                    <li>mclustc</li>
+                    <li>mclust</li>
                  </ul>
                  </i>
                  <br/>
@@ -76,7 +72,7 @@ shinyUI(navbarPage("i-CoDa",
         ')
     ),
     navbarMenu("Data",
-    tabPanel("See Data",
+    tabPanel("Inspect Data",
     HTML(
         ' <div class="selectorDiv">Select Data </br> <select id="dataSelector" class="btn" onchange="selectedDataSet(value)"></select></div>
         <div class="selectorDiv">Select Variable Group </br> <select id="variableGroupSelector" class="btn" onchange="selectedVariableGroup(selectedOptions)"></select></div>
@@ -149,7 +145,7 @@ shinyUI(navbarPage("i-CoDa",
         ),
         tabPanel('Factor Analysis',
             HTML('
-                <div class="well workingWell" id="faWell"></div>
+                <div class="well workingWell" id="pfaWell"></div>
             ')
         ),
         tabPanel('Discriminant Analysis',
