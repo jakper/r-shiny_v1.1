@@ -288,11 +288,11 @@ createGlobalModals = function(){
     body.appendChild(modalDialog);
     hideElement('div#modalDialog');
 
-    modalPopUp = createDiv('modalDialog', 'modalPopUp', '');
+    modalPopUp = createDiv('', 'modalPopUp', '');
     body.appendChild(modalPopUp);
     hideElement('div#modalPopUp');
 
-    var previewTable = createDiv('modalDialog table table-bordered table-condensed', 'previewTable');
+    var previewTable = createDiv('table table-bordered table-condensed', 'previewTable');
     body.appendChild(previewTable);
     hideElement('div#previewTable');
 
@@ -414,7 +414,9 @@ popUpMessage = function(messageText){
     showElement('div#modalPopUp');
     showElement('.backgroundDiv');
     setTimeout(function(){
-        hideElement('.backgroundDiv');
+        if($('.modalDialog:hidden').length > 0){
+            hideElement('.backgroundDiv');
+        }
         hideElement('div#modalPopUp');
         modalPopUp.innerHTML = '';
     },3500);
@@ -3223,27 +3225,32 @@ getBoxPlotOptions = function(){
 
     var options = {};
     if(type == 'factor'){
-        if(option.value == ""){
+        if(option != undefined && option != null){
+            if(option.value == ""){
+                popUpMessage('ERROR: chosen data doesn\'t contain any factors!');
+                return;
+            }
+            options['factor'] = option.value;
+            var variable = document.getElementById('plotParametersYTextField').value;
+            if(variable == ""){
+                popUpMessage('ERROR: empty variable-field!');
+                return;
+            }else{
+                if(!doesGivenVariableExist(variable)){
+                    popUpMessage('ERROR: variable "' + variable +'" doesn\'t exist on current dataset');
+                }
+            }
+            options["variable"] = variable;
+            var method = document.getElementById('boxPlotMethodField').value;
+            options["method"] = method;
+            if(method != ""){
+                options['title'] = method + '(' + variable + ') in ' + option.value;
+            }else{
+                options['title'] = variable + ' in ' + option.value;
+            }
+        }else{
             popUpMessage('ERROR: chosen data doesn\'t contain any factors!');
             return;
-        }
-        options['factor'] = option.value;
-        var variable = document.getElementById('plotParametersYTextField').value;
-        if(variable == ""){
-            popUpMessage('ERROR: empty variable-field!');
-            return;
-        }else{
-            if(!doesGivenVariableExist(variable)){
-                popUpMessage('ERROR: variable "' + variable +'" doesn\'t exist on current dataset');
-            }
-        }
-        options["variable"] = variable;
-        var method = document.getElementById('boxPlotMethodField').value;
-        options["method"] = method;
-        if(method != ""){
-            options['title'] = method + '(' + variable + ') in ' + option.value;
-        }else{
-            options['title'] = variable + ' in ' + option.value;
         }
     }else{
         options['variablesName'] = option.value;
@@ -3290,7 +3297,7 @@ createBoxPlotSeries = function(data){
 
     plotBoxPlot(data.title, data.categories, dataToPlot, outliers);
     hideElement('#plotDialog');
-    $('.backgroundDiv').height();
+    $('.backgroundDiv').hide();
     createPlotContainer();
 
 };
@@ -3344,9 +3351,3 @@ plotBoxPlot = function(title, categories, data, outliers){
 
     });
 };
-
-$(document).ready(function(){
-    if ($('html').attr('class')=='shiny-busy') {
-        console.log('IO');
-    }
-});
