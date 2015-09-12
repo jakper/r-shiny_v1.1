@@ -8,7 +8,7 @@ tryCatch({library(MASS)}, error = function(cond){return(NULL)})
 tryCatch({library(mclust)}, error = function(cond){return(NULL)})
 
 #TODO: tryCatch
-require(rCharts)
+#library(rCharts)
 library(ggplot2)
 
 
@@ -1298,26 +1298,23 @@ observe({
 	    })
 	    
 	    
-	    
-	    
+	    data(USArrests)
+	    output$pca.BiPlot <- renderPlot({
+	      ggplot(USArrests, aes(Murder, Assault)) + geom_point()
+	      #plot(prcomp(USArrests,scale=TRUE), type = 'l')
+	    })
 	    
 	  }
 		
-		mtcars2 <- mtcars[, c("mpg", "cyl", "disp", "hp", "wt", "am", "gear")]
-		output$pca.BiPlot <- renderPlot({
-		  print(ggplot(mtcars2, aes(wt, mpg)) + geom_point())
-		  
-		})
-    
 	}
 })
 
 
     data(USArrests)
     output$pca.ScreePlot <- renderPlot({
-      plot(prcomp(USArrests,scale=TRUE), type = 'l')
+      #ggplot(USArrests, aes(Murder, Assault)) + geom_point()
+      pca.ScreePlot <- plot(prcomp(USArrests,scale=TRUE), type = 'l')
     })
-
 
 
 #######################################################################################################################################
