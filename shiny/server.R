@@ -11,6 +11,8 @@ tryCatch({library(mclust)}, error = function(cond){return(NULL)})
 require(rCharts)
 library(ggplot2)
 
+
+
 # class gemasInfo
 setClass("gemasInfo", representation(header = 'character', comment = 'character', sample = 'character', id = 'vector', coords = 'character',
         variable = 'character', extraction = 'character', method = 'character', UDL = 'vector', LDL = 'vector', unit = 'character'), contains = NULL)
