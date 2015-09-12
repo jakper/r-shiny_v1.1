@@ -259,6 +259,11 @@ $(document).ready(function(){
             createBoxPlotSeries(data);
         }
     );
+	Shiny.addCustomMessageHandler('pcaPlot',
+        function(data){
+            createPcaPlot(data);
+        }
+    );
 });
 
 initElements = function(){
@@ -577,6 +582,13 @@ createAddButton = function(id, onclick){
     icon.setAttribute('class', 'icon-plus-sign');
     addButton.appendChild(icon);
     return addButton;
+};
+
+createPropertiesAndEvents  = function(textFieldClass, id){
+	var pre =document.createElement("PRE");
+    pre.setAttribute('class', textFieldClass);
+    pre.setAttribute('id', id);
+	return pre;
 };
 
 /**********************************************************************************
@@ -2240,39 +2252,53 @@ createPCADialog = function(){
     var pcaContainer = document.getElementById('pcaWell');
     if(typeOfSelectedVariableGroup == 'transformations'){
         pcaContainer.appendChild(createH4Title('PCA can\'t be applied on transformed data!'));
-    }else {
+    }else if(typeOfSelectedVariableGroup == 'compositions') {
         pcaContainer.appendChild(createHr());
         pcaContainer.appendChild(createDiv('', '', 'Method'));
         var selector = createSelect('', 'pcaMethodSelect');
         pcaContainer.appendChild(selector);
         selector.appendChild(createOption('', 'robust', 'robust'));
         selector.appendChild(createOption('', 'standard', 'standard'));
+		
+		pcaContainer.appendChild(createBr());
+		pcaContainer.appendChild(createDiv('', '', 'Center'));
+		pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaCenterCheckBox', 'Center'));
+		pcaContainer.appendChild(createBr());
+		pcaContainer.appendChild(createDiv('', '', 'Scale'));
+		pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaScaleCheckBox', 'Scale'));
 
-        if(typeOfSelectedVariableGroup != "compositions"){
+        /*if(typeOfSelectedVariableGroup != "compositions"){
             pcaContainer.appendChild(createDiv('','', 'Correlation'));
             var corSelect = createSelect('','pcaCorSelect');
             pcaContainer.appendChild(corSelect);
             corSelect.appendChild(createOption('', 'true', 'true'));
             corSelect.appendChild(createOption('', 'false', 'false'));
-        }
+        }*/
 
         pcaContainer.appendChild(createHr());
         pcaContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getPCAOptions()'));
     }
+	else{
+		pcaContainer.appendChild(createH4Title('PCA methods can\'t be applied on chosen (non compositional) data!'));
+	}
 };
 
 getPCAOptions = function(){
     var options = {
-        method: document.getElementById('pcaMethodSelect').value
+        method: document.getElementById('pcaMethodSelect').value,
+		center: document.getElementById('pcaCenterCheckBox').checked,
+		scale: document.getElementById('pcaScaleCheckBox').checked
     };
 
     if(typeOfSelectedVariableGroup != 'compositions'){
         options["cor"] = document.getElementById('pcaCorSelect').value;
     }
 
+	options["groupData"] = currentVariablesGroup;
     options["type"] = typeOfSelectedVariableGroup;
     options["group"] = currentVariablesGroupName;
     options["subset"] = currentSubset;
+	Shiny.onInputChange("pca.in", options);
 };
 
 /**********************************************************************************
@@ -2317,8 +2343,10 @@ getPFAOptions = function(){};
 
 
 
-
-
+ 
+ 
+ 
+ 
 
 
 /**********************************************************************************
@@ -3010,7 +3038,10 @@ createScatterPlotSeries = function(x, y, factor){
                     }
                 }
                 series[i] = {
-                    name: currentData.data[factor][indexes[0]],
+                    name: 'test',
+					//getArrayOfIDs(tmp),
+					//currentData.data[factor][indexes[0]],
+					//getPointInfo(dataInfoIndex, i)
                     color: plotColors[i],
                     data: tmp
                 }
@@ -3025,9 +3056,18 @@ createScatterPlotSeries = function(x, y, factor){
     createPlotContainer();
 };
 
+/*
 getPointInfo = function(dataInfoIndex, index){
     return dataInfo[dataInfoIndex][index];
 };
+
+getArrayOfIDs = function(data){
+	for(i = 1; i <= data.length; i ++){
+		interation.push([i]);
+	}
+	return interation;
+}
+*/
 
 addExtractionAndMethodToInfo = function(tmpInfo, nameIndex){
     if(currentData.gemasInfo.EXTRACTION != null && currentData.gemasInfo.EXTRACTION != undefined){
@@ -3120,11 +3160,6 @@ plotScatterPlot = function(title, xAxisTitle, yAxisTitle, series){
             floating: true,
             backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
             borderWidth: 1
-        },
-        tooltip: {
-            formatter: function(){
-                return getPointInfo(dataInfoIndex, this.series.data.indexOf( this.point ))
-            }
         },
         plotOptions: {
             series: {

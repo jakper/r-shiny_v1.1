@@ -1,0 +1,17 @@
+{
+    "contents" : "## server.r\nlibrary(shiny)\n\nrequire(rCharts)\n\ncitibike_all <- read.csv(\"all-data.csv\", header = TRUE, sep = \",\")\ncitibike_all$miles <- round(citibike_all$milesToday, digits=0)\n\nfit1 <- lm(miles ~ day_of_week + maxtemp + precip + cloudsNum + MinDewpointF + maxwind, data=citibike_all)\ncitibike_all$fit <- as.numeric(fitted(fit1))\n\n#Shiny server function, inputs from slider and dropdown menu, outputs to ui.R or html\nshinyServer(function(input, output) {\n  \n  #########     BEGIN REACTIVE EXPRESIONS    ############\n  \n\t plotBy <- reactive({\n\t\t paste(\"miles ~ \", input$variable)\t\n\t      })   \n\t groupBy <- reactive({\n\t\t groups <- switch(input$group,\n \t\t            \"rain\" = rain,\n\t\t\t\"sky\" = sky,\n\t\t\t\"day_of_week\" = day_of_week,\n \t\t            \"month\" = month)\n\t      })   \n\tcorNum  <- reactive({\n\t\tyChoice = input$variable\n\t\tyCor = citibike_all[yChoice]\n\t\t round(cor(citibike_all$miles,yCor,method=\"pearson\"),2)\n\t      })\n \tcorText  <- reactive({\n \t\t paste(\"Correlation between miles and  \", input$variable,\":\")\n \t      })\t   \t \n\n  #########     END REACTIVE EXPRESIONS    ############\n  \t\t \n  #########     BEGIN OUTPUTS    ############\t\n     \n\t output$mainPlot2 <- renderChart2({\n\t\t groups <- input$group\n\t\t yPlot <- input$variable\n\t\t h1 <- hPlot(as.formula(plotBy()), data = citibike_all, group=groups,name='date',type = 'scatter', radius = 8, \n\t\t   group.na = \"Not Available\")\n\t\t h1$params$width = 1000\n\t\t h1$params$height = 700\n\t\t h1$yAxis(title = list(text = \"Miles travelled\"))\n\t\t \n\t\t # h1$legend(symbolWidth = 80)\n\t\t h1$tooltip(formatter = \"#! function(d) { return '<p>' + this.series.name +'<br>Miles travelled: '     + this.point.y + \n\t\t                                                 '<br>x: '  + this.point.x + '</p>'  ; } !#\")\n\t\t#h1$tooltip(valuePrefix = paste(yPlot,\" \"), crosshairs=list(width=1,color='gray'))\n\t\n\t\t return(h1)\n\t     })\n\t\t\n\t     output$corNum <- renderText({\n\t       corNum()\n\t     })\n\t     output$corText <- renderText({\n\t       corText()\n\t     })\n\t   \n  #########     END OUTPUTS    ############\n  \n})\n",
+    "created" : 1435101007574.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1339400032",
+    "id" : "1720827A",
+    "lastKnownWriteTime" : 1435024211,
+    "path" : "C:/Users/Jakob/shiny/Tests/highcharts/citi-bike-data-with-rCharts-master/server.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

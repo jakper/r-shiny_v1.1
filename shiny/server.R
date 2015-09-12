@@ -7,6 +7,10 @@ tryCatch({library(robustbase)}, error = function(cond){return(NULL)})
 tryCatch({library(MASS)}, error = function(cond){return(NULL)})
 tryCatch({library(mclust)}, error = function(cond){return(NULL)})
 
+#TODO: tryCatch
+require(rCharts)
+library(ggplot2)
+
 # class gemasInfo
 setClass("gemasInfo", representation(header = 'character', comment = 'character', sample = 'character', id = 'vector', coords = 'character',
         variable = 'character', extraction = 'character', method = 'character', UDL = 'vector', LDL = 'vector', unit = 'character'), contains = NULL)
@@ -1251,6 +1255,67 @@ observe({
             resetConnector('defineObservationsFactor')
         }
     })
+
+########################################################################################################################################
+################################################################### Statistical Methods ################################################
+########################################################################################################################################
+############################################################## PCA #####################################################################
+	observe({
+	options <- input$pca.in
+	if(!is.null(options)){
+	  
+		data <- as.data.frame(variablesEnv$currentData)
+
+		variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
+		if(length(options$groupData) != 0){
+			data <- data[variablesEnv$currentVariableGroup]
+		}
+
+	  if(options$method == 'robust'){
+	    try <- tryCatch({tmp <- prcomp(data,center=options$center,scale=options$scale, covmat =covPCAproj(data)$cov )},
+	                    error = function(cond){return(NULL)})
+	    
+	  }
+	  else if (options$method == 'standard'){
+	   try <- tryCatch({tmp <- prcomp(data,center=options$center,scale=options$scale)},
+	                   error = function(cond){return(NULL)})
+	  }
+	  else{
+	    
+	  }
+	  
+	  if(is.null(try)){
+	    sendPopUpMessage("ERROR: chosen method does not exist or can\'t be applied on chosen data!")
+	  }
+	  else{
+	    
+	    
+	    output$pca.Score <- renderPrint({
+	      print(summary(tmp))
+	      
+	    })
+	    
+	    
+	    
+	    
+	    
+	  }
+		
+		mtcars2 <- mtcars[, c("mpg", "cyl", "disp", "hp", "wt", "am", "gear")]
+		output$pca.BiPlot <- renderPlot({
+		  print(ggplot(mtcars2, aes(wt, mpg)) + geom_point())
+		  
+		})
+    
+	}
+})
+
+
+    data(USArrests)
+    output$pca.ScreePlot <- renderPlot({
+      plot(prcomp(USArrests,scale=TRUE), type = 'l')
+    })
+
 
 
 #######################################################################################################################################

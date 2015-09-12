@@ -1,4 +1,6 @@
 tryCatch({library(shiny)}, error = function(cond){return(NULL)})
+library(ggplot2)
+require(rCharts)
 
 shinyUI(navbarPage("i-CoDa",
     tabPanel("StartPage",
@@ -141,6 +143,11 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Principal Component Analysis',
             HTML('
                 <div class="well workingWell", id="pcaWell"></div>
+				<div id="pca" class="shiny-html-output">
+				<pre id="pca.Score" class = "shiny-text-output"></pre>
+				</div>
+				<div id="pca.BiPlot" class="well workingWell"></div>
+				<div id="pca.ScreePlot" class="well workingWell"></div>
             ')
         ),
         tabPanel('Factor Analysis',
