@@ -381,6 +381,7 @@ renderDataMethodsInformation = function(){
         createDefineObservationsGroupDialog();
         createPCADialog();
         createPFADialog();
+		createClusterAnalysisDialog();
         if(currentVariablesGroupName == "allGroups"){
             createTable('dataTable', currentData.names, currentData.data);
             createNAsInfo(currentData.names, currentData.nas);
@@ -2252,7 +2253,7 @@ createPCADialog = function(){
     var pcaContainer = document.getElementById('pcaWell');
     if(typeOfSelectedVariableGroup == 'transformations'){
         pcaContainer.appendChild(createH4Title('PCA can\'t be applied on transformed data!'));
-    }else if(typeOfSelectedVariableGroup == 'compositions') {
+    }else if(typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
         pcaContainer.appendChild(createHr());
         pcaContainer.appendChild(createDiv('', '', 'Method'));
         var selector = createSelect('', 'pcaMethodSelect');
@@ -2261,38 +2262,30 @@ createPCADialog = function(){
         selector.appendChild(createOption('', 'standard', 'standard'));
 		
 		pcaContainer.appendChild(createBr());
-		pcaContainer.appendChild(createDiv('', '', 'Center'));
-		pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaCenterCheckBox', 'Center'));
-		pcaContainer.appendChild(createBr());
-		pcaContainer.appendChild(createDiv('', '', 'Scale'));
-		pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaScaleCheckBox', 'Scale'));
-
-        /*if(typeOfSelectedVariableGroup != "compositions"){
-            pcaContainer.appendChild(createDiv('','', 'Correlation'));
-            var corSelect = createSelect('','pcaCorSelect');
-            pcaContainer.appendChild(corSelect);
-            corSelect.appendChild(createOption('', 'true', 'true'));
-            corSelect.appendChild(createOption('', 'false', 'false'));
-        }*/
-
+		pcaContainer.appendChild(createDiv('', '', 'Show Scores'));
+		pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaShowScoresCheckBox', 'Show Scores'));
+		if(typeOfSelectedVariableGroup == 'externals'){
+			pcaContainer.appendChild(createBr());
+			pcaContainer.appendChild(createDiv('', '', 'Scale'));
+			pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaScaleCheckBox', 'Scale'));
+		}
         pcaContainer.appendChild(createHr());
         pcaContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getPCAOptions()'));
     }
 	else{
-		pcaContainer.appendChild(createH4Title('PCA methods can\'t be applied on chosen (non compositional) data!'));
+		pcaContainer.appendChild(createH4Title('PCA methods can\'t be applied on chosen data!'));
 	}
 };
 
 getPCAOptions = function(){
     var options = {
         method: document.getElementById('pcaMethodSelect').value,
-		center: document.getElementById('pcaCenterCheckBox').checked,
-		scale: document.getElementById('pcaScaleCheckBox').checked
+		showScores: document.getElementById('pcaShowScoresCheckBox').checked,
     };
 
-    if(typeOfSelectedVariableGroup != 'compositions'){
-        options["cor"] = document.getElementById('pcaCorSelect').value;
-    }
+	if(typeOfSelectedVariableGroup == 'externals'){
+		options["scale"] = document.getElementById('pcaScaleCheckBox').checked
+	}
 
 	options["groupData"] = currentVariablesGroup;
     options["type"] = typeOfSelectedVariableGroup;
@@ -2309,44 +2302,126 @@ createPFADialog = function(){
     var pfaContainer = document.getElementById('pfaWell');
     if(typeOfSelectedVariableGroup == 'transformations'){
         pfaContainer.appendChild(createH4Title('PFA can\'t be applied on transformed data!'));
-    }else{
+    }else if(typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
         pfaContainer.appendChild(createHr());
-        if(typeOfSelectedVariableGroup == 'compositions'){
-            var pfa = pfaCompositions['pfa'];
-        }else{
-            var pfa = pfaNonCompositions['pfa'];
-        }
-
-        for(var obj in pfa){
-            var param = pfa[obj];
-            pfaContainer.appendChild(createDiv('','', param[0], ''));
-
-            if(param.length == 1){
-                var textField = createTextField('','','');
-                textField.setAttribute('placeholder', 'Insert the number of factors!');
-                pfaContainer.appendChild(textField);
-            }else{
-                var select = createSelect('', '', '');
-                for(var i = 1; i < param.length; i++){
-                    select.appendChild(createOption('', param[i], param[i]));
-                }
-                pfaContainer.appendChild(select);
-            }
-        }
-        pfaContainer.appendChild(createHr());
+        pfaContainer.appendChild(createDiv('', '', 'Method'));
+        var selector = createSelect('', 'pfaMethodSelect');
+        pfaContainer.appendChild(selector);
+        selector.appendChild(createOption('', 'robust', 'robust'));
+        selector.appendChild(createOption('', 'standard', 'standard'));
+		
+		pfaContainer.appendChild(createBr());
+		pfaContainer.appendChild(createDiv('', '', 'Scale'));
+		pfaContainer.appendChild(createCheckBox('plotDialogElement', 'pfaScaleCheckBox', 'Scale'));
+		pfaContainer.appendChild(createBr());
+		pfaContainer.appendChild(createDiv('', '', 'Log'));
+		pfaContainer.appendChild(createCheckBox('plotDialogElement', 'pfaLogCheckBox', 'Log'));
+		pfaContainer.appendChild(createBr());
+		pfaContainer.appendChild(createDiv('', '', 'Ln'));
+		pfaContainer.appendChild(createCheckBox('plotDialogElement', 'pfaLnCheckBox', 'Ln'));
+		
+		pfaContainer.appendChild(createHr());
         pfaContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getPFAOptions()'));
-
     }
+	else{
+		pfaContainer.appendChild(createH4Title('PFA methods can\'t be applied on chosen data!'));
+	}
 };
 
 getPFAOptions = function(){};
 
 
 
+ /**********************************************************************************
+********************************** ClusterAnalysis *********************************
+**********************************************************************************/
+ createClusterAnalysisDialog = function(){
+	cleanModalDialog('clustWell');
+	var clustContainer = document.getElementById('clustWell');
+	var clusterAllowed = true;
+	var clusterVariablesTypes = currentData.variablesTypes;
+	for(var i=0; i < clusterVariablesTypes.length; i++){
+		
+		if(currentVariablesGroup.length >= 1){
+			for(var j=0; j < currentVariablesGroup.length; j++){
+				if( currentVariablesGroup[j] == i){
+					if(clusterVariablesTypes[i] != 'numeric'){
+						clusterAllowed = false;
+					}
+				}
+			}
+		}
+		else{
+			if(clusterVariablesTypes[i] != 'numeric'){
+				clusterAllowed = false;
+			}
+		}
+	
+	}
+	
+	if(clusterAllowed){  
+		clustContainer.appendChild(createHr());
+        clustContainer.appendChild(createDiv('','', 'Function'));
+		var functionSelector = createSelect('', 'clusterFunctionSelector');
+        functionSelector.setAttribute('onclick','createClustFunctionWell(selectedOptions)');
+        functionSelector.appendChild(createOption('clustFunctionOption', 'HClust', 'HClust'));
+        functionSelector.appendChild(createOption('clustFunctionOption', 'Kmeans', 'Kmeans'));
+		functionSelector.appendChild(createOption('clustFunctionOption', 'MClust', 'MClust'));
+        clustContainer.appendChild(functionSelector);
+		clustContainer.appendChild(createDiv('', '', 'NumberOfClusters'));
+		clustContainer.appendChild(createTextField('','NumberOfClustersTextField', '4'));
+		clustContainer.appendChild(createHr());
+        clustContainer.appendChild(createDiv('', 'defineClustFunctionContainer', ''));
+        clustContainer.appendChild(createBr());
+        clustContainer.appendChild(createHr());
+        createClustFunctionWell(functionSelector.selectedOptions);
+        clustContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getClusterAnalysis();'));
+	}
+	else{
+		clustContainer.appendChild(createH4Title('Cluster analysis can\'t be applied on chosen data!'));
+	}
+ };
  
+ createClustFunctionWell = function(selectedOptions){
+	cleanModalDialog('defineClustFunctionContainer');
+	var defineClustFunctionContainer = document.getElementById('defineClustFunctionContainer');
+    cleanModalDialog('defineClustFunctionContainer');
+    if(selectedOptions[0].value == 'HClust'){
+		defineClustFunctionContainer.appendChild(createDiv('','', 'Method'));
+        var functionSelector = createSelect('', 'clusterHClustMethodSelector');
+        functionSelector.appendChild(createOption('clustHClustMethodOption', 'Ward', 'Ward'));
+        functionSelector.appendChild(createOption('clustHClustMethodOption', 'Ward.D2', 'Ward.D2'));
+		defineClustFunctionContainer.appendChild(functionSelector);
+    }
+    else if(selectedOptions[0].value == 'Kmeans'){
+        
+    }
+	else if(selectedOptions[0].value == 'MClust'){
+       
+    }
+	else{
+	defineClustFunctionContainer.appendChild(createH4Title('Cluster analysis can\'t be applied on chosen function!'));
+	}
+};
  
- 
- 
+ getClusterAnalysis = function(){
+	var function_ = document.getElementById('clusterFunctionSelector').value;
+	var options = {
+            func: function_
+        };
+        options['group'] = currentVariablesGroupName;
+	
+	if(function_ == 'HClust'){
+		options['method'] = document.getElementById('clusterHClustMethodSelector').value;
+	}
+	else if(function_ == 'Kmeans'){
+        
+    }
+	else if(function_ == 'MClust'){
+       
+    }
+	//Shiny.onInputChange('clust.in', options);
+ };
 
 
 /**********************************************************************************

@@ -8,8 +8,11 @@ tryCatch({library(MASS)}, error = function(cond){return(NULL)})
 tryCatch({library(mclust)}, error = function(cond){return(NULL)})
 
 #TODO: tryCatch
-#library(rCharts)
-library(ggplot2)
+tryCatch({library(devtools)}, error = function(cond){return(NULL)})
+tryCatch({library(robCompositions)}, error = function(cond){return(NULL)})
+tryCatch({library(ggplot2)}, error = function(cond){return(NULL)})
+tryCatch({library(ggbiplot)}, error = function(cond){return(NULL)})
+
 
 
 
@@ -1262,60 +1265,155 @@ observe({
 ################################################################### Statistical Methods ################################################
 ########################################################################################################################################
 ############################################################## PCA #####################################################################
-	observe({
-	options <- input$pca.in
-	if(!is.null(options)){
-	  
-		data <- as.data.frame(variablesEnv$currentData)
-
-		variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
-		if(length(options$groupData) != 0){
-			data <- data[variablesEnv$currentVariableGroup]
-		}
-
-	  if(options$method == 'robust'){
-	    try <- tryCatch({tmp <- prcomp(data,center=options$center,scale=options$scale, covmat =covPCAproj(data)$cov )},
-	                    error = function(cond){return(NULL)})
-	    
-	  }
-	  else if (options$method == 'standard'){
-	   try <- tryCatch({tmp <- prcomp(data,center=options$center,scale=options$scale)},
-	                   error = function(cond){return(NULL)})
-	  }
-	  else{
-	    
-	  }
-	  
-	  if(is.null(try)){
-	    sendPopUpMessage("ERROR: chosen method does not exist or can\'t be applied on chosen data!")
-	  }
-	  else{
-	    
-	    
-	    output$pca.Score <- renderPrint({
-	      print(summary(tmp))
-	      
-	    })
-	    
-	    
-	    data(USArrests)
-	    output$pca.BiPlot <- renderPlot({
-	      ggplot(USArrests, aes(Murder, Assault)) + geom_point()
-	      #plot(prcomp(USArrests,scale=TRUE), type = 'l')
-	    })
-	    
-	  }
-		
-	}
-})
-
-
-    data(USArrests)
-    output$pca.ScreePlot <- renderPlot({
-      #ggplot(USArrests, aes(Murder, Assault)) + geom_point()
-      pca.ScreePlot <- plot(prcomp(USArrests,scale=TRUE), type = 'l')
+    observe({
+      
+      options <- input$pca.in
+      if(!is.null(options)){
+        
+        data <- as.data.frame(variablesEnv$currentData)
+        
+        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
+        if(length(options$groupData) != 0){
+          data <- data[variablesEnv$currentVariableGroup]
+        }
+        if(options$type == 'compositions'){
+          
+          
+          if(options$method == 'robust'){
+            try <- tryCatch({tmp <- pcaCoDa(USArrests, method = 'robust')},
+                            error = function(cond){return(NULL)})
+            
+          }
+          else if (options$method == 'standard'){
+            try <- tryCatch({tmp <- pcaCoDa(USArrests, method = 'standard')},
+                            error = function(cond){return(NULL)})
+          }
+          else{
+            sendPopUpMessage(paste0('ERROR: method "', options$method, '" is not supported' ))
+          }
+          
+        }
+        else if(options$type == 'externals'){
+          
+          if(options$method == 'robust'){
+            try <- tryCatch({tmp <- prcomp(data,scale=options$scale, covmat =covPCAproj(data)$cov )},
+                            error = function(cond){return(NULL)})
+            
+          }
+          else if (options$method == 'standard'){
+            try <- tryCatch({tmp <- prcomp(data,scale=options$scale)},
+                            error = function(cond){return(NULL)})
+          }
+          else{
+            sendPopUpMessage(paste0('ERROR: method "', options$method, '" is not supported' ))
+          }
+          
+        }
+        else{
+          sendPopUpMessage(paste0('ERROR: type "', options$type, '" is not supported' ))
+        }
+        
+        if(is.null(try)){
+          sendPopUpMessage("ERROR: chosen method does not exist or can\'t be applied on chosen data!")
+        }
+        else{
+          
+          if(options$showScores){
+            output$pca.Score <- renderPrint({
+              print(summary(tmp))
+              
+            })
+          }
+          
+          if(options$type == 'compositions'){
+            output$pca.BiPlot <- renderPlot({
+              plot(tmp)
+            })
+            
+          }
+          else{
+            output$pca.BiPlot <- renderPlot({
+              ggbiplot(tmp, labels =  rownames(tmp))
+            })
+            
+            output$pca.ScreePlot <- renderPlot({
+              #data(USArrests)
+              #plot(prcomp(USArrests,scale=TRUE), type = 'l')
+              screeplot(tmp, type = 'l')
+            })
+          }
+          
+        }
+        
+      }
+      
     })
 
+    
+############################################################## ClusterAnalysis #####################################################################
+    
+    observe({
+      
+      options <- input$clust.in
+      if(!is.null(options)){
+        
+        data <- as.data.frame(variablesEnv$currentData)
+        
+        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
+        if(length(options$groupData) != 0){
+          data <- data[variablesEnv$currentVariableGroup]
+        }
+        if(options$variant == 'hierarchic'){
+          if(options$type == 'ward'){
+            
+            
+            
+          }
+          else if(options$type == 'ward.D2'){
+            
+            
+            
+          }
+          else{
+            sendPopUpMessage(paste0('ERROR: type "', options$type, '" is not supported' ))
+          }
+          
+          
+        }
+        else if(options$variant == 'partitioning'){
+          
+          if(options$type == 'kmeans'){
+            
+            
+            
+          }
+          else if(options$type == 'mclust'){
+            
+            
+            
+          }
+          else{
+            sendPopUpMessage(paste0('ERROR: type "', options$type, '" is not supported' ))
+          }
+          
+        }
+        else{
+          sendPopUpMessage(paste0('ERROR: variant "', options$variant, '" is not supported' ))
+        }
+        
+        if(is.null(try)){
+          sendPopUpMessage("ERROR: chosen method does not exist or can\'t be applied on chosen data!")
+        }
+        else{
+          
+         
+          
+        }
+        
+      }
+      
+    })  
+    
 
 #######################################################################################################################################
 ################################################################ PLOT #################################################################
