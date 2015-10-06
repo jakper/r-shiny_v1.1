@@ -2339,6 +2339,8 @@ getPFAOptions = function(){};
  createClusterAnalysisDialog = function(){
 	cleanModalDialog('clustWell');
 	var clustContainer = document.getElementById('clustWell');
+
+     /*
 	var clusterAllowed = true;
 	var clusterVariablesTypes = currentData.variablesTypes;
 	for(var i=0; i < clusterVariablesTypes.length; i++){
@@ -2358,9 +2360,9 @@ getPFAOptions = function(){};
 			}
 		}
 	
-	}
+	}*/
 	
-	if(clusterAllowed){  
+	if (currentData.data != null && currentData.data != undefined) {
 		clustContainer.appendChild(createHr());
         clustContainer.appendChild(createDiv('','', 'Function'));
 		var functionSelector = createSelect('', 'clusterFunctionSelector');
@@ -2370,28 +2372,69 @@ getPFAOptions = function(){};
 		functionSelector.appendChild(createOption('clustFunctionOption', 'MClust', 'MClust'));
         clustContainer.appendChild(functionSelector);
 		clustContainer.appendChild(createDiv('', '', 'NumberOfClusters'));
-		clustContainer.appendChild(createTextField('','NumberOfClustersTextField', '4'));
+		clustContainer.appendChild(createTextField('', 'numberOfClustersTextField', '4'));
+		clustContainer.appendChild(createBr());
+		clustContainer.appendChild(createDiv('names', '', 'log'));
+		var cb = createCheckBox('clustLogCheckBox', 'clustLogCheckBox', 'log');
+		cb.checked = false;
+		clustContainer.appendChild(cb);
+		clustContainer.appendChild(createBr());
+		clustContainer.appendChild(createDiv('names', '', 'scale'));
+		var cb2 = createCheckBox('clustScaleCheckBox', 'clustScaleCheckBox', 'scale');
+		cb2.checked = true;
+		clustContainer.appendChild(cb2);
+		clustContainer.appendChild(createBr());
 		clustContainer.appendChild(createHr());
         clustContainer.appendChild(createDiv('', 'defineClustFunctionContainer', ''));
         clustContainer.appendChild(createBr());
         clustContainer.appendChild(createHr());
         createClustFunctionWell(functionSelector.selectedOptions);
+
+        var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
+        var xTextField = createTextField('plotDialogElement', 'clustXTextField', currentData.names[1]);
+        clustContainer.appendChild(xAxis);
+        xTextField.setAttribute('placeholder', 'eg: ' + currentData.names[Math.ceil(currentData.names.length / 2)]);
+        clustContainer.appendChild(xTextField);
+        var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
+        var yTextField = createTextField('plotDialogElement', 'clustYTextField', currentData.names[0]);
+        clustContainer.appendChild(yAxis);
+        yTextField.setAttribute('placeholder', 'eg: ' + currentData.names[0]);
+        clustContainer.appendChild(yTextField);
+        clustContainer.appendChild(createHr());
+
+        clustContainer.appendChild(createDiv('variablesType', '', 'Used variables for Cluster Analysis'));
+        var tmpNames;
+        if (typeOfSelectedVariableGroup != "allGroups") {
+            tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
+        }
+        else {
+            tmpNames = currentData.names;
+        }
+        for (var i = 0; i < tmpNames.length; i++) {
+
+            clustContainer.appendChild(createDiv('names', '', tmpNames[i]));
+            var cb = createCheckBox('clusterVariablesCheckBox', 'cluster_' + tmpNames[i], tmpNames[i]);
+            //cb.checked = true;
+            clustContainer.appendChild(cb);
+            clustContainer.appendChild(createBr());
+            
+        }
+
         clustContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getClusterAnalysis();'));
 	}
 	else{
-		clustContainer.appendChild(createH4Title('Cluster analysis can\'t be applied on chosen data!'));
+	    clustContainer.appendChild(createH4Title('Cluster analysis can\'t be applied without data!'));
 	}
  };
  
  createClustFunctionWell = function(selectedOptions){
 	cleanModalDialog('defineClustFunctionContainer');
 	var defineClustFunctionContainer = document.getElementById('defineClustFunctionContainer');
-    cleanModalDialog('defineClustFunctionContainer');
     if(selectedOptions[0].value == 'HClust'){
 		defineClustFunctionContainer.appendChild(createDiv('','', 'Method'));
         var functionSelector = createSelect('', 'clusterHClustMethodSelector');
-        functionSelector.appendChild(createOption('clustHClustMethodOption', 'Ward', 'Ward'));
-        functionSelector.appendChild(createOption('clustHClustMethodOption', 'Ward.D2', 'Ward.D2'));
+        functionSelector.appendChild(createOption('clustHClustMethodOption', 'ward.D', 'ward.D'));
+        functionSelector.appendChild(createOption('clustHClustMethodOption', 'ward.D2', 'ward.D2'));
 		defineClustFunctionContainer.appendChild(functionSelector);
     }
     else if(selectedOptions[0].value == 'Kmeans'){
@@ -2405,23 +2448,77 @@ getPFAOptions = function(){};
 	}
 };
  
- getClusterAnalysis = function(){
-	var function_ = document.getElementById('clusterFunctionSelector').value;
-	var options = {
-            func: function_
-        };
-        options['group'] = currentVariablesGroupName;
+ getClusterAnalysis = function () {
+     var func = document.getElementById('clusterFunctionSelector').value;
+     var scale = document.getElementById('clustScaleCheckBox').checked;
+     var log = document.getElementById('clustLogCheckBox').checked;
+     var options = {
+         func: func,
+         group: currentVariablesGroupName,
+         log: log,
+         scale:scale,
+         numberOfClusters: document.getElementById('numberOfClustersTextField').value
+     };
+     var x = document.getElementById('clustXTextField').value;
+     var y = document.getElementById('clustYTextField').value;
+     var tmpNames;
+     var tmpVariablesTypes;
+     var clustAllowed = true;
+
+     if (x == "" && y == "") {
+         popUpMessage('ERROR: all textfields are empty!');
+         return;
+     }
+     if (!doesGivenVariableExist(x)) {
+         popUpMessage('ERROR: variable "' + x + '" does not exist on this data-set!');
+         return;
+     }
+
+     if (!doesGivenVariableExist(y)) {
+         popUpMessage('ERROR: variable "' + y + '" does not exist on this data-set!');
+         return;
+     }
+     if (scale && log) {
+         popUpMessage('ERROR: only log or scale!');
+         return;
+     }
+     options['x'] = x;
+     options['y'] = y;
+
+     if (typeOfSelectedVariableGroup != "allGroups") {
+         tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup);
+         tmpVariablesTypes = getDataFromGivenIndexes(currentData.variablesTypes, currentVariablesGroup);
+     }
+     else {
+         tmpNames = currentData.names;
+         tmpVariablesTypes = currentData.variablesTypes;
+     }
+     var j = 0;
+     for (var i = 0; i < tmpNames.length; i++) {
+         var variablesElement = document.getElementById('cluster_' + tmpNames[i]);
+         if (variablesElement != null && document.getElementById('cluster_' + tmpNames[i]).checked) {
+             if (tmpVariablesTypes[i] != 'numeric') {
+                 clustAllowed = true;
+             }
+             variablesdName[j] = variablesElement.value;
+             j++;
+         }
+     }
+
 	
-	if(function_ == 'HClust'){
+	
+     if (func == 'HClust') {
 		options['method'] = document.getElementById('clusterHClustMethodSelector').value;
 	}
-	else if(function_ == 'Kmeans'){
+     else if (func == 'Kmeans') {
         
     }
-	else if(function_ == 'MClust'){
-       
-    }
-	//Shiny.onInputChange('clust.in', options);
+     else if (func == 'MClust') {
+	}
+	if (clustAllowed) {
+	    Shiny.onInputChange('clust.in', options);
+	}
+	
  };
  
  
@@ -2445,20 +2542,22 @@ createRegressionDialog = function(){
         methodSelector.appendChild(createOption('regressionMethodOption', 'lmrob', 'lmrob'));
 		methodSelector.appendChild(createOption('regressionMethodOption', 'ltsReg', 'ltsReg'));
         regressionContainer.appendChild(methodSelector);
-		regressionContainer.appendChild(createBr());
+        regressionContainer.appendChild(createBr());
+        regressionContainer.appendChild(createDiv('names', '', 'log'));
 		var cb = createCheckBox('regressionLogCheckBox','regressionLogCheckBox', 'log');
 		cb.checked = false;
 		regressionContainer.appendChild(cb);
+		regressionContainer.appendChild(createBr());
 		regressionContainer.appendChild(createHr());
 				
 		var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
-		var xTextField = createTextField('plotDialogElement', 'plotParametersXTextField', '');
+		var xTextField = createTextField('plotDialogElement', 'regressionXTextField', '');
 		regressionContainer.appendChild(xAxis);
 		xTextField.setAttribute('placeholder', 'eg: ' + currentData.names[Math.ceil(currentData.names.length/2)]);
 		regressionContainer.appendChild(xTextField);
 		regressionContainer.appendChild(createDiv('', '', ''));
 		var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
-		var yTextField = createTextField('plotDialogElement', 'plotParametersYTextField', '');
+		var yTextField = createTextField('plotDialogElement', 'regressionYTextField', '');
 		regressionContainer.appendChild(yAxis);
 		yTextField.setAttribute('placeholder', 'eg: ' + currentData.names[0]);
 		regressionContainer.appendChild(yTextField);
@@ -2486,7 +2585,7 @@ createRegressionDialog = function(){
         regressionContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getRegression();'));
 	}
 	else{
-		regressionContainer.appendChild(createH4Title('Regression analysis can\'t be applied with no data!'));
+	    regressionContainer.appendChild(createH4Title('Regression analysis can\'t be applied without data!'));
 	}
  };
 
@@ -2499,8 +2598,8 @@ createRegressionDialog = function(){
 	var regressionAllowed = true;	
 	var tmpNames;
 	var tmpVariablesTypes;	
-	var x = document.getElementById('plotParametersXTextField').value;
-    var y = document.getElementById('plotParametersYTextField').value;
+	var x = document.getElementById('regressionXTextField').value;
+	var y = document.getElementById('regressionYTextField').value;
 	var log = document.getElementById('regressionLogCheckBox').checked;
 	
     if(x == "" && y == ""){
@@ -2569,7 +2668,7 @@ createRegressionDialog = function(){
  
  createRegressionVariablesDiv = function(selectedOption){
 	cleanModalDialog('regressionVariablesDiv');
-	document.getElementById('plotParametersYTextField').value = selectedOption[0].value;
+	document.getElementById('regressionYTextField').value = selectedOption[0].value;
 	
     var container = document.getElementById('regressionVariablesDiv');
     container.appendChild(createDiv('','', 'Regression Coefficients'));

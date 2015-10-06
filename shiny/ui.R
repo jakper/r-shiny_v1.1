@@ -166,13 +166,33 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Cluster',
             HTML('
                 <div class="well workingWell" id="clustWell"></div>
-            ')
+                <pre id="clust.tes" class = "shiny-text-output"></pre>
+            '),
+            
+            plotOutput("clust.Plot", height = 300,
+                       # Equivalent to: click = clickOpts(id = "plot_click")
+                       click = "clust.Plot_click",
+                       brush = brushOpts(
+                         id = "clust.Plot_brush"
+                       )),
+            fluidRow(
+              column(width = 6,
+                     h4("Points near click"),
+                     #verbatimTextOutput("click_info")
+                     dataTableOutput("clust.click_info")
+              ),
+              column(width = 6,
+                     h4("Brushed points"),
+                     #verbatimTextOutput("brush_info")
+                     dataTableOutput("clust.brush_info")
+              )
+            ),
+            plotOutput("clust.Dendrogram")
         ),
         tabPanel('Regression',
             HTML('
                 <div class="well workingWell" id="regressionWell"></div>
                 <div class="" id="regressionOutputDiv">
-                <pre id="render.tes" class = "shiny-text-output"></pre>
             '), 
             plotOutput("regression.Plot", height = 300,
                        # Equivalent to: click = clickOpts(id = "plot_click")
@@ -180,6 +200,9 @@ shinyUI(navbarPage("i-CoDa",
                        brush = brushOpts(
                          id = "regression.Plot_brush"
                        )),
+            HTML('
+                <pre id="render.tes" class = "shiny-text-output"></pre>
+            '),
            fluidRow(
              column(width = 6,
                     h4("Points near click"),

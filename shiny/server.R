@@ -12,6 +12,12 @@ tryCatch({library(devtools)}, error = function(cond){return(NULL)})
 tryCatch({library(robCompositions)}, error = function(cond){return(NULL)})
 tryCatch({library(ggplot2)}, error = function(cond){return(NULL)})
 tryCatch({library(ggbiplot)}, error = function(cond){return(NULL)})
+tryCatch({library(ggdendrogram)}, error = function(cond){return(NULL)})
+#mvoutlier
+#robCompositions
+#ggmap
+#sp
+#rgdal
 
 
 
@@ -1363,38 +1369,56 @@ observe({
         if(length(options$groupData) != 0){
           data <- data[variablesEnv$currentVariableGroup]
         }
-        if(options$variant == 'hierarchic'){
-          if(options$type == 'ward'){
-            
-            
-            
-          }
-          else if(options$type == 'ward.D2'){
-            
-            
-            
-          }
-          else{
-            sendPopUpMessage(paste0('ERROR: type "', options$type, '" is not supported' ))
-          }
+        
+        
+        
+        if(options$log){
+          temdata <- log(data)
+          temdata <- rapply( unclass(temdata), f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
+          temdata <- as.data.frame(temdata)
+        }
+        else if(options$scale){
+          temdata <- scale((data))
+          temdata <- as.data.frame(temdata)
+        }
+        else{
+          temdata <- data
+        }
+        
+        
+
+        if(options$func == 'HClust'){
+          tmpclust <- hclust(dist(temdata), method = options$method)
+          clustdata <- cutree(tmpclust,options$numberOfClusters)
           
+          output$clust.Plot <- renderPlot({
+            
+            eval(parse(text = paste0('ggplot((temdata), aes( ', options$x ,',',options$y,')) + geom_point(colour = clustdata)')))
+          })
+          
+          output$clust.Dendrogram <- renderPlot({
+            plot(tmpclust)
+          })
+
+        }
+        else if(options$func == 'Kmeans'){
+          
+          tmpclust <- kmeans(dist(temdata),options$numberOfClusters)
+          
+          output$clust.Plot <- renderPlot({
+            eval(parse(text = paste0('ggplot((temdata), aes( ', options$x ,',',options$y,')) + geom_point(colour = tmpclust$cluster)')))
+            #ggplot((as.data.frame(olives_scale)), aes(palmitoleic,palmitic)) + geom_point(aes(colour = map(tmpclust$cluster))) +     scale_colour_gradientn(colours=rainbow(options$numberOfClusters))
+          })
           
         }
-        else if(options$variant == 'partitioning'){
+        else if(options$func == 'MClust'){
           
-          if(options$type == 'kmeans'){
-            
-            
-            
-          }
-          else if(options$type == 'mclust'){
-            
-            
-            
-          }
-          else{
-            sendPopUpMessage(paste0('ERROR: type "', options$type, '" is not supported' ))
-          }
+          tmpclust <- Mclust(dist(temdata),options$numberOfClusters)
+          
+          output$clust.Plot <- renderPlot({
+          eval(parse(text = paste0('ggplot((temdata), aes( ', options$x ,',',options$y,')) + geom_point(colour = map(tmpclust$z))')))
+          #ggplot((as.data.frame(olives_scale)), aes(palmitoleic,palmitic)) + geom_point(aes(colour = map(tmpclust$z))) +     scale_colour_gradientn(colours=rainbow(options$numberOfClusters))
+          })
           
         }
         else{
@@ -1405,10 +1429,24 @@ observe({
           sendPopUpMessage("ERROR: chosen method does not exist or can\'t be applied on chosen data!")
         }
         else{
-          
-          
+
           
         }
+        
+        
+
+        #renderPrint
+        output$clust.click_info <- renderDataTable({
+          nearPoints(temdata, input$clust.Plot_click)
+        },options=list(
+          paging = FALSE,
+          searching = FALSE))
+        
+        #renderPrint
+        output$clust.brush_info <- renderDataTable({
+          
+          brushedPoints(temdata, input$clust.Plot_brush) 
+        })
         
       }
       
@@ -1424,6 +1462,10 @@ observe({
         
         #
         dataAll <- variablesEnv$currentData
+        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
+        if(length(options$groupData) != 0){
+          dataAll <- dataAll[variablesEnv$currentVariableGroup]
+        }
         
         data <- dataAll[which(names(dataAll)==options$dependentVariable)]
         for ( i in 1:(length(names(dataAll))) ) {
@@ -1441,15 +1483,9 @@ observe({
         else{
           temdata <- data
         }
-        rapply( temdata, f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
-        rapply( temdata, f=function(x) ifelse(is.nan(x),0,x), how="replace" )
-        rapply( temdata, f=function(x) ifelse(is.finite(x),0,x), how="replace" )
+        temdata <- rapply( unclass(temdata), f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
+        temdata <- as.data.frame(temdata)
 
-        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
-        if(length(options$groupData) != 0){
-          temdata <- data[variablesEnv$currentVariableGroup]
-        }
-        
         #dependentVariable
         #variablesdName
         #which(names(ice)=="x2")
@@ -1477,7 +1513,6 @@ observe({
         
         
         
-        tes <- options$variablesdName 
         output$regression.Plot <- renderPlot({
           eval(parse(text = paste0('ggplot((temdata), aes( ', options$x ,',',options$y,')) + geom_point()  + geom_abline(intercept=',tmp$coefficients[1] ,', slope=',tmp$coefficients[which(names(tmp$coefficients)==options$x)],' )')))
         })
@@ -1497,7 +1532,7 @@ observe({
         })
         
         output$render.tes <- renderPrint({
-          print(data)
+          print(tmp)
         })
         
       }
