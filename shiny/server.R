@@ -1350,7 +1350,7 @@ observe({
     })
 
     
-############################################################## ClusterAnalysis #####################################################################
+    ############################################################## ClusterAnalysis #####################################################################
     
     observe({
       
@@ -1406,9 +1406,99 @@ observe({
         }
         else{
           
-         
+          
           
         }
+        
+      }
+      
+    })  
+    
+    
+    ############################################################## Regression #####################################################################
+    
+    observe({
+      
+      options <- input$regression.in
+      if(!is.null(options)){
+        
+        #
+        dataAll <- variablesEnv$currentData
+        
+        data <- dataAll[which(names(dataAll)==options$dependentVariable)]
+        for ( i in 1:(length(names(dataAll))) ) {
+            if(length(which(names(dataAll)==options$variablesdName[i]))>0){
+              data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+            }
+        }
+
+        
+        #eval(parse(text = paste0('data <- data[c(data', options$dependentVariable,',',paste(options$variablesdName,collapse=","),')]')))
+        
+        if(options$log){
+          temdata <- log(data)
+        }
+        else{
+          temdata <- data
+        }
+        rapply( temdata, f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
+        rapply( temdata, f=function(x) ifelse(is.nan(x),0,x), how="replace" )
+        rapply( temdata, f=function(x) ifelse(is.finite(x),0,x), how="replace" )
+
+        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
+        if(length(options$groupData) != 0){
+          temdata <- data[variablesEnv$currentVariableGroup]
+        }
+        
+        #dependentVariable
+        #variablesdName
+        #which(names(ice)=="x2")
+        
+        variablesdName <- paste(options$variablesdName,collapse="+")
+        
+        
+        if(options$regressionMethod == 'lm'){
+          #eval(parse(text = paste0('tmp <- lm(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))
+          try <- tryCatch({eval(parse(text = paste0('tmp <- lm(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))},
+                         error = function(cond){return(NULL)})
+          
+        }
+        
+        else if(options$regressionMethod == 'lmrob'){
+          try <- tryCatch({eval(parse(text = paste0('tmp <- lmrob(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))},
+                          error = function(cond){return(NULL)})
+        }
+        
+        else if(options$regressionMethod == 'ltsReg'){
+          try <- tryCatch({eval(parse(text = paste0('tmp <- ltsReg(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))},
+                          error = function(cond){return(NULL)})
+        }
+        
+        
+        
+        
+        tes <- options$variablesdName 
+        output$regression.Plot <- renderPlot({
+          eval(parse(text = paste0('ggplot((temdata), aes( ', options$x ,',',options$y,')) + geom_point()  + geom_abline(intercept=',tmp$coefficients[1] ,', slope=',tmp$coefficients[which(names(tmp$coefficients)==options$x)],' )')))
+        })
+        
+        
+        #renderPrint
+        output$click_info <- renderDataTable({
+          nearPoints(temdata, input$regression.Plot_click)
+        },options=list(
+          paging = FALSE,
+          searching = FALSE))
+        
+        #renderPrint
+        output$brush_info <- renderDataTable({
+          
+          brushedPoints(temdata, input$regression.Plot_brush) 
+        })
+        
+        output$render.tes <- renderPrint({
+          print(data)
+        })
         
       }
       

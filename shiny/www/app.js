@@ -382,6 +382,7 @@ renderDataMethodsInformation = function(){
         createPCADialog();
         createPFADialog();
 		createClusterAnalysisDialog();
+		createRegressionDialog();
         if(currentVariablesGroupName == "allGroups"){
             createTable('dataTable', currentData.names, currentData.data);
             createNAsInfo(currentData.names, currentData.nas);
@@ -2421,6 +2422,175 @@ getPFAOptions = function(){};
        
     }
 	//Shiny.onInputChange('clust.in', options);
+ };
+ 
+ 
+ 
+ 
+  /**********************************************************************************
+********************************** Regression ***************************************
+**********************************************************************************/
+createRegressionDialog = function(){
+	cleanModalDialog('regressionWell');
+	hideElement('div#regressionVariablesDiv');
+	var regressionContainer = document.getElementById('regressionWell');
+		
+	if(currentData.data != null && currentData.data != undefined){  
+		regressionContainer.appendChild(createHr());
+        regressionContainer.appendChild(createDiv('variablesType','', 'Method'));
+		var methodSelector = createSelect('', 'regressionMethodSelector');
+		var firstOption = createOption('regressionMethodOption', 'lm', 'lm');
+		firstOption.setAttribute('selected','selected');
+        methodSelector.appendChild(firstOption);
+        methodSelector.appendChild(createOption('regressionMethodOption', 'lmrob', 'lmrob'));
+		methodSelector.appendChild(createOption('regressionMethodOption', 'ltsReg', 'ltsReg'));
+        regressionContainer.appendChild(methodSelector);
+		regressionContainer.appendChild(createBr());
+		var cb = createCheckBox('regressionLogCheckBox','regressionLogCheckBox', 'log');
+		cb.checked = false;
+		regressionContainer.appendChild(cb);
+		regressionContainer.appendChild(createHr());
+				
+		var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
+		var xTextField = createTextField('plotDialogElement', 'plotParametersXTextField', '');
+		regressionContainer.appendChild(xAxis);
+		xTextField.setAttribute('placeholder', 'eg: ' + currentData.names[Math.ceil(currentData.names.length/2)]);
+		regressionContainer.appendChild(xTextField);
+		regressionContainer.appendChild(createDiv('', '', ''));
+		var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
+		var yTextField = createTextField('plotDialogElement', 'plotParametersYTextField', '');
+		regressionContainer.appendChild(yAxis);
+		yTextField.setAttribute('placeholder', 'eg: ' + currentData.names[0]);
+		regressionContainer.appendChild(yTextField);
+		regressionContainer.appendChild(createHr());
+		
+		regressionContainer.appendChild(createDiv('','', 'Dependent Variable'));
+		var dependentVariableSelector = createSelect('', 'dependentVariableSelector');
+		dependentVariableSelector.setAttribute('onclick','createRegressionVariablesDiv(selectedOptions)');
+		var tmpNames;
+		if(typeOfSelectedVariableGroup != "allGroups"){
+			tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
+		}
+		else{
+			tmpNames = currentData.names;
+		}
+		for(var i = 0; i < tmpNames.length; i++){
+			dependentVariableSelector.appendChild(createOption('regressionMethodOption', tmpNames[i], tmpNames[i]));
+		}
+		regressionContainer.appendChild(dependentVariableSelector);
+		regressionContainer.appendChild(createDiv('', '', ''));
+		
+		regressionContainer.appendChild(createDiv('regressionVariablesDiv','regressionVariablesDiv', ''));
+		regressionContainer.appendChild(createHr());
+		createRegressionVariablesDiv(dependentVariableSelector.selectedOptions);
+        regressionContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getRegression();'));
+	}
+	else{
+		regressionContainer.appendChild(createH4Title('Regression analysis can\'t be applied with no data!'));
+	}
+ };
+
+ 
+ getRegression = function(){
+	var dependentVariables = {};
+	var regressionMethod = document.getElementById('regressionMethodSelector').value;
+	var dependentVariable = document.getElementById('dependentVariableSelector').value;
+    var variablesdName = [];
+	var regressionAllowed = true;	
+	var tmpNames;
+	var tmpVariablesTypes;	
+	var x = document.getElementById('plotParametersXTextField').value;
+    var y = document.getElementById('plotParametersYTextField').value;
+	var log = document.getElementById('regressionLogCheckBox').checked;
+	
+    if(x == "" && y == ""){
+        popUpMessage('ERROR: all textfields are empty!');
+        return;
+    }
+	if(!doesGivenVariableExist(x)){
+        popUpMessage('ERROR: variable "' + x + '" does not exist on this data-set!');
+        return;
+    }
+
+    if(!doesGivenVariableExist(y)){
+		popUpMessage('ERROR: variable "' + y + '" does not exist on this data-set!');
+		return;
+    }
+    
+	
+	if(typeOfSelectedVariableGroup != "allGroups"){
+		tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup);
+		tmpVariablesTypes = getDataFromGivenIndexes(currentData.variablesTypes, currentVariablesGroup);
+	}
+	else{
+		tmpNames = currentData.names;
+		tmpVariablesTypes = currentData.variablesTypes;
+	}
+	var j=0;
+    for(var i = 0; i < tmpNames.length; i++){
+		var variablesElement = document.getElementById('regression_' + tmpNames[i]);
+        if(variablesElement != null && document.getElementById('regression_' + tmpNames[i]).checked){
+			if(tmpVariablesTypes[i] != 'numeric'){
+				regressionAllowed = false;
+			}
+			variablesdName[j] = variablesElement.value;
+			j++;
+        }
+    }
+	
+	var options = {
+            regressionMethod: regressionMethod,
+			dependentVariable: dependentVariable,
+			variablesdName: variablesdName,
+			x:x,
+			y:y,
+			log:log
+        };
+        options['group'] = currentVariablesGroupName;
+	
+	if(regressionMethod == 'lm'){
+
+	}
+	else if(regressionMethod == 'lmrob'){
+        
+    }
+	else if(regressionMethod == 'ltsReg'){
+       
+    }
+	if(regressionAllowed){
+	    Shiny.onInputChange('regression.in', options);
+	}
+	else{
+	popUpMessage('ERROR: Regression analysis can\'t be applied on chosen data!');
+	}
+	
+ };
+ 
+ 
+ createRegressionVariablesDiv = function(selectedOption){
+	cleanModalDialog('regressionVariablesDiv');
+	document.getElementById('plotParametersYTextField').value = selectedOption[0].value;
+	
+    var container = document.getElementById('regressionVariablesDiv');
+    container.appendChild(createDiv('','', 'Regression Coefficients'));
+	var tmpNames;
+	if(typeOfSelectedVariableGroup != "allGroups"){
+		tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
+	}
+	else{
+		tmpNames = currentData.names;
+	}
+	for(var i = 0; i < tmpNames.length; i++){
+		if(tmpNames[i] != selectedOption[0].value){
+			container.appendChild(createDiv('names', '', tmpNames[i]));
+			var cb = createCheckBox('regressionVariablesCheckBox', 'regression_' + tmpNames[i],tmpNames[i]);
+			//cb.checked = true;
+			container.appendChild(cb);
+			container.appendChild(createBr());
+		}
+    }
+	
+    showElement('div#regressionVariablesDiv');
  };
 
 

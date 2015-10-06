@@ -171,7 +171,32 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Regression',
             HTML('
                 <div class="well workingWell" id="regressionWell"></div>
+                <div class="" id="regressionOutputDiv">
+                <pre id="render.tes" class = "shiny-text-output"></pre>
+            '), 
+            plotOutput("regression.Plot", height = 300,
+                       # Equivalent to: click = clickOpts(id = "plot_click")
+                       click = "regression.Plot_click",
+                       brush = brushOpts(
+                         id = "regression.Plot_brush"
+                       )),
+           fluidRow(
+             column(width = 6,
+                    h4("Points near click"),
+                    #verbatimTextOutput("click_info")
+                    dataTableOutput("click_info")
+             ),
+             column(width = 6,
+                    h4("Brushed points"),
+                    #verbatimTextOutput("brush_info")
+                    dataTableOutput("brush_info")
+             )
+           ),
+           HTML('
+               </div>
+                
             ')
+            
         ),
         tabPanel('Outlier Detection',
             HTML('

@@ -181,10 +181,14 @@ img#xButton{
 
 div.variablesType{
     color: #66CCFF;
-    width: 60px;
-    text-align: center;
+    width: 160px;
+    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+div#click_info,#brush_info{
+    	height: 300px;
 }
 
 input.variableChooserCheckbox, .variableGroupCheckbox{
