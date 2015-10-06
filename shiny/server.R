@@ -1363,14 +1363,19 @@ observe({
       options <- input$clust.in
       if(!is.null(options)){
         
-        data <- as.data.frame(variablesEnv$currentData)
+        dataAll <- variablesEnv$currentData
         
         variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
         if(length(options$groupData) != 0){
-          data <- data[variablesEnv$currentVariableGroup]
+          dataAll <- data[variablesEnv$currentVariableGroup]
         }
-        
-        
+        data <- dataAll[1]
+        data <- data[-c(1)]
+        for ( i in 1:(length(names(dataAll))) ) {
+          if(length(which(names(dataAll)==options$variablesdName[i]))>0){
+            data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+          }
+        }
         
         if(options$log){
           temdata <- log(data)

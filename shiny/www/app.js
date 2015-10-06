@@ -2464,6 +2464,7 @@ getPFAOptions = function(){};
      var tmpNames;
      var tmpVariablesTypes;
      var clustAllowed = true;
+     var variablesdName = [];
 
      if (x == "" && y == "") {
          popUpMessage('ERROR: all textfields are empty!');
@@ -2504,7 +2505,7 @@ getPFAOptions = function(){};
              j++;
          }
      }
-
+     options['variablesdName'] = variablesdName;
 	
 	
      if (func == 'HClust') {
@@ -2517,6 +2518,9 @@ getPFAOptions = function(){};
 	}
 	if (clustAllowed) {
 	    Shiny.onInputChange('clust.in', options);
+	}
+	else {
+	    popUpMessage('ERROR: Cluster analysis can\'t be applied on chosen data!');
 	}
 	
  };
