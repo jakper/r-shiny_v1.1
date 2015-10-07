@@ -13,6 +13,9 @@ tryCatch({library(robCompositions)}, error = function(cond){return(NULL)})
 tryCatch({library(ggplot2)}, error = function(cond){return(NULL)})
 tryCatch({library(ggbiplot)}, error = function(cond){return(NULL)})
 tryCatch({library(ggdendrogram)}, error = function(cond){return(NULL)})
+tryCatch({library(rrcov)}, error = function(cond){return(NULL)})
+
+
 #mvoutlier
 #robCompositions
 #ggmap
@@ -1286,12 +1289,12 @@ observe({
           
           
           if(options$method == 'robust'){
-            try <- tryCatch({tmp <- pcaCoDa(USArrests, method = 'robust')},
+            try <- tryCatch({tmp <- pcaCoDa(data, method = 'robust')},
                             error = function(cond){return(NULL)})
             
           }
           else if (options$method == 'standard'){
-            try <- tryCatch({tmp <- pcaCoDa(USArrests, method = 'standard')},
+            try <- tryCatch({tmp <- pcaCoDa(data, method = 'standard')},
                             error = function(cond){return(NULL)})
           }
           else{
@@ -1335,6 +1338,10 @@ observe({
             output$pca.BiPlot <- renderPlot({
               plot(tmp)
             })
+            output$pca.Score <- renderPrint({
+              print(tmp)
+              
+            })
             
           }
           else{
@@ -1355,6 +1362,95 @@ observe({
       
     })
 
+    
+    ############################################################## Factor Analysis #####################################################################
+    #ggplot() + geom_point(data =(p$scores), aes(x=p$scores[,1],y=p$scores[,2] )) + geom_line(data = load2, aes(x = Factor1, y = Factor2, color = "red"))
+    #load=as.data.frame(unclass(p$loadings))
+    
+    #plotten von factanal
+    #http://rpubs.com/sinhrks/plot_pca
+    
+    observe({
+      
+      options <- input$pfa.in
+      if(!is.null(options)){
+        
+        dataAll <- variablesEnv$currentData
+        
+        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
+        if(length(options$groupData) != 0){
+          dataAll <- data[variablesEnv$currentVariableGroup]
+        }
+        data <- dataAll[1]
+        data <- data[-c(1)]
+        for ( i in 1:(length(names(dataAll))) ) {
+          if(length(which(names(dataAll)==options$variablesdName[i]))>0){
+            data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+          }
+        }
+        
+        if(options$log){
+          temdata <- log10(data)
+          temdata <- rapply( temdata, f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
+          temdata <- as.data.frame(temdata)
+        }
+        else{
+          temdata <- data
+        }
+        
+        
+        if(options$func == 'pfa'){
+          if(options$pfaRobust == 'robust'){
+            x.mcd=covMcd(temdata,cor=TRUE) 
+            x.rsc=scale(temdata,x.mcd$cent,sqrt(diag(x.mcd$cov))) 
+            tmp=pfa(x.rsc,factors=as.numeric(options$numberOfFactorsTextField),covmat=x.mcd,scores=options$score,rotation=options$rotation) 
+            
+          }
+          else{
+            tmp=pfa(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation) 
+          }
+        }
+        else if(options$func == 'factanal'){
+          tmp=pfa(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation)
+          }
+        else{
+          sendPopUpMessage(paste0('ERROR: function "', options$func, '" is not supported' ))
+        }
+        
+        output$pfa.BiPlot <- renderPlot({
+          autoplot(tmp, data = temdata,loadings = TRUE, loadings.colour = 'blue',loadings.label = TRUE, loadings.label.size = 3)
+
+        })
+        
+        output$pfa.Loadplot <- renderPlot({
+          loadplot(tmp,crit=0.3) 
+        })
+        
+        #renderPrint
+        output$pfa.click_info <- renderDataTable({
+          nearPoints(as.data.frame(tmp$scores), input$pfa.Plot_click)
+        },options=list(
+          paging = FALSE,
+          searching = FALSE))
+        
+        #renderPrint
+        output$pfa.brush_info <- renderDataTable({
+          brushedPoints(as.data.frame(tmp$scores), input$pfa.Plot_brush) 
+        })
+        output$downloadData <- downloadHandler(
+          filename = function() { 
+            paste('score', '.csv', sep='') 
+          },
+          content = function(file) {
+            write.csv(tmp$scores, file,row.names = FALSE)
+          }
+        )
+
+      }
+      
+    })
+    
+    
     
     ############################################################## ClusterAnalysis #####################################################################
     

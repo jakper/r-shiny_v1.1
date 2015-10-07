@@ -156,7 +156,26 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Factor Analysis',
             HTML('
                 <div class="well workingWell" id="pfaWell"></div>
-            ')
+            '),
+            plotOutput("pfa.BiPlot", height = 300,
+                       click = "pfa.Plot_click",
+                       brush = brushOpts(
+                         id = "pfa.Plot_brush"
+                       )),
+            downloadButton('downloadData', 'Download Scors'),
+            fluidRow(
+              column(width = 6,
+                     h4("Points near click"),
+                     #verbatimTextOutput("click_info")
+                     dataTableOutput("pfa.click_info")
+              ),
+              column(width = 6,
+                     h4("Brushed points"),
+                     #verbatimTextOutput("brush_info")
+                     dataTableOutput("pfa.brush_info")
+              )
+            ),
+            plotOutput("pfa.Loadplot")
         ),
         tabPanel('Discriminant Analysis',
             HTML('
@@ -203,7 +222,7 @@ shinyUI(navbarPage("i-CoDa",
             HTML('
                 <pre id="render.tes" class = "shiny-text-output"></pre>
             '),
-           fluidRow(
+          fluidRow(
              column(width = 6,
                     h4("Points near click"),
                     #verbatimTextOutput("click_info")

@@ -2301,35 +2301,157 @@ getPCAOptions = function(){
 createPFADialog = function(){
     cleanModalDialog('pfaWell');
     var pfaContainer = document.getElementById('pfaWell');
-    if(typeOfSelectedVariableGroup == 'transformations'){
+    /*if(typeOfSelectedVariableGroup == 'transformations'){
         pfaContainer.appendChild(createH4Title('PFA can\'t be applied on transformed data!'));
     }else if(typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
-        pfaContainer.appendChild(createHr());
-        pfaContainer.appendChild(createDiv('', '', 'Method'));
-        var selector = createSelect('', 'pfaMethodSelect');
-        pfaContainer.appendChild(selector);
-        selector.appendChild(createOption('', 'robust', 'robust'));
-        selector.appendChild(createOption('', 'standard', 'standard'));
-		
-		pfaContainer.appendChild(createBr());
-		pfaContainer.appendChild(createDiv('', '', 'Scale'));
-		pfaContainer.appendChild(createCheckBox('plotDialogElement', 'pfaScaleCheckBox', 'Scale'));
-		pfaContainer.appendChild(createBr());
-		pfaContainer.appendChild(createDiv('', '', 'Log'));
-		pfaContainer.appendChild(createCheckBox('plotDialogElement', 'pfaLogCheckBox', 'Log'));
-		pfaContainer.appendChild(createBr());
-		pfaContainer.appendChild(createDiv('', '', 'Ln'));
-		pfaContainer.appendChild(createCheckBox('plotDialogElement', 'pfaLnCheckBox', 'Ln'));
-		
-		pfaContainer.appendChild(createHr());
-        pfaContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getPFAOptions()'));
+    */
+
+    pfaContainer.appendChild(createHr());
+    pfaContainer.appendChild(createDiv('variablesType', '', 'Function'));
+    var functionSelector = createSelect('', 'pfaFunctionSelector');
+    functionSelector.setAttribute('onclick', 'createPfaFunctionWell(selectedOptions)');
+    var firstFunctionOption = createOption('pfaFunctionOption', 'pfa', 'pfa');
+    firstFunctionOption.setAttribute('selected', 'selected');
+    functionSelector.appendChild(firstFunctionOption);
+    functionSelector.appendChild(createOption('pfaFunctionOption', 'factanal', 'factanal'));
+    pfaContainer.appendChild(functionSelector);
+    pfaContainer.appendChild(createBr());
+    pfaContainer.appendChild(createDiv('', '', 'Number of Factors'));
+    pfaContainer.appendChild(createTextField('', 'numberOfFactorsTextField', '2'));
+    pfaContainer.appendChild(createBr());
+    pfaContainer.appendChild(createDiv('', '', 'log'));
+    var cb = createCheckBox('pfaLogCheckBox', 'pfaLogCheckBox', 'log');
+    cb.checked = false;
+    pfaContainer.appendChild(cb);
+
+    pfaContainer.appendChild(createHr());
+    pfaContainer.appendChild(createDiv('createPfaFunctionDiv', 'createPfaFunctionDiv', ''));
+    createPfaFunctionWell(functionSelector.selectedOptions);
+
+    pfaContainer.appendChild(createHr());
+    pfaContainer.appendChild(createDiv('variablesType', '', 'Used variables for Factor Analysis'));
+    var tmpNames;
+    if (typeOfSelectedVariableGroup != "allGroups") {
+        tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
     }
+    else {
+        tmpNames = currentData.names;
+    }
+    for (var i = 0; i < tmpNames.length; i++) {
+        pfaContainer.appendChild(createDiv('names', '', tmpNames[i]));
+        var cb = createCheckBox('clusterVariablesCheckBox', 'pfa_' + tmpNames[i], tmpNames[i]);
+        //cb.checked = true;
+        pfaContainer.appendChild(cb);
+        pfaContainer.appendChild(createBr());
+    }
+		
+	pfaContainer.appendChild(createHr());
+    pfaContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getPFAOptions()'));
+
+
+    /*}
 	else{
 		pfaContainer.appendChild(createH4Title('PFA methods can\'t be applied on chosen data!'));
-	}
+	}*/
 };
 
-getPFAOptions = function(){};
+getPFAOptions = function () {
+    var func = document.getElementById('pfaFunctionSelector').value;
+    var log = document.getElementById('pfaLogCheckBox').checked;
+    var pfaAllowed = true;
+    var tmpNames;
+    var tmpVariablesTypes;
+    var variablesdName = [];
+    
+
+    if (typeOfSelectedVariableGroup != "allGroups") {
+        tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup);
+        tmpVariablesTypes = getDataFromGivenIndexes(currentData.variablesTypes, currentVariablesGroup);
+    }
+    else {
+        tmpNames = currentData.names;
+        tmpVariablesTypes = currentData.variablesTypes;
+    }
+    var j = 0;
+    for (var i = 0; i < tmpNames.length; i++) {
+        var variablesElement = document.getElementById('pfa_' + tmpNames[i]);
+        if (variablesElement != null && document.getElementById('pfa_' + tmpNames[i]).checked) {
+            if (tmpVariablesTypes[i] != 'numeric') {
+                pfaAllowed = false;
+            }
+            variablesdName[j] = variablesElement.value;
+            j++;
+        }
+    }
+    var options = {
+        func: func,
+        group: currentVariablesGroupName,
+        log: log,
+        numberOfFactorsTextField: document.getElementById('numberOfFactorsTextField').value,
+        score: document.getElementById('pfaScoreSelector').value,
+        rotation: document.getElementById('pfaRotationSelector').value,
+        variablesdName: variablesdName
+    };
+
+    if (func == 'pfa') {
+        options['pfaRobust'] = document.getElementById('pfaRobustSelector').value;
+    }
+    else if (func == 'factanal') {
+
+    }
+
+    if (pfaAllowed) {
+        Shiny.onInputChange('pfa.in', options);
+    }
+    else {
+        popUpMessage('ERROR: Factor analysis can\'t be applied on chosen data!');
+    }
+    
+};
+
+createPfaFunctionWell = function (selectedOptions) {
+    cleanModalDialog('createPfaFunctionDiv');
+    var pfaContainer = document.getElementById('createPfaFunctionDiv');
+
+    pfaContainer.appendChild(createDiv('variablesType', '', 'Score'));
+    var scoreSelector = createSelect('', 'pfaScoreSelector');
+    var firstScoreOption = createOption('pfaScoreOption', 'regression', 'regression');
+    firstScoreOption.setAttribute('selected', 'selected');
+    scoreSelector.appendChild(firstScoreOption);
+    scoreSelector.appendChild(createOption('pfaScoreOption', 'Bartlett', 'Bartlett'));
+    pfaContainer.appendChild(scoreSelector);
+
+    pfaContainer.appendChild(createDiv('variablesType', '', 'Rotation'));
+    var rotationSelector = createSelect('', 'pfaRotationSelector');
+    var firstRotationOption = createOption('pfaRotationOption', 'varimax', 'varimax');
+    firstRotationOption.setAttribute('selected', 'selected');
+    rotationSelector.appendChild(firstRotationOption);
+    rotationSelector.appendChild(createOption('pfaRotationOption', 'none', 'none'));
+    pfaContainer.appendChild(rotationSelector);
+
+    if (selectedOptions[0].value == 'pfa') {
+        
+        pfaContainer.appendChild(createDiv('variablesType', '', 'Type'));
+        var robustSelector = createSelect('', 'pfaRobustSelector');
+        var firstRobustOption = createOption('pfaRobustOption', 'robust', 'robust');
+        firstRobustOption.setAttribute('selected', 'selected');
+        robustSelector.appendChild(firstRobustOption);
+        robustSelector.appendChild(createOption('pfaRobustOption', 'standard', 'standard'));
+        pfaContainer.appendChild(robustSelector);
+    }
+    else if (selectedOptions[0].value == 'factanal') {
+
+    }
+};
+
+
+/**********************************************************************************
+********************************** ClusterAnalysis *********************************
+**********************************************************************************/
+createClusterAnalysisDialog = function () {
+
+
+};
 
 
 
@@ -2340,28 +2462,6 @@ getPFAOptions = function(){};
 	cleanModalDialog('clustWell');
 	var clustContainer = document.getElementById('clustWell');
 
-     /*
-	var clusterAllowed = true;
-	var clusterVariablesTypes = currentData.variablesTypes;
-	for(var i=0; i < clusterVariablesTypes.length; i++){
-		
-		if(currentVariablesGroup.length >= 1){
-			for(var j=0; j < currentVariablesGroup.length; j++){
-				if( currentVariablesGroup[j] == i){
-					if(clusterVariablesTypes[i] != 'numeric'){
-						clusterAllowed = false;
-					}
-				}
-			}
-		}
-		else{
-			if(clusterVariablesTypes[i] != 'numeric'){
-				clusterAllowed = false;
-			}
-		}
-	
-	}*/
-	
 	if (currentData.data != null && currentData.data != undefined) {
 		clustContainer.appendChild(createHr());
         clustContainer.appendChild(createDiv('','', 'Function'));
@@ -2431,7 +2531,7 @@ getPFAOptions = function(){};
 	cleanModalDialog('defineClustFunctionContainer');
 	var defineClustFunctionContainer = document.getElementById('defineClustFunctionContainer');
     if(selectedOptions[0].value == 'HClust'){
-		defineClustFunctionContainer.appendChild(createDiv('','', 'Method'));
+        defineClustFunctionContainer.appendChild(createDiv('variablesType', '', 'Method'));
         var functionSelector = createSelect('', 'clusterHClustMethodSelector');
         functionSelector.appendChild(createOption('clustHClustMethodOption', 'ward.D', 'ward.D'));
         functionSelector.appendChild(createOption('clustHClustMethodOption', 'ward.D2', 'ward.D2'));
