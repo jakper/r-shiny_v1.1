@@ -219,9 +219,6 @@ shinyUI(navbarPage("i-CoDa",
                        brush = brushOpts(
                          id = "regression.Plot_brush"
                        )),
-            HTML('
-                <pre id="render.tes" class = "shiny-text-output"></pre>
-            '),
           fluidRow(
              column(width = 6,
                     h4("Points near click"),
@@ -235,9 +232,13 @@ shinyUI(navbarPage("i-CoDa",
              )
            ),
            HTML('
+                <pre id="render.tes" class = "shiny-text-output"></pre>
+
                </div>
                 
-            ')
+            '),
+          plotOutput("regression.Res_Fitt"),
+          plotOutput("regression.QQ")
             
         ),
         tabPanel('Outlier Detection',

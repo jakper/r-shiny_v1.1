@@ -14,6 +14,7 @@ tryCatch({library(ggplot2)}, error = function(cond){return(NULL)})
 tryCatch({library(ggbiplot)}, error = function(cond){return(NULL)})
 tryCatch({library(ggdendrogram)}, error = function(cond){return(NULL)})
 tryCatch({library(rrcov)}, error = function(cond){return(NULL)})
+tryCatch({library(ggfortify)}, error = function(cond){return(NULL)})
 
 
 #mvoutlier
@@ -1274,6 +1275,9 @@ observe({
 ################################################################### Statistical Methods ################################################
 ########################################################################################################################################
 ############################################################## PCA #####################################################################
+    #ggplot() + geom_point(data =(p$scores), aes(x=p$scores[,1],y=p$scores[,2] )) + geom_line(data = load2, aes(x = Factor1, y = Factor2, color = "red"))
+    #load=as.data.frame(unclass(p$loadings))
+    
     observe({
       
       options <- input$pca.in
@@ -1364,9 +1368,7 @@ observe({
 
     
     ############################################################## Factor Analysis #####################################################################
-    #ggplot() + geom_point(data =(p$scores), aes(x=p$scores[,1],y=p$scores[,2] )) + geom_line(data = load2, aes(x = Factor1, y = Factor2, color = "red"))
-    #load=as.data.frame(unclass(p$loadings))
-    
+
     #plotten von factanal
     #http://rpubs.com/sinhrks/plot_pca
     
@@ -1449,6 +1451,27 @@ observe({
       }
       
     })
+    
+    
+    
+    
+    ############################################################## Factor Analysis #####################################################################
+    #LdaClassic, Linda, QdaClassic, QdaCov 
+    #
+    
+    #http://www.statistik.tuwien.ac.at/StatDA/R-scripts/
+    #lda
+    #https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/lda.html
+    
+    #qda
+    #https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/qda.html
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -1555,6 +1578,9 @@ observe({
     
     
     ############################################################## Regression #####################################################################
+    #http://rpubs.com/sinhrks/plot_lm
+    #ggplot(lm.model, aes(.fitted, .resid))+geom_point() + stat_smooth(method="loess")+geom_hline(yintercept=0, col="red", linetype="dashed") +xlab("Fitted values")+ylab("Residuals")+ggtitle("Residual vs Fitted Plot")+theme_bw()
+    
     
     observe({
       
@@ -1633,12 +1659,55 @@ observe({
         })
         
         output$render.tes <- renderPrint({
-          print(tmp)
+          print(summary(tmp))
+        })
+        
+        output$regression.Res_Fitt <- renderPlot({
+          if(options$regressionMethod == 'lm'){
+            ggplot(tmp, aes(.fitted, .resid))+geom_point() + stat_smooth(method="loess")+geom_hline(yintercept=0, col="red", linetype="dashed") +xlab("Fitted values")+ylab("Residuals")+ggtitle("Residual vs Fitted Plot")+theme_bw()
+          }
+           else if(options$regressionMethod == 'lmrob'){
+             plot(tmp, which = 3)
+          }
+          else if(options$regressionMethod == 'ltsReg'){
+            rid <- tmp$residuals/tmp$scale
+            plot(tmp$fitted,rid,cex.lab=1.2,xlab="Fitted values",ylab="Standardised LTS residuals",type="n")
+            points(tmp$fitted[tmp$lts.wt==0],rid[tmp$lts.wt==0],cex=0.8,pch=3)
+            points(tmp$fitted[tmp$lts.wt==1],rid[tmp$lts.wt==1],cex=0.8,pch=1)
+            abline(h=0,col="grey",lty=2)
+            abline(h=c(-2.5,2.5),lty=3,cex=1.1) 
+          }
+        })
+        
+        output$regression.QQ <- renderPlot({
+          if(options$regressionMethod == 'lm'){
+            ggplot(tmp, aes(qqnorm(.stdresid)[[1]], .stdresid))+geom_point(na.rm = TRUE)+geom_abline(aes(qqline(.stdresid)))+xlab("Theoretical Quantiles")+ylab("Standardized Residuals")+ggtitle("Normal Q-Q")+theme_bw()
+          }
+          else if(options$regressionMethod == 'lmrob'){
+            plot(tmp, which = 2)
+          }
+          else if(options$regressionMethod == 'ltsReg'){
+            plot(tmp, which = "rqq")
+          }
         })
         
       }
       
     })  
+    
+    
+    ############################################################## Outlier Detection #####################################################################
+    
+    #data(Animals, package ="MASS")
+    #brain <- Animals[c(1:24, 26:25, 27:28),]
+    #mcd <- covMcd(log(brain))
+    
+    #plot(mcd, which = "distance", classic = TRUE)# 2 plots
+    #plot(mcd, which = "dd")
+    #plot(mcd, which = "tolEllipsePlot", classic = TRUE)
+    #op <- par(mfrow = c(2,3))
+    #plot(mcd) ## -> which = "all" (5 plots)
+    #par(op)
     
 
 #######################################################################################################################################

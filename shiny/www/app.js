@@ -381,7 +381,9 @@ renderDataMethodsInformation = function(){
         createDefineObservationsGroupDialog();
         createPCADialog();
         createPFADialog();
-		createClusterAnalysisDialog();
+        createDADialog();
+        createClusterAnalysisDialog();
+        createODDialog();
 		createRegressionDialog();
         if(currentVariablesGroupName == "allGroups"){
             createTable('dataTable', currentData.names, currentData.data);
@@ -2339,7 +2341,7 @@ createPFADialog = function(){
     }
     for (var i = 0; i < tmpNames.length; i++) {
         pfaContainer.appendChild(createDiv('names', '', tmpNames[i]));
-        var cb = createCheckBox('clusterVariablesCheckBox', 'pfa_' + tmpNames[i], tmpNames[i]);
+        var cb = createCheckBox('pfaVariablesCheckBox', 'pfa_' + tmpNames[i], tmpNames[i]);
         //cb.checked = true;
         pfaContainer.appendChild(cb);
         pfaContainer.appendChild(createBr());
@@ -2446,10 +2448,23 @@ createPfaFunctionWell = function (selectedOptions) {
 
 
 /**********************************************************************************
-********************************** ClusterAnalysis *********************************
+********************************** Discriminant Analysis ***************************
 **********************************************************************************/
-createClusterAnalysisDialog = function () {
+createDADialog = function () {
+    cleanModalDialog('daWell');
+    var daContainer = document.getElementById('daWell');
+    if (currentData.data != null && currentData.data != undefined) {
+        daContainer.appendChild(createHr());
+        daContainer.appendChild(createDiv('', '', 'Function'));
+        var functionSelector = createSelect('', 'clusterFunctionSelector');
+        functionSelector.setAttribute('onclick', 'createDAFunctionWell(selectedOptions)');
+        functionSelector.appendChild(createOption('daFunctionOption', 'lda', 'lda'));
+        functionSelector.appendChild(createOption('daFunctionOption', 'qda', 'qda'));
+        daContainer.appendChild(functionSelector);
+    }
+};
 
+createDAFunctionWell = function (selectedOptions) {
 
 };
 
@@ -2794,6 +2809,29 @@ createRegressionDialog = function(){
     }
 	
     showElement('div#regressionVariablesDiv');
+ };
+
+
+
+ /**********************************************************************************
+ ********************************** Outlier Detection ***************************
+ **********************************************************************************/
+ createODDialog = function () {
+     cleanModalDialog('outlierWell');
+     var odContainer = document.getElementById('outlierWell');
+     if (currentData.data != null && currentData.data != undefined) {
+         odContainer.appendChild(createHr());
+         odContainer.appendChild(createDiv('', '', 'Function'));
+         var functionSelector = createSelect('', 'clusterFunctionSelector');
+         functionSelector.setAttribute('onclick', 'createODFunctionWell(selectedOptions)');
+         functionSelector.appendChild(createOption('odFunctionOption', 'lda', 'lda'));
+         functionSelector.appendChild(createOption('odFunctionOption', 'qda', 'qda'));
+         odContainer.appendChild(functionSelector);
+     }
+ };
+
+ createODFunctionWell = function (selectedOptions) {
+
  };
 
 
