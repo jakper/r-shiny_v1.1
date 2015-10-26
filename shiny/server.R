@@ -7,7 +7,6 @@ tryCatch({library(robustbase)}, error = function(cond){return(NULL)})
 tryCatch({library(MASS)}, error = function(cond){return(NULL)})
 tryCatch({library(mclust)}, error = function(cond){return(NULL)})
 
-#TODO: tryCatch
 tryCatch({library(devtools)}, error = function(cond){return(NULL)})
 tryCatch({library(robCompositions)}, error = function(cond){return(NULL)})
 tryCatch({library(ggplot2)}, error = function(cond){return(NULL)})
@@ -15,6 +14,8 @@ tryCatch({library(ggbiplot)}, error = function(cond){return(NULL)})
 tryCatch({library(ggdendrogram)}, error = function(cond){return(NULL)})
 tryCatch({library(rrcov)}, error = function(cond){return(NULL)})
 tryCatch({library(ggfortify)}, error = function(cond){return(NULL)})
+
+
 
 
 #mvoutlier
@@ -1283,83 +1284,187 @@ observe({
       options <- input$pca.in
       if(!is.null(options)){
         
-        data <- as.data.frame(variablesEnv$currentData)
         
-        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
-        if(length(options$groupData) != 0){
-          data <- data[variablesEnv$currentVariableGroup]
-        }
-        if(options$type == 'compositions'){
+        try <- tryCatch({
+          dataAll <- variablesEnv$currentData
           
           
-          if(options$method == 'robust'){
-            try <- tryCatch({tmp <- pcaCoDa(data, method = 'robust')},
-                            error = function(cond){return(NULL)})
-            
+          data <- dataAll[1]
+          data <- data[-c(1)]
+          for ( i in 1:(length(names(dataAll))) ) {
+            if(length(which(names(dataAll)==options$variablesdName[i]))>0){
+              data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+            }
           }
-          else if (options$method == 'standard'){
-            try <- tryCatch({tmp <- pcaCoDa(data, method = 'standard')},
-                            error = function(cond){return(NULL)})
+          
+          if(options$type == 'compositions'){
+            if(options$clr){
+              temdata <- cenLR(data)
+              temdata <- temdata$x.clr
+            }
+            else{
+              temdata <- data
+            }
           }
           else{
-            sendPopUpMessage(paste0('ERROR: method "', options$method, '" is not supported' ))
+            if(options$log){
+              temdata <- log(data)
+              temdata <- rapply( temdata, f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
+              temdata <- as.data.frame(temdata)
+            }
+            else{
+              temdata <- data
+            }
           }
-          
+        }, error = function(cond){
+          sendPopUpMessage(paste0('Error in data-input or transformation:  ',as.character(cond$message)))
+          return(NULL)})
+        
+        if(!is.null(try)){
+          try <- tryCatch({
+            if(options$type == 'compositions'){
+              if(options$method == 'robust'){
+                tmp <- pcaCoDa(temdata, method = 'robust')
+                
+              }
+              else if (options$method == 'standard'){
+                tmp <- pcaCoDa(temdata, method = 'standard')
+              }
+              else{
+                sendPopUpMessage(paste0('ERROR: method "', options$method, '" is not supported' ))
+              }
+              #add pc's to data ==> needed for nearPoints and brushedPoints function
+              total<- merge(temdata,as.data.frame(tmp$princompOutputClr$scores), by="row.names")
+              
+            }
+            else if(options$type == 'externals'){
+              
+              if(options$method == 'robust'){
+               tmp <- prcomp(temdata,scale=options$scale, covmat =covPCAproj(temdata)$cov )
+                
+              }
+              else if (options$method == 'standard'){
+                tmp <- prcomp(temdata,scale=options$scale)
+              }
+              else{
+                sendPopUpMessage(paste0('ERROR: method "', options$method, '" is not supported' ))
+              }
+              #add pc's to data ==> needed for nearPoints and brushedPoints function
+              total<- merge(temdata,as.data.frame(tmp$x), by="row.names")
+              
+            }
+            else{
+              sendPopUpMessage(paste0('ERROR: type "', options$type, '" is not supported' ))
+            }
+          }, error = function(cond){
+            sendPopUpMessage(paste0('Error applying pca-function:  ',as.character(cond$message)))
+            return(NULL)})
         }
-        else if(options$type == 'externals'){
-          
-          if(options$method == 'robust'){
-            try <- tryCatch({tmp <- prcomp(data,scale=options$scale, covmat =covPCAproj(data)$cov )},
-                            error = function(cond){return(NULL)})
-            
-          }
-          else if (options$method == 'standard'){
-            try <- tryCatch({tmp <- prcomp(data,scale=options$scale)},
-                            error = function(cond){return(NULL)})
-          }
-          else{
-            sendPopUpMessage(paste0('ERROR: method "', options$method, '" is not supported' ))
-          }
-          
-        }
-        else{
-          sendPopUpMessage(paste0('ERROR: type "', options$type, '" is not supported' ))
-        }
+        
+        
         
         if(is.null(try)){
           sendPopUpMessage("ERROR: chosen method does not exist or can\'t be applied on chosen data!")
         }
         else{
+          try <- tryCatch({
           
-          if(options$showScores){
-            output$pca.Score <- renderPrint({
-              print(summary(tmp))
+            if(options$showScores){
+              output$pca.Score <- renderPrint({
+                if(options$type == 'compositions'){
+                  print(summary(tmp$princompOutputClr))
+                  
+                }
+                else{
+                  print(summary(tmp))
+                }
+                
+              })
+            }
+            
+            if(options$type == 'compositions'){
+              output$pca.BiPlot <- renderPlot({
+                ggbiplot(tmp$princompOutputClr, scale = 0, labels.size = 3)
+              })
+              output$pca.ScreePlot <- renderPlot({
+                screeplot(tmp$princompOutputClr, type = 'l')
+                
+              })
               
-            })
-          }
+            }
+            else{
+              output$pca.BiPlot <- renderPlot({
+                ggbiplot(tmp, labels =  rownames(tmp),scale = 0)
+              })
+              
+              output$pca.ScreePlot <- renderPlot({
+                screeplot(tmp, type = 'l')
+              })
+            }
           
-          if(options$type == 'compositions'){
-            output$pca.BiPlot <- renderPlot({
-              plot(tmp)
+            output$pca.click_info <- renderDataTable({
+              if(options$type == 'compositions'){
+                nearPoints(total, input$pca.Plot_click,paste0('Comp.', options$x),paste0('Comp.', options$y))
+              }
+              else{
+                nearPoints(total, input$pca.Plot_click,paste0('PC', options$x),paste0('PC', options$y))
+              }
+              
+            },options=list(
+              paging = FALSE,
+              searching = FALSE))
+            
+            
+            output$pca.brush_info <- renderDataTable({
+              filteredData() 
             })
-            output$pca.Score <- renderPrint({
-              print(tmp)
+            
+            
+            output$downloadScors <- downloadHandler(
+              filename = function() { 
+                paste('score', '.csv', sep='') 
+              },
+              content = function(file) {
+                if(options$type == 'compositions'){
+                  write.csv(tmp$scores, file,row.names = FALSE)
+                }
+                else{
+                  write.csv(tmp$x, file,row.names = FALSE)
+                }
+                
+              }
+            )
+            
+            output$downloadFilteredData <- downloadHandler(
+              filename = function() { 
+                paste('filteredData', '.csv', sep='') 
+              },
+              content = function(file) {
+                fData <- filteredData()
+                fOutputData <- fData[1]
+                fOutputData <- fOutputData[-c(1)]
+                for ( i in 1:(length(temdata)) ) {
+                  fOutputData[names(temdata[i])] <- fData[i+1]
+                }
+                write.csv(fOutputData, file,row.names = FALSE)
+              }
+            )
+            
+            
+            filteredData <- reactive({
+              if(options$type == 'compositions'){
+                brushedPoints(total, input$pca.Plot_brush,paste0('Comp.', options$x),paste0('Comp.', options$y))
+              }
+              else{
+                brushedPoints(total, input$pca.Plot_brush,paste0('PC', options$x),paste0('PC', options$y))
+              }
               
             })
             
-          }
-          else{
-            output$pca.BiPlot <- renderPlot({
-              ggbiplot(tmp, labels =  rownames(tmp))
-            })
+          }, error = function(cond){
             
-            output$pca.ScreePlot <- renderPlot({
-              #data(USArrests)
-              #plot(prcomp(USArrests,scale=TRUE), type = 'l')
-              screeplot(tmp, type = 'l')
-            })
-          }
-          
+            sendPopUpMessage(paste0('Error while creating plots:  ',as.character(cond$message)))
+            return(NULL)})
         }
         
       }
@@ -1376,77 +1481,131 @@ observe({
       
       options <- input$pfa.in
       if(!is.null(options)){
-        
-        dataAll <- variablesEnv$currentData
-        
-        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
-        if(length(options$groupData) != 0){
-          dataAll <- data[variablesEnv$currentVariableGroup]
-        }
-        data <- dataAll[1]
-        data <- data[-c(1)]
-        for ( i in 1:(length(names(dataAll))) ) {
-          if(length(which(names(dataAll)==options$variablesdName[i]))>0){
-            data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+        try <- tryCatch({
+          dataAll <- variablesEnv$currentData
+          
+          variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
+          if(length(options$groupData) != 0){
+            dataAll <- data[variablesEnv$currentVariableGroup]
           }
-        }
-        
-        if(options$log){
-          temdata <- log10(data)
-          temdata <- rapply( temdata, f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
-          temdata <- as.data.frame(temdata)
-        }
-        else{
-          temdata <- data
-        }
-        
-        
-        if(options$func == 'pfa'){
-          if(options$pfaRobust == 'robust'){
-            x.mcd=covMcd(temdata,cor=TRUE) 
-            x.rsc=scale(temdata,x.mcd$cent,sqrt(diag(x.mcd$cov))) 
-            tmp=pfa(x.rsc,factors=as.numeric(options$numberOfFactorsTextField),covmat=x.mcd,scores=options$score,rotation=options$rotation) 
-            
+          data <- dataAll[1]
+          data <- data[-c(1)]
+          for ( i in 1:(length(names(dataAll))) ) {
+            if(length(which(names(dataAll)==options$variablesdName[i]))>0){
+              data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+            }
+          }
+          
+          if(options$type == 'compositions'){
+            if(options$clr){
+              temdata <- cenLR(data)
+              temdata <- temdata$x.clr
+            }
+            else{
+              temdata <- data
+            }
           }
           else{
-            tmp=pfa(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation) 
+            if(options$log){
+              temdata <- log(data)
+              temdata <- rapply( temdata, f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
+              temdata <- as.data.frame(temdata)
+            }
+            else{
+              temdata <- data
+            }
           }
-        }
-        else if(options$func == 'factanal'){
-          tmp=pfa(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation)
-          }
-        else{
-          sendPopUpMessage(paste0('ERROR: function "', options$func, '" is not supported' ))
+        }, error = function(cond){
+          sendPopUpMessage(paste0('Error in data-input or transformation:  ',as.character(cond$message)))
+          return(NULL)})
+        
+        if(!is.null(try)){
+          try <- tryCatch({
+            if(options$func == 'pfa'){
+              if(options$pfaRobust == 'robust'){
+                x.mcd=covMcd(temdata,cor=TRUE) 
+                x.rsc=scale(temdata,x.mcd$cent,sqrt(diag(x.mcd$cov))) 
+                #res1 <- pfa(x, factors=1, covmat="covMcd")
+                tmp=pfa(x.rsc,factors=as.numeric(options$numberOfFactorsTextField),covmat=x.mcd,scores=options$score,rotation=options$rotation) 
+                
+              }
+              else{
+                tmp=pfa(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation) 
+              }
+            }
+            else if(options$func == 'factanal'){
+              tmp=factanal(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation)
+            }
+            else{
+              sendPopUpMessage(paste0('ERROR: function "', options$func, '" is not supported' ))
+            }
+            #add factors to data ==> needed for nearPoints and brushedPoints function
+            total<- merge(temdata,as.data.frame(tmp$scores), by="row.names")
+            
+          }, error = function(cond){
+            sendPopUpMessage(paste0('Error applying function ',options$func ,':  ',as.character(cond$message)))
+            return(NULL)})
         }
         
-        output$pfa.BiPlot <- renderPlot({
-          autoplot(tmp, data = temdata,loadings = TRUE, loadings.colour = 'blue',loadings.label = TRUE, loadings.label.size = 3)
+        if(!is.null(try)){
+          try <- tryCatch({
+          output$pfa.BiPlot <- renderPlot({
+            biplot <- autoplot(tmp, data = temdata,loadings = TRUE, loadings.colour = 'blue',loadings.label = TRUE, loadings.label.size = 3)
+            eval(parse(text = paste0('biplot <- biplot + aes( Factor', options$x ,', Factor',options$y,')')))
+            biplot
+          })
+          
+          output$pfa.Loadplot <- renderPlot({
+            loadplot(tmp,crit=0.3) 
+          })
+          
+        
+          output$pfa.click_info <- renderDataTable({
+            nearPoints(total, input$pfa.Plot_click,paste0('Factor', options$x),paste0('Factor', options$y))
+          },options=list(
+            paging = FALSE,
+            searching = FALSE))
+          
+          
+          output$pfa.brush_info <- renderDataTable({
+            filteredData() 
+          })
+          
+          
+          output$downloadScors <- downloadHandler(
+            filename = function() { 
+              paste('score', '.csv', sep='') 
+            },
+            content = function(file) {
+              write.csv(tmp$scores, file,row.names = FALSE)
+            }
+          )
+          
+          output$downloadFilteredData <- downloadHandler(
+            filename = function() { 
+              paste('filteredData', '.csv', sep='') 
+            },
+            content = function(file) {
+              fData <- filteredData()
+              fOutputData <- fData[1]
+              fOutputData <- fOutputData[-c(1)]
+              for ( i in 1:(length(temdata)) ) {
+                fOutputData[names(temdata[i])] <- fData[i+1]
+              }
+              write.csv(fOutputData, file,row.names = FALSE)
+            }
+          )
+          
+          
+          filteredData <- reactive({
+            brushedPoints(total, input$pfa.Plot_brush,paste0('Factor', options$x),paste0('Factor', options$y))
+          })
+        
+          }, error = function(cond){
 
-        })
-        
-        output$pfa.Loadplot <- renderPlot({
-          loadplot(tmp,crit=0.3) 
-        })
-        
-        #renderPrint
-        output$pfa.click_info <- renderDataTable({
-          nearPoints(as.data.frame(tmp$scores), input$pfa.Plot_click)
-        },options=list(
-          paging = FALSE,
-          searching = FALSE))
-        
-        #renderPrint
-        output$pfa.brush_info <- renderDataTable({
-          brushedPoints(as.data.frame(tmp$scores), input$pfa.Plot_brush) 
-        })
-        output$downloadData <- downloadHandler(
-          filename = function() { 
-            paste('score', '.csv', sep='') 
-          },
-          content = function(file) {
-            write.csv(tmp$scores, file,row.names = FALSE)
-          }
-        )
+            sendPopUpMessage(paste0('Error while creating plots:  ',as.character(cond$message)))
+            return(NULL)})
+        }
 
       }
       

@@ -2,14 +2,29 @@
     "debugBreakpointsState" : {
         "breakpoints" : [
             {
-                "editor_line_number" : 1402,
+                "editor_line_number" : 21,
                 "editor_state" : 1,
                 "function_name" : "toplevel",
                 "function_steps" : "",
-                "id" : 12,
+                "id" : 14,
                 "is_package_breakpoint" : false,
                 "is_pending_debug_completion" : false,
-                "line_number" : 1402,
+                "line_number" : 21,
+                "needs_updated_steps" : false,
+                "package_name" : "",
+                "path" : "C:/Users/Jakob/shiny/gmap.r",
+                "state" : 1,
+                "type" : 1
+            },
+            {
+                "editor_line_number" : 1393,
+                "editor_state" : 1,
+                "function_name" : "toplevel",
+                "function_steps" : "",
+                "id" : 15,
+                "is_package_breakpoint" : false,
+                "is_pending_debug_completion" : false,
+                "line_number" : 1393,
                 "needs_updated_steps" : false,
                 "package_name" : "",
                 "path" : "C:/Users/Jakob/shiny/r-shiny_v1.1/shiny/server.R",

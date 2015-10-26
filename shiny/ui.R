@@ -143,26 +143,45 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Principal Component Analysis',
             HTML('
                 <div class="well workingWell", id="pcaWell"></div>
-				<div id="pca" class="shiny-html-output">
-				<pre id="pca.Score" class = "shiny-text-output"></pre>
-				</div>
+				<div id="pcaOutput" class="shiny-html-output">
+				
+				
             '),
-            plotOutput("pca.BiPlot"),
+            plotOutput("pca.BiPlot",width = "400px", height = "400px",
+                       click = "pca.Plot_click",
+                       brush = brushOpts(
+                         id = "pca.Plot_brush"
+                       )),
+            downloadButton('pcaDownloadScors', 'Download Scors'),
+            downloadButton('pcaDownloadFilteredData', 'Download filtered Data'),
+            fluidRow(
+              column(width = 6,
+                     h4("Points near click"),
+                     dataTableOutput("pca.click_info")
+              ),
+              column(width = 6,
+                     h4("Brushed points"),
+                     dataTableOutput("pca.brush_info")
+              )
+            ),
             plotOutput("pca.ScreePlot"),
             HTML('
-                
+                <pre id="pca.Score" class = "shiny-text-output"></pre>
+                </div>
                  ')
         ),
         tabPanel('Factor Analysis',
             HTML('
                 <div class="well workingWell" id="pfaWell"></div>
+                <div  id="pfaOutput">
             '),
-            plotOutput("pfa.BiPlot", height = 300,
+            plotOutput("pfa.BiPlot",width = "400px", height = "400px",
                        click = "pfa.Plot_click",
                        brush = brushOpts(
                          id = "pfa.Plot_brush"
                        )),
-            downloadButton('downloadData', 'Download Scors'),
+            downloadButton('downloadScors', 'Download Scors'),
+            downloadButton('downloadFilteredData', 'Download filtered Data'),
             fluidRow(
               column(width = 6,
                      h4("Points near click"),
@@ -175,7 +194,10 @@ shinyUI(navbarPage("i-CoDa",
                      dataTableOutput("pfa.brush_info")
               )
             ),
-            plotOutput("pfa.Loadplot")
+            plotOutput("pfa.Loadplot"),
+            HTML('
+                </div>
+                 ')
         ),
         tabPanel('Discriminant Analysis',
             HTML('

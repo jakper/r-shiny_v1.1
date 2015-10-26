@@ -2256,22 +2256,66 @@ createPCADialog = function(){
     var pcaContainer = document.getElementById('pcaWell');
     if(typeOfSelectedVariableGroup == 'transformations'){
         pcaContainer.appendChild(createH4Title('PCA can\'t be applied on transformed data!'));
-    }else if(typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
+    } else if (typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
+
         pcaContainer.appendChild(createHr());
         pcaContainer.appendChild(createDiv('', '', 'Method'));
         var selector = createSelect('', 'pcaMethodSelect');
         pcaContainer.appendChild(selector);
         selector.appendChild(createOption('', 'robust', 'robust'));
-        selector.appendChild(createOption('', 'standard', 'standard'));
-		
+        selector.appendChild(createOption('', 'standard', 'standard'));		
 		pcaContainer.appendChild(createBr());
 		pcaContainer.appendChild(createDiv('', '', 'Show Scores'));
 		pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaShowScoresCheckBox', 'Show Scores'));
-		if(typeOfSelectedVariableGroup == 'externals'){
+		if (typeOfSelectedVariableGroup == 'externals') {
+		    pcaContainer.appendChild(createBr());
+		    pcaContainer.appendChild(createDiv('', '', 'log'));
+		    var cb = createCheckBox('pcaLogCheckBox', 'pcaLogCheckBox', 'log');
+		    cb.checked = false;
+		    pcaContainer.appendChild(cb);
 			pcaContainer.appendChild(createBr());
 			pcaContainer.appendChild(createDiv('', '', 'Scale'));
 			pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaScaleCheckBox', 'Scale'));
 		}
+		else {
+		    pcaContainer.appendChild(createBr());
+		    pcaContainer.appendChild(createDiv('', '', 'clr'));
+		    var cb = createCheckBox('pcaClrCheckBox', 'pcaClrCheckBox', 'clr');
+		    cb.checked = true;
+		    pcaContainer.appendChild(cb);
+		}
+
+		pcaContainer.appendChild(createHr());
+		var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
+		var xTextField = createTextField('plotDialogElement', 'pcaXTextField', '1');
+		pcaContainer.appendChild(xAxis);
+		xTextField.setAttribute('placeholder', 'eg: 1');
+		pcaContainer.appendChild(xTextField);
+		pcaContainer.appendChild(createDiv('', '', ''));
+		var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
+		var yTextField = createTextField('plotDialogElement', 'pcaYTextField', '2');
+		pcaContainer.appendChild(yAxis);
+		yTextField.setAttribute('placeholder', 'eg: 2');
+		pcaContainer.appendChild(yTextField);
+
+		pcaContainer.appendChild(createHr());
+		pcaContainer.appendChild(createDiv('variablesType', '', 'Used variables for PCA'));
+		var tmpNames;
+		if (typeOfSelectedVariableGroup != "allGroups") {
+		    tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
+		}
+		else {
+		    tmpNames = currentData.names;
+		}
+		for (var i = 0; i < tmpNames.length; i++) {
+		    pcaContainer.appendChild(createDiv('names', '', tmpNames[i]));
+		    var cb = createCheckBox('pcaVariablesCheckBox', 'pca_' + tmpNames[i], tmpNames[i]);
+		    cb.checked = true;
+		    pcaContainer.appendChild(cb);
+		    pcaContainer.appendChild(createBr());
+		}
+
+
         pcaContainer.appendChild(createHr());
         pcaContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getPCAOptions()'));
     }
@@ -2280,21 +2324,83 @@ createPCADialog = function(){
 	}
 };
 
-getPCAOptions = function(){
+getPCAOptions = function () {
+    var pcaAllowed = true;
+    var tmpNames;
+    var tmpVariablesTypes;
+    var variablesdName = [];
+    var x = document.getElementById('pcaXTextField').value;
+    var y = document.getElementById('pcaYTextField').value;
+
+    try {
+        x = parseInt(x);
+        y = parseInt(y);
+    }
+    catch (err) {
+        popUpMessage('ERROR: Invalid value for x or y axis!');
+        return;
+    }
+
+    if (!(Number(x) === x && x % 1 === 0)) {
+        popUpMessage('ERROR: Invalid value for x axis!');
+        return;
+    }
+
+    if (!(Number(y) === y && y % 1 === 0)) {
+        popUpMessage('ERROR: Invalid value for y axis!');
+        return;
+    }
+
+    if (typeOfSelectedVariableGroup != "allGroups") {
+        tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup);
+        tmpVariablesTypes = getDataFromGivenIndexes(currentData.variablesTypes, currentVariablesGroup);
+    }
+    else {
+        tmpNames = currentData.names;
+        tmpVariablesTypes = currentData.variablesTypes;
+    }
+    var j = 0;
+    for (var i = 0; i < tmpNames.length; i++) {
+        var variablesElement = document.getElementById('pca_' + tmpNames[i]);
+        if (variablesElement != null && document.getElementById('pca_' + tmpNames[i]).checked) {
+            if (tmpVariablesTypes[i] != 'numeric') {
+                pcaAllowed = false;
+            }
+            variablesdName[j] = variablesElement.value;
+            j++;
+        }
+    }
+
+
     var options = {
         method: document.getElementById('pcaMethodSelect').value,
-		showScores: document.getElementById('pcaShowScoresCheckBox').checked,
+        showScores: document.getElementById('pcaShowScoresCheckBox').checked,
+        x: document.getElementById('pcaXTextField').value,
+        y: document.getElementById('pcaYTextField').value,
+        variablesdName: variablesdName
     };
 
 	if(typeOfSelectedVariableGroup == 'externals'){
-		options["scale"] = document.getElementById('pcaScaleCheckBox').checked
+	    options["scale"] = document.getElementById('pcaScaleCheckBox').checked;
+	    options['log'] = document.getElementById('pcaLogCheckBox').checked;
+	}
+	else {
+	    options['clr'] = document.getElementById('pcaClrCheckBox').checked;
 	}
 
 	options["groupData"] = currentVariablesGroup;
     options["type"] = typeOfSelectedVariableGroup;
     options["group"] = currentVariablesGroupName;
     options["subset"] = currentSubset;
-	Shiny.onInputChange("pca.in", options);
+	
+    if (pcaAllowed && variablesdName.length > 1) {
+        //showElement('div#pfaOutput');
+        Shiny.onInputChange('pca.in', options);
+
+    }
+    else {
+        popUpMessage('ERROR: PCA can\'t be applied on chosen data!');
+    }
 };
 
 /**********************************************************************************
@@ -2302,68 +2408,124 @@ getPCAOptions = function(){
 **********************************************************************************/
 createPFADialog = function(){
     cleanModalDialog('pfaWell');
+    //hideElement('div#pfaOutput');
+
     var pfaContainer = document.getElementById('pfaWell');
-    /*if(typeOfSelectedVariableGroup == 'transformations'){
+    if(typeOfSelectedVariableGroup == 'transformations'){
         pfaContainer.appendChild(createH4Title('PFA can\'t be applied on transformed data!'));
-    }else if(typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
-    */
+    } else if (typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
 
-    pfaContainer.appendChild(createHr());
-    pfaContainer.appendChild(createDiv('variablesType', '', 'Function'));
-    var functionSelector = createSelect('', 'pfaFunctionSelector');
-    functionSelector.setAttribute('onclick', 'createPfaFunctionWell(selectedOptions)');
-    var firstFunctionOption = createOption('pfaFunctionOption', 'pfa', 'pfa');
-    firstFunctionOption.setAttribute('selected', 'selected');
-    functionSelector.appendChild(firstFunctionOption);
-    functionSelector.appendChild(createOption('pfaFunctionOption', 'factanal', 'factanal'));
-    pfaContainer.appendChild(functionSelector);
-    pfaContainer.appendChild(createBr());
-    pfaContainer.appendChild(createDiv('', '', 'Number of Factors'));
-    pfaContainer.appendChild(createTextField('', 'numberOfFactorsTextField', '2'));
-    pfaContainer.appendChild(createBr());
-    pfaContainer.appendChild(createDiv('', '', 'log'));
-    var cb = createCheckBox('pfaLogCheckBox', 'pfaLogCheckBox', 'log');
-    cb.checked = false;
-    pfaContainer.appendChild(cb);
+        pfaContainer.appendChild(createHr());
+        pfaContainer.appendChild(createDiv('variablesType', '', 'Function'));
+        var functionSelector = createSelect('', 'pfaFunctionSelector');
+        functionSelector.setAttribute('onclick', 'createPfaFunctionWell(selectedOptions)');
+        var firstFunctionOption = createOption('pfaFunctionOption', 'pfa', 'pfa');
+        firstFunctionOption.setAttribute('selected', 'selected');
+        functionSelector.appendChild(firstFunctionOption);
+        functionSelector.appendChild(createOption('pfaFunctionOption', 'factanal', 'factanal'));
+        pfaContainer.appendChild(functionSelector);
+        pfaContainer.appendChild(createBr());
+        pfaContainer.appendChild(createDiv('', '', 'Number of Factors'));
+        pfaContainer.appendChild(createTextField('', 'numberOfFactorsTextField', '2'));
 
-    pfaContainer.appendChild(createHr());
-    pfaContainer.appendChild(createDiv('createPfaFunctionDiv', 'createPfaFunctionDiv', ''));
-    createPfaFunctionWell(functionSelector.selectedOptions);
+        if (typeOfSelectedVariableGroup == 'compositions') {
+            pfaContainer.appendChild(createBr());
+            pfaContainer.appendChild(createDiv('', '', 'clr'));
+            var cb = createCheckBox('pfaClrCheckBox', 'pfaClrCheckBox', 'clr');
+            cb.checked = true;
+            pfaContainer.appendChild(cb);
+        }
+        else {
+            pfaContainer.appendChild(createBr());
+            pfaContainer.appendChild(createDiv('', '', 'log'));
+            var cb = createCheckBox('pfaLogCheckBox', 'pfaLogCheckBox', 'log');
+            cb.checked = false;
+            pfaContainer.appendChild(cb);
+        }
+        
 
-    pfaContainer.appendChild(createHr());
-    pfaContainer.appendChild(createDiv('variablesType', '', 'Used variables for Factor Analysis'));
-    var tmpNames;
-    if (typeOfSelectedVariableGroup != "allGroups") {
-        tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
+        pfaContainer.appendChild(createHr());
+        pfaContainer.appendChild(createDiv('createPfaFunctionDiv', 'createPfaFunctionDiv', ''));
+        createPfaFunctionWell(functionSelector.selectedOptions);
+
+        pfaContainer.appendChild(createHr());
+        var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
+        var xTextField = createTextField('plotDialogElement', 'pfaXTextField', '');
+        pfaContainer.appendChild(xAxis);
+        xTextField.setAttribute('placeholder', 'eg: 1');
+        pfaContainer.appendChild(xTextField);
+        pfaContainer.appendChild(createDiv('', '', ''));
+        var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
+        var yTextField = createTextField('plotDialogElement', 'pfaYTextField', '');
+        pfaContainer.appendChild(yAxis);
+        yTextField.setAttribute('placeholder', 'eg: 2');
+        pfaContainer.appendChild(yTextField);
+
+        pfaContainer.appendChild(createHr());
+        pfaContainer.appendChild(createDiv('variablesType', '', 'Used variables for Factor Analysis'));
+        var tmpNames;
+        if (typeOfSelectedVariableGroup != "allGroups") {
+            tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
+        }
+        else {
+            tmpNames = currentData.names;
+        }
+        for (var i = 0; i < tmpNames.length; i++) {
+            pfaContainer.appendChild(createDiv('names', '', tmpNames[i]));
+            var cb = createCheckBox('pfaVariablesCheckBox', 'pfa_' + tmpNames[i], tmpNames[i]);
+            cb.checked = true;
+            pfaContainer.appendChild(cb);
+            pfaContainer.appendChild(createBr());
+        }
+
+        pfaContainer.appendChild(createHr());
+        pfaContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getPFAOptions()'));
+
+
     }
     else {
-        tmpNames = currentData.names;
+        pfaContainer.appendChild(createH4Title('PFA methods can\'t be applied on chosen data!'));
     }
-    for (var i = 0; i < tmpNames.length; i++) {
-        pfaContainer.appendChild(createDiv('names', '', tmpNames[i]));
-        var cb = createCheckBox('pfaVariablesCheckBox', 'pfa_' + tmpNames[i], tmpNames[i]);
-        //cb.checked = true;
-        pfaContainer.appendChild(cb);
-        pfaContainer.appendChild(createBr());
-    }
-		
-	pfaContainer.appendChild(createHr());
-    pfaContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getPFAOptions()'));
-
-
-    /*}
-	else{
-		pfaContainer.appendChild(createH4Title('PFA methods can\'t be applied on chosen data!'));
-	}*/
 };
 
 getPFAOptions = function () {
     var func = document.getElementById('pfaFunctionSelector').value;
-    var log = document.getElementById('pfaLogCheckBox').checked;
     var pfaAllowed = true;
     var tmpNames;
     var tmpVariablesTypes;
     var variablesdName = [];
+    var x = document.getElementById('pfaXTextField').value;
+    var y = document.getElementById('pfaYTextField').value;
+    var numberOfFactorsTextField = document.getElementById('numberOfFactorsTextField').value;
+
+    try{
+        x = parseInt(x);
+        y = parseInt(y);
+        numberOfFactorsTextField = parseInt(numberOfFactorsTextField);
+    }
+    catch (err) {
+        return;
+    }
+    
+    if (!(Number.isInteger(x))) {
+        popUpMessage('ERROR: Invalid value for x axis!');
+        return;
+    }
+
+    if (!(Number(y) === y && y % 1 === 0)) {
+        popUpMessage('ERROR: Invalid value for y axis!');
+        return;
+    }
+
+    if (!(Number(numberOfFactorsTextField) === numberOfFactorsTextField && numberOfFactorsTextField % 1 === 0)) {
+        popUpMessage('ERROR: Invalid value for number of Factors!');
+        return;
+    }
+
+    if (x > numberOfFactorsTextField || y > numberOfFactorsTextField) {
+        popUpMessage('ERROR: Too large value x or y axis!');
+        return;
+    }
     
 
     if (typeOfSelectedVariableGroup != "allGroups") {
@@ -2388,12 +2550,21 @@ getPFAOptions = function () {
     var options = {
         func: func,
         group: currentVariablesGroupName,
-        log: log,
         numberOfFactorsTextField: document.getElementById('numberOfFactorsTextField').value,
+        x: document.getElementById('pfaXTextField').value,
+        y: document.getElementById('pfaYTextField').value,
         score: document.getElementById('pfaScoreSelector').value,
         rotation: document.getElementById('pfaRotationSelector').value,
-        variablesdName: variablesdName
+        variablesdName: variablesdName,
+        type: typeOfSelectedVariableGroup
     };
+
+    if (typeOfSelectedVariableGroup == 'compositions') {
+        options['clr'] = document.getElementById('pfaClrCheckBox').checked;
+    }
+    else {
+        options['log'] = document.getElementById('pfaLogCheckBox').checked;
+    }
 
     if (func == 'pfa') {
         options['pfaRobust'] = document.getElementById('pfaRobustSelector').value;
@@ -2402,8 +2573,11 @@ getPFAOptions = function () {
 
     }
 
+
     if (pfaAllowed) {
+        //showElement('div#pfaOutput');
         Shiny.onInputChange('pfa.in', options);
+        
     }
     else {
         popUpMessage('ERROR: Factor analysis can\'t be applied on chosen data!');
@@ -2456,7 +2630,7 @@ createDADialog = function () {
     if (currentData.data != null && currentData.data != undefined) {
         daContainer.appendChild(createHr());
         daContainer.appendChild(createDiv('', '', 'Function'));
-        var functionSelector = createSelect('', 'clusterFunctionSelector');
+        var functionSelector = createSelect('', 'daFunctionSelector');
         functionSelector.setAttribute('onclick', 'createDAFunctionWell(selectedOptions)');
         functionSelector.appendChild(createOption('daFunctionOption', 'lda', 'lda'));
         functionSelector.appendChild(createOption('daFunctionOption', 'qda', 'qda'));
@@ -2822,7 +2996,7 @@ createRegressionDialog = function(){
      if (currentData.data != null && currentData.data != undefined) {
          odContainer.appendChild(createHr());
          odContainer.appendChild(createDiv('', '', 'Function'));
-         var functionSelector = createSelect('', 'clusterFunctionSelector');
+         var functionSelector = createSelect('', 'odFunctionSelector');
          functionSelector.setAttribute('onclick', 'createODFunctionWell(selectedOptions)');
          functionSelector.appendChild(createOption('odFunctionOption', 'lda', 'lda'));
          functionSelector.appendChild(createOption('odFunctionOption', 'qda', 'qda'));

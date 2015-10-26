@@ -1,0 +1,17 @@
+{
+    "contents" : "library(shiny)\n\nshinyUI(fluidPage(\n  \n  tags$head(\n    tags$style(type=\"text/css\", \"tfoot {display: table-header-group}\") # Move filters to top of datatable\n  ),\n  \n  titlePanel(\"Filtered Data CSV Download\"),\n  sidebarLayout(\n    sidebarPanel(\n      HTML('\n                    <script type=\"text/javascript\">\n                        $(document).ready(function() {\n                            $(\"#downloadData\").click(function() {\n                                var filtered_table_data = $(\"#DataTables_Table_0\").dataTable()._(\"tr\", {\"filter\":\"applied\"});\n                                Shiny.onInputChange(\"filtered_table\", filtered_table_data);\n                            });\n                        });\n                   </script>\n                '),\n      \n      downloadButton('downloadData', 'Download Filtered Data')\n    ),\n    mainPanel(\n      dataTableOutput(\"data_table\")\n    )\n  )\n))",
+    "created" : 1445686836932.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3722760130",
+    "id" : "60BD24E4",
+    "lastKnownWriteTime" : 1445767227,
+    "path" : "C:/Users/Jakob/shiny/Tests/reactivity/test1/ui.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
