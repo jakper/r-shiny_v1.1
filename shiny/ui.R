@@ -143,8 +143,6 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Principal Component Analysis',
             HTML('
                 <div class="well workingWell", id="pcaWell"></div>
-				<div id="pcaOutput" class="shiny-html-output">
-				
 				
             '),
             plotOutput("pca.BiPlot",width = "400px", height = "400px",
@@ -155,20 +153,18 @@ shinyUI(navbarPage("i-CoDa",
             downloadButton('pcaDownloadScors', 'Download Scors'),
             downloadButton('pcaDownloadFilteredData', 'Download filtered Data'),
             fluidRow(
-              column(width = 6,
-                     h4("Points near click"),
+              column(width = 12, h4("Points near click"),
                      dataTableOutput("pca.click_info")
               ),
-              column(width = 6,
-                     h4("Brushed points"),
+              column(width = 12, h4("Brushed points"),
                      dataTableOutput("pca.brush_info")
               )
             ),
-            plotOutput("pca.ScreePlot"),
+            plotOutput("pca.ScreePlot",height = "400px"),
             HTML('
-                <pre id="pca.Score" class = "shiny-text-output"></pre>
-                </div>
-                 ')
+                <pre id="pca.Summary" class = "shiny-text-output"></pre>
+                 '),
+            dataTableOutput("pca.Score")
         ),
         tabPanel('Factor Analysis',
             HTML('
@@ -183,19 +179,18 @@ shinyUI(navbarPage("i-CoDa",
             downloadButton('downloadScors', 'Download Scors'),
             downloadButton('downloadFilteredData', 'Download filtered Data'),
             fluidRow(
-              column(width = 6,
-                     h4("Points near click"),
+              column(width = 12, h4("Points near click"),
                      #verbatimTextOutput("click_info")
                      dataTableOutput("pfa.click_info")
               ),
-              column(width = 6,
-                     h4("Brushed points"),
+              column(width = 12, h4("Brushed points"),
                      #verbatimTextOutput("brush_info")
                      dataTableOutput("pfa.brush_info")
               )
             ),
             plotOutput("pfa.Loadplot"),
             HTML('
+                <pre id="pfa.Loadings" class = "shiny-text-output"></pre>
                 </div>
                  ')
         ),
@@ -207,33 +202,39 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Cluster',
             HTML('
                 <div class="well workingWell" id="clustWell"></div>
-                <pre id="clust.tes" class = "shiny-text-output"></pre>
             '),
             
-            plotOutput("clust.Plot", height = 300,
+            plotOutput("clust.Plot", width = "400px", height = "400px",
                        # Equivalent to: click = clickOpts(id = "plot_click")
                        click = "clust.Plot_click",
                        brush = brushOpts(
                          id = "clust.Plot_brush"
                        )),
+            #HTML('
+            #    <div id="clustChooseCluster"></div>
+            #'),
+            #downloadButton('clustDownloadCluster', 'Download Cluster'),
+            downloadButton('clustDownloadFilteredData', 'Download filtered Data'),
             fluidRow(
-              column(width = 6,
-                     h4("Points near click"),
+              column(width = 12, h4("Points near click"),
                      #verbatimTextOutput("click_info")
                      dataTableOutput("clust.click_info")
               ),
-              column(width = 6,
-                     h4("Brushed points"),
+              column(width = 12, h4("Brushed points"),
                      #verbatimTextOutput("brush_info")
                      dataTableOutput("clust.brush_info")
               )
-            ),
-            plotOutput("clust.Dendrogram")
+              ),
+            plotOutput("clust.Dendrogram"),
+            plotOutput("clust.BicPlot", width = "400px", height = "400px"),
+            HTML('
+                <pre id="clust.OptimalCluster" class = "shiny-text-output"></pre>
+                <pre id="clust.ClusterVector" class = "shiny-text-output"></pre>
+            ')
         ),
         tabPanel('Regression',
             HTML('
                 <div class="well workingWell" id="regressionWell"></div>
-                <div class="" id="regressionOutputDiv">
             '), 
             plotOutput("regression.Plot", height = 300,
                        # Equivalent to: click = clickOpts(id = "plot_click")
@@ -255,8 +256,6 @@ shinyUI(navbarPage("i-CoDa",
            ),
            HTML('
                 <pre id="render.tes" class = "shiny-text-output"></pre>
-
-               </div>
                 
             '),
           plotOutput("regression.Res_Fitt"),

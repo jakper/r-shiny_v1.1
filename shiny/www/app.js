@@ -2450,13 +2450,13 @@ createPFADialog = function(){
 
         pfaContainer.appendChild(createHr());
         var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
-        var xTextField = createTextField('plotDialogElement', 'pfaXTextField', '');
+        var xTextField = createTextField('plotDialogElement', 'pfaXTextField', '1');
         pfaContainer.appendChild(xAxis);
         xTextField.setAttribute('placeholder', 'eg: 1');
         pfaContainer.appendChild(xTextField);
         pfaContainer.appendChild(createDiv('', '', ''));
         var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
-        var yTextField = createTextField('plotDialogElement', 'pfaYTextField', '');
+        var yTextField = createTextField('plotDialogElement', 'pfaYTextField', '2');
         pfaContainer.appendChild(yAxis);
         yTextField.setAttribute('placeholder', 'eg: 2');
         pfaContainer.appendChild(yTextField);
@@ -2651,7 +2651,10 @@ createDAFunctionWell = function (selectedOptions) {
 	cleanModalDialog('clustWell');
 	var clustContainer = document.getElementById('clustWell');
 
-	if (currentData.data != null && currentData.data != undefined) {
+	if (typeOfSelectedVariableGroup == 'transformations') {
+	    pfaContainer.appendChild(createH4Title('PFA can\'t be applied on transformed data!'));
+	} else if (typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
+
 		clustContainer.appendChild(createHr());
         clustContainer.appendChild(createDiv('','', 'Function'));
 		var functionSelector = createSelect('', 'clusterFunctionSelector');
@@ -2659,28 +2662,49 @@ createDAFunctionWell = function (selectedOptions) {
         functionSelector.appendChild(createOption('clustFunctionOption', 'HClust', 'HClust'));
         functionSelector.appendChild(createOption('clustFunctionOption', 'Kmeans', 'Kmeans'));
 		functionSelector.appendChild(createOption('clustFunctionOption', 'MClust', 'MClust'));
-        clustContainer.appendChild(functionSelector);
-		clustContainer.appendChild(createDiv('', '', 'NumberOfClusters'));
+		clustContainer.appendChild(functionSelector);
+
+        clustContainer.appendChild(createDiv('clustNumberOfClusters', 'clustNumberOfClusters', 'Number of Clusters'));
 		clustContainer.appendChild(createTextField('', 'numberOfClustersTextField', '4'));
 		clustContainer.appendChild(createBr());
-		clustContainer.appendChild(createDiv('names', '', 'log'));
-		var cb = createCheckBox('clustLogCheckBox', 'clustLogCheckBox', 'log');
-		cb.checked = false;
-		clustContainer.appendChild(cb);
+
+
+		if (typeOfSelectedVariableGroup == 'compositions') {
+		    clustContainer.appendChild(createBr());
+		    clustContainer.appendChild(createDiv('', '', 'clr'));
+		    var cb = createCheckBox('clustClrCheckBox', 'clustClrCheckBox', 'clr');
+		    cb.checked = true;
+		    clustContainer.appendChild(cb);
+		}
+		else {
+		    clustContainer.appendChild(createDiv('names', '', 'log'));
+		    var cb = createCheckBox('clustLogCheckBox', 'clustLogCheckBox', 'log');
+		    cb.checked = false;
+		    clustContainer.appendChild(cb);
+		    clustContainer.appendChild(createBr());
+		    clustContainer.appendChild(createDiv('names', '', 'scale'));
+		    var cb2 = createCheckBox('clustScaleCheckBox', 'clustScaleCheckBox', 'scale');
+		    cb2.checked = true;
+		    clustContainer.appendChild(cb2);
+		}
 		clustContainer.appendChild(createBr());
-		clustContainer.appendChild(createDiv('names', '', 'scale'));
-		var cb2 = createCheckBox('clustScaleCheckBox', 'clustScaleCheckBox', 'scale');
-		cb2.checked = true;
-		clustContainer.appendChild(cb2);
-		clustContainer.appendChild(createBr());
+
 		clustContainer.appendChild(createHr());
         clustContainer.appendChild(createDiv('', 'defineClustFunctionContainer', ''));
         clustContainer.appendChild(createBr());
+
         clustContainer.appendChild(createHr());
         createClustFunctionWell(functionSelector.selectedOptions);
 
         var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
-        var xTextField = createTextField('plotDialogElement', 'clustXTextField', currentData.names[1]);
+        //if (currentData.ids != null) {
+	    //    var xTextField = (currentData.coords);
+	    //    var tet = (currentData.coords['id1']);
+	    //}
+	    //else {
+            var xTextField = createTextField('plotDialogElement', 'clustXTextField', currentData.names[1]);
+	    //}
+        
         clustContainer.appendChild(xAxis);
         xTextField.setAttribute('placeholder', 'eg: ' + currentData.names[Math.ceil(currentData.names.length / 2)]);
         clustContainer.appendChild(xTextField);
@@ -2712,7 +2736,7 @@ createDAFunctionWell = function (selectedOptions) {
         clustContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getClusterAnalysis();'));
 	}
 	else{
-	    clustContainer.appendChild(createH4Title('Cluster analysis can\'t be applied without data!'));
+	    clustContainer.appendChild(createH4Title('Cluster analysis can\'t be applied on chosen data!'));
 	}
  };
  
@@ -2724,13 +2748,14 @@ createDAFunctionWell = function (selectedOptions) {
         var functionSelector = createSelect('', 'clusterHClustMethodSelector');
         functionSelector.appendChild(createOption('clustHClustMethodOption', 'ward.D', 'ward.D'));
         functionSelector.appendChild(createOption('clustHClustMethodOption', 'ward.D2', 'ward.D2'));
-		defineClustFunctionContainer.appendChild(functionSelector);
+        defineClustFunctionContainer.appendChild(functionSelector);
+        document.getElementById('clustNumberOfClusters').innerHTML = 'Number of Clusters';
     }
     else if(selectedOptions[0].value == 'Kmeans'){
-        
+        document.getElementById('clustNumberOfClusters').innerHTML = 'Number of Clusters';
     }
 	else if(selectedOptions[0].value == 'MClust'){
-       
+	    document.getElementById('clustNumberOfClusters').innerHTML = 'Max Number of Clusters';
     }
 	else{
 	defineClustFunctionContainer.appendChild(createH4Title('Cluster analysis can\'t be applied on chosen function!'));
@@ -2739,14 +2764,11 @@ createDAFunctionWell = function (selectedOptions) {
  
  getClusterAnalysis = function () {
      var func = document.getElementById('clusterFunctionSelector').value;
-     var scale = document.getElementById('clustScaleCheckBox').checked;
-     var log = document.getElementById('clustLogCheckBox').checked;
      var options = {
          func: func,
          group: currentVariablesGroupName,
-         log: log,
-         scale:scale,
-         numberOfClusters: document.getElementById('numberOfClustersTextField').value
+         numberOfClusters: document.getElementById('numberOfClustersTextField').value,
+         type: typeOfSelectedVariableGroup
      };
      var x = document.getElementById('clustXTextField').value;
      var y = document.getElementById('clustYTextField').value;
@@ -2766,10 +2788,6 @@ createDAFunctionWell = function (selectedOptions) {
 
      if (!doesGivenVariableExist(y)) {
          popUpMessage('ERROR: variable "' + y + '" does not exist on this data-set!');
-         return;
-     }
-     if (scale && log) {
-         popUpMessage('ERROR: only log or scale!');
          return;
      }
      options['x'] = x;
@@ -2795,17 +2813,38 @@ createDAFunctionWell = function (selectedOptions) {
          }
      }
      options['variablesdName'] = variablesdName;
+
+     if (typeOfSelectedVariableGroup == 'compositions') {
+         options['clr'] = document.getElementById('clustClrCheckBox').checked;
+     }
+     else {
+         options['log'] = document.getElementById('clustLogCheckBox').checked;
+         options['scale'] = document.getElementById('clustScaleCheckBox').checked;
+     }
 	
 	
      if (func == 'HClust') {
-		options['method'] = document.getElementById('clusterHClustMethodSelector').value;
+         options['method'] = document.getElementById('clusterHClustMethodSelector').value;
+         cleanModalDialog('clust.BicPlot');
+         cleanModalDialog('clust.OptimalCluster');
+         cleanModalDialog('clust.ClusterVector');
 	}
      else if (func == 'Kmeans') {
-        
+         cleanModalDialog('clust.Dendrogram');
+         cleanModalDialog('clust.BicPlot');
+         cleanModalDialog('clust.OptimalCluster');
+         cleanModalDialog('clust.ClusterVector');
     }
      else if (func == 'MClust') {
+         cleanModalDialog('clust.Dendrogram');
 	}
-	if (clustAllowed) {
+     if (clustAllowed) {
+         cleanModalDialog('clustChooseCluster');
+         var clustChooseClusterContainer = document.getElementById('clustChooseCluster');
+         var clustChooseClusterSelector = createSelect('', 'clustChooseClusterSelector');
+         for (var i = 1; i <= document.getElementById('numberOfClustersTextField').value; i++) {
+             clustChooseClusterSelector.appendChild(createOption('clustChooseClusterSelector', i, i));
+         }
 	    Shiny.onInputChange('clust.in', options);
 	}
 	else {

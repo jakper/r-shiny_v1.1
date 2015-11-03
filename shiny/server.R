@@ -1333,6 +1333,10 @@ observe({
               else{
                 sendPopUpMessage(paste0('ERROR: method "', options$method, '" is not supported' ))
               }
+              # needed for autoplot
+              tmp$princompOutputClr$scale <- NULL
+              tmp$princompOutputClr$center <- NULL
+              
               #add pc's to data ==> needed for nearPoints and brushedPoints function
               total<- merge(temdata,as.data.frame(tmp$princompOutputClr$scores), by="row.names")
               
@@ -1370,13 +1374,13 @@ observe({
           try <- tryCatch({
           
             if(options$showScores){
-              output$pca.Score <- renderPrint({
+              output$pca.Score <- renderDataTable({
                 if(options$type == 'compositions'){
-                  print(summary(tmp$princompOutputClr))
+                  tmp$scores
                   
                 }
                 else{
-                  print(summary(tmp))
+                  tmp$x
                 }
                 
               })
@@ -1384,21 +1388,36 @@ observe({
             
             if(options$type == 'compositions'){
               output$pca.BiPlot <- renderPlot({
-                ggbiplot(tmp$princompOutputClr, scale = 0, labels.size = 3)
+                #ggbiplot(tmp$princompOutputClr, scale = 0, labels.size = 3)
+                biplot <- autoplot(tmp$princompOutputClr, data = total,loadings = TRUE, loadings.colour = 'blue',loadings.label = TRUE, loadings.label.size = 3)
+                eval(parse(text = paste0('biplot <- biplot + aes( Comp.', options$x ,', Comp.',options$y,')')))
+                biplot
               })
               output$pca.ScreePlot <- renderPlot({
                 screeplot(tmp$princompOutputClr, type = 'l')
                 
               })
               
+              output$pca.Summary <- renderPrint({
+                  print(summary(tmp$princompOutputClr))
+              })
+              
+              
             }
             else{
               output$pca.BiPlot <- renderPlot({
-                ggbiplot(tmp, labels =  rownames(tmp),scale = 0)
+                #ggbiplot(tmp, labels =  rownames(tmp),scale = 0)
+                biplot <- autoplot(tmp, data = total,loadings = TRUE, loadings.colour = 'blue',loadings.label = TRUE, loadings.label.size = 3)
+                eval(parse(text = paste0('biplot <- biplot + aes( PC', options$x ,', PC',options$y,')')))
+                biplot
               })
               
               output$pca.ScreePlot <- renderPlot({
                 screeplot(tmp, type = 'l')
+              })
+              
+              output$pca.Summary <- renderPrint({
+                print(summary(tmp))
               })
             }
           
@@ -1420,7 +1439,7 @@ observe({
             })
             
             
-            output$downloadScors <- downloadHandler(
+            output$pcaDownloadScors <- downloadHandler(
               filename = function() { 
                 paste('score', '.csv', sep='') 
               },
@@ -1435,7 +1454,7 @@ observe({
               }
             )
             
-            output$downloadFilteredData <- downloadHandler(
+            output$pcaDownloadFilteredData <- downloadHandler(
               filename = function() { 
                 paste('filteredData', '.csv', sep='') 
               },
@@ -1559,7 +1578,12 @@ observe({
             loadplot(tmp,crit=0.3) 
           })
           
-        
+          output$pfa.Loadings <- renderPrint({
+            print(tmp$loadings)
+            
+          })
+          
+          
           output$pfa.click_info <- renderDataTable({
             nearPoints(total, input$pfa.Plot_click,paste0('Factor', options$x),paste0('Factor', options$y))
           },options=list(
@@ -1614,7 +1638,7 @@ observe({
     
     
     
-    ############################################################## Factor Analysis #####################################################################
+    ############################################################## Discriminant Analysis #####################################################################
     #LdaClassic, Linda, QdaClassic, QdaCov 
     #
     
@@ -1643,93 +1667,155 @@ observe({
         
         dataAll <- variablesEnv$currentData
         
-        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
-        if(length(options$groupData) != 0){
-          dataAll <- data[variablesEnv$currentVariableGroup]
-        }
-        data <- dataAll[1]
-        data <- data[-c(1)]
-        for ( i in 1:(length(names(dataAll))) ) {
-          if(length(which(names(dataAll)==options$variablesdName[i]))>0){
-            data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+        try <- tryCatch({
+          data <- dataAll[1]
+          data <- data[-c(1)]
+          for ( i in 1:(length(names(dataAll))) ) {
+            if(length(which(names(dataAll)==options$variablesdName[i]))>0){
+              data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+            }
           }
-        }
+          
+          if(options$type == 'compositions'){
+            if(options$clr){
+              temdata <- cenLR(data)
+              temdata <- temdata$x.clr
+            }
+            else{
+              temdata <- data
+            }
+          }
+          else{ 
+            if(options$log){
+              temdata <- log(data)
+              temdata <- rapply( unclass(temdata), f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
+              temdata <- as.data.frame(temdata)
+            }
+            else{
+              temdata <- data
+            }
+            if(options$scale){
+              temdata <- scale((temdata))
+              temdata <- as.data.frame(temdata)
+            }
+          }
+          
+          if(length(which(names(data)==options$x))==0){
+            data[options$x] <- dataAll[which(names(dataAll)==options$x)]
+          }
+          if(length(which(names(data)==options$y))==0){
+            data[options$y] <- dataAll[which(names(dataAll)==options$y)]
+          }
+        }, error = function(cond){
+          sendPopUpMessage(paste0('Error in data-input or transformation:  ',as.character(cond$message)))
+          return(NULL)})
         
-        if(options$log){
-          temdata <- log(data)
-          temdata <- rapply( unclass(temdata), f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
-          temdata <- as.data.frame(temdata)
-        }
-        else if(options$scale){
-          temdata <- scale((data))
-          temdata <- as.data.frame(temdata)
-        }
-        else{
-          temdata <- data
-        }
+
+        #if(!is.null(try)){
+          try <- tryCatch({
+            if(options$func == 'HClust'){
+              tmpclust <- hclust(dist(temdata), method = options$method)
+              clustdata <- cutree(tmpclust,options$numberOfClusters)
+              
+              data['Classification.HClust']<- clustdata
+              
+              output$clust.Plot <- renderPlot({
+                
+                eval(parse(text = paste0('ggplot((data), aes( ', options$x ,',',options$y,')) + geom_point(colour = clustdata)')))
+              })
+              
+              output$clust.Dendrogram <- renderPlot({
+                plot(tmpclust)
+              })
+    
+            }
+            else if(options$func == 'Kmeans'){
+              
+              tmpclust <- kmeans(temdata,options$numberOfClusters)
+              data['Classification.Kmeans']<-tmpclust$cluster
+              
+              
+              output$clust.Plot <- renderPlot({
+                eval(parse(text = paste0('ggplot((data), aes( ', options$x ,',',options$y,')) + geom_point(colour = tmpclust$cluster)')))
+                #ggplot((as.data.frame(olives_scale)), aes(palmitoleic,palmitic)) + geom_point(aes(colour = map(tmpclust$cluster))) +     scale_colour_gradientn(colours=rainbow(options$numberOfClusters))
+              })
+              
+            }
+            else if(options$func == 'MClust'){
+              
+              tmpclust <- Mclust(temdata,options$numberOfClusters)
+              tmpclust_Dr = MclustDR(tmpclust)
+              tmpclust_mclustFull <- Mclust(temdata)
+              tmpclust_mclustFull_Dr = MclustDR(tmpclust_mclustFull)
+              
+              data['Classification.MClust']<-map(tmpclust$z)
+              
+              output$clust.Plot <- renderPlot({
+              eval(parse(text = paste0('ggplot((data), aes( ', options$x ,',',options$y,')) + geom_point(colour = tmpclust_Dr$class)')))
+              #ggplot((as.data.frame(olives_scale)), aes(palmitoleic,palmitic)) + geom_point(aes(colour = map(tmpclust$z))) +     scale_colour_gradientn(colours=rainbow(options$numberOfClusters))
+              })
+              
+              output$clust.BicPlot <- renderPlot({
+                plot(tmpclust_mclustFull$BIC)
+              })
+              
+              output$clust.OptimalCluster <- renderPrint({
+                print(summary(tmpclust_mclustFull$BIC))
+                
+              })
+              
+              output$clust.ClusterVector <- renderPrint({
+                print(summary(tmpclust_mclustFull_Dr))
+                
+              })
+              
+            }
+            else{
+              sendPopUpMessage(paste0('ERROR: variant "', options$variant, '" is not supported' ))
+            }
+          }, error = function(cond){
+            sendPopUpMessage(paste0('Error applying function ',options$func ,':  ',as.character(cond$message)))
+            return(NULL)})
+        #}
         
         
 
-        if(options$func == 'HClust'){
-          tmpclust <- hclust(dist(temdata), method = options$method)
-          clustdata <- cutree(tmpclust,options$numberOfClusters)
-          
-          output$clust.Plot <- renderPlot({
-            
-            eval(parse(text = paste0('ggplot((temdata), aes( ', options$x ,',',options$y,')) + geom_point(colour = clustdata)')))
-          })
-          
-          output$clust.Dendrogram <- renderPlot({
-            plot(tmpclust)
-          })
-
-        }
-        else if(options$func == 'Kmeans'){
-          
-          tmpclust <- kmeans(dist(temdata),options$numberOfClusters)
-          
-          output$clust.Plot <- renderPlot({
-            eval(parse(text = paste0('ggplot((temdata), aes( ', options$x ,',',options$y,')) + geom_point(colour = tmpclust$cluster)')))
-            #ggplot((as.data.frame(olives_scale)), aes(palmitoleic,palmitic)) + geom_point(aes(colour = map(tmpclust$cluster))) +     scale_colour_gradientn(colours=rainbow(options$numberOfClusters))
-          })
-          
-        }
-        else if(options$func == 'MClust'){
-          
-          tmpclust <- Mclust(dist(temdata),options$numberOfClusters)
-          
-          output$clust.Plot <- renderPlot({
-          eval(parse(text = paste0('ggplot((temdata), aes( ', options$x ,',',options$y,')) + geom_point(colour = map(tmpclust$z))')))
-          #ggplot((as.data.frame(olives_scale)), aes(palmitoleic,palmitic)) + geom_point(aes(colour = map(tmpclust$z))) +     scale_colour_gradientn(colours=rainbow(options$numberOfClusters))
-          })
-          
-        }
-        else{
-          sendPopUpMessage(paste0('ERROR: variant "', options$variant, '" is not supported' ))
-        }
-        
-        if(is.null(try)){
-          sendPopUpMessage("ERROR: chosen method does not exist or can\'t be applied on chosen data!")
-        }
-        else{
-
-          
-        }
-        
-        
-
-        #renderPrint
         output$clust.click_info <- renderDataTable({
-          nearPoints(temdata, input$clust.Plot_click)
+          nearPoints(data, input$clust.Plot_click)
         },options=list(
           paging = FALSE,
           searching = FALSE))
         
-        #renderPrint
+
         output$clust.brush_info <- renderDataTable({
           
-          brushedPoints(temdata, input$clust.Plot_brush) 
+          brushedPoints(data, input$clust.Plot_brush) 
         })
+        
+        #output$clustDownloadCluster <- downloadHandler(
+        #  filename = function() { 
+        #    paste('cluster', '.csv', sep='') 
+        #  },
+        #  content = function(file) {
+        #    if(options$func == 'HClust'){
+        #    }
+        #    else if(options$func == 'Kmeans'){
+        #    }
+        #    else if(options$func == 'MClust'){
+        #    }
+        #    
+        #    write.csv(tmp$scores, file,row.names = FALSE)
+        #  }
+        #)
+        
+        output$clustDownloadFilteredData <- downloadHandler(
+          filename = function() { 
+            paste('filteredData', '.csv', sep='') 
+          },
+          content = function(file) {
+            write.csv(brushedPoints(data, input$clust.Plot_brush), file,row.names = FALSE)
+          }
+        )
         
       }
       
