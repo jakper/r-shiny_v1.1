@@ -145,13 +145,20 @@ shinyUI(navbarPage("i-CoDa",
                 <div class="well workingWell", id="pcaWell"></div>
 				
             '),
-            plotOutput("pca.BiPlot",width = "400px", height = "400px",
-                       click = "pca.Plot_click",
-                       brush = brushOpts(
-                         id = "pca.Plot_brush"
-                       )),
+            fluidRow(
+              column(width = 6,
+                plotOutput("pca.BiPlot",width = "400px", height = "400px",
+                           click = "pca.Plot_click",
+                           brush = brushOpts(
+                             id = "pca.Plot_brush"
+                           ))),
+              column(width = 6,
+                plotOutput("pca.BiPlotNoInteraction",width = "400px", height = "400px"
+                           ))
+            ),
             downloadButton('pcaDownloadScors', 'Download Scors'),
             downloadButton('pcaDownloadFilteredData', 'Download filtered Data'),
+            downloadButton('pcaDownloadLoadings', 'Download Loadings'),
             fluidRow(
               column(width = 12, h4("Points near click"),
                      dataTableOutput("pca.click_info")
@@ -164,7 +171,8 @@ shinyUI(navbarPage("i-CoDa",
             HTML('
                 <pre id="pca.Summary" class = "shiny-text-output"></pre>
                  '),
-            dataTableOutput("pca.Score")
+            h4("Loadings"),
+            dataTableOutput("pca.Loadings")
         ),
         tabPanel('Factor Analysis',
             HTML('

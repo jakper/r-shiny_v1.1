@@ -1279,6 +1279,16 @@ observe({
     #ggplot() + geom_point(data =(p$scores), aes(x=p$scores[,1],y=p$scores[,2] )) + geom_line(data = load2, aes(x = Factor1, y = Factor2, color = "red"))
     #load=as.data.frame(unclass(p$loadings))
     
+    round_df <- function(x, digits) {
+      # round all numeric variables
+      # x: data frame 
+      # digits: number of digits to round
+      numeric_columns <- sapply(x, class) == 'numeric'
+      x[numeric_columns] <-  round(x[numeric_columns], digits)
+      x
+    }
+    
+    
     observe({
       
       options <- input$pca.in
@@ -1296,18 +1306,10 @@ observe({
               data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
             }
           }
-          
           if(options$type == 'compositions'){
-            if(options$clr){
-              temdata <- cenLR(data)
-              temdata <- temdata$x.clr
-            }
-            else{
-              temdata <- data
-            }
+            temdata <- data
           }
-          else{
-            if(options$log){
+          else if(options$log){
               temdata <- log(data)
               temdata <- rapply( temdata, f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
               temdata <- as.data.frame(temdata)
@@ -1315,7 +1317,7 @@ observe({
             else{
               temdata <- data
             }
-          }
+          
         }, error = function(cond){
           sendPopUpMessage(paste0('Error in data-input or transformation:  ',as.character(cond$message)))
           return(NULL)})
@@ -1338,7 +1340,9 @@ observe({
               tmp$princompOutputClr$center <- NULL
               
               #add pc's to data ==> needed for nearPoints and brushedPoints function
-              total<- merge(temdata,as.data.frame(tmp$princompOutputClr$scores), by="row.names")
+              total <- temdata[1]
+              total <- total[-c(1)]
+              total<- merge(total,as.data.frame(tmp$princompOutputClr$scores), by="row.names")
               
             }
             else if(options$type == 'externals'){
@@ -1353,8 +1357,10 @@ observe({
               else{
                 sendPopUpMessage(paste0('ERROR: method "', options$method, '" is not supported' ))
               }
-              #add pc's to data ==> needed for nearPoints and brushedPoints function
-              total<- merge(temdata,as.data.frame(tmp$x), by="row.names")
+              #add rownames to pc's 
+              total <- temdata[1]
+              total <- total[-c(1)]
+              total<- merge(total,as.data.frame(tmp$x), by="row.names")
               
             }
             else{
@@ -1373,19 +1379,6 @@ observe({
         else{
           try <- tryCatch({
           
-            if(options$showScores){
-              output$pca.Score <- renderDataTable({
-                if(options$type == 'compositions'){
-                  tmp$scores
-                  
-                }
-                else{
-                  tmp$x
-                }
-                
-              })
-            }
-            
             if(options$type == 'compositions'){
               output$pca.BiPlot <- renderPlot({
                 #ggbiplot(tmp$princompOutputClr, scale = 0, labels.size = 3)
@@ -1393,6 +1386,11 @@ observe({
                 eval(parse(text = paste0('biplot <- biplot + aes( Comp.', options$x ,', Comp.',options$y,')')))
                 biplot
               })
+              
+              output$pca.BiPlotNoInteraction <- renderPlot({
+                biplot(tmp$princompOutputClr)
+              })
+              
               output$pca.ScreePlot <- renderPlot({
                 screeplot(tmp$princompOutputClr, type = 'l')
                 
@@ -1400,6 +1398,19 @@ observe({
               
               output$pca.Summary <- renderPrint({
                   print(summary(tmp$princompOutputClr))
+              })
+              
+              output$pca.Loadings <- renderDataTable({
+                if(length(tmp$loadings[1,])>8){
+                  loadings <- round_df(tmp$loadings[,c(1:8)],3)
+                }
+                else{
+                  loadings <- round_df(tmp$loadings,3)
+                }
+                loadings <- as.data.frame(loadings)
+                temLoadData <- loadings[1]
+                temLoadData <- temLoadData[-c(1)]
+                merge(temLoadData,loadings, by="row.names")
               })
               
               
@@ -1412,6 +1423,10 @@ observe({
                 biplot
               })
               
+              output$pca.BiPlotNoInteraction <- renderPlot({
+                biplot(tmp)
+              })
+              
               output$pca.ScreePlot <- renderPlot({
                 screeplot(tmp, type = 'l')
               })
@@ -1419,14 +1434,33 @@ observe({
               output$pca.Summary <- renderPrint({
                 print(summary(tmp))
               })
+              
+              output$pca.Loadings <- renderDataTable({
+                if(length(tmp$rotation[1,])>8){
+                  loadings <- round_df(tmp$rotation[,c(1:8)],3)
+                }
+                else{
+                  loadings <- round_df(tmp$rotation,3)
+                }
+                loadings <- as.data.frame(loadings)
+                temLoadData <- loadings[1]
+                temLoadData <- temLoadData[-c(1)]
+                merge(temLoadData,loadings, by="row.names")
+              })
             }
           
             output$pca.click_info <- renderDataTable({
               if(options$type == 'compositions'){
-                nearPoints(total, input$pca.Plot_click,paste0('Comp.', options$x),paste0('Comp.', options$y))
+                tmpInFoTable <- round_df(nearPoints(total, input$pca.Plot_click,paste0('Comp.', options$x),paste0('Comp.', options$y)),3)
               }
               else{
-                nearPoints(total, input$pca.Plot_click,paste0('PC', options$x),paste0('PC', options$y))
+                tmpInFoTable <- round_df(nearPoints(total, input$pca.Plot_click,paste0('PC', options$x),paste0('PC', options$y)),3)
+              }
+              if(length(tmpInFoTable[1,])>9){
+                tmpInFoTable[,c(1:9)]
+              }
+              else{
+                tmpInFoTable
               }
               
             },options=list(
@@ -1435,7 +1469,13 @@ observe({
             
             
             output$pca.brush_info <- renderDataTable({
-              filteredData() 
+              tmpBrushTable <- round_df(filteredData(),3)
+              if(length(tmpBrushTable[1,])>9){
+                tmpBrushTable[,c(1:9)]
+              }
+              else{
+                tmpBrushTable
+              }
             })
             
             
@@ -1454,18 +1494,27 @@ observe({
               }
             )
             
+            output$pcaDownloadLoadings <- downloadHandler(
+              filename = function() { 
+                paste('loadings', '.csv', sep='') 
+              },
+              content = function(file) {
+                if(options$type == 'compositions'){
+                  write.csv(tmp$loadings, file,row.names = FALSE)
+                }
+                else{
+                  write.csv(tmp$rotation, file,row.names = FALSE)
+                }
+                
+              }
+            )
+            
             output$pcaDownloadFilteredData <- downloadHandler(
               filename = function() { 
                 paste('filteredData', '.csv', sep='') 
               },
               content = function(file) {
-                fData <- filteredData()
-                fOutputData <- fData[1]
-                fOutputData <- fOutputData[-c(1)]
-                for ( i in 1:(length(temdata)) ) {
-                  fOutputData[names(temdata[i])] <- fData[i+1]
-                }
-                write.csv(fOutputData, file,row.names = FALSE)
+                write.csv(filteredData(), file,row.names = FALSE)
               }
             )
             
@@ -1516,13 +1565,7 @@ observe({
           }
           
           if(options$type == 'compositions'){
-            if(options$clr){
-              temdata <- cenLR(data)
-              temdata <- temdata$x.clr
-            }
-            else{
               temdata <- data
-            }
           }
           else{
             if(options$log){
@@ -1579,7 +1622,7 @@ observe({
           })
           
           output$pfa.Loadings <- renderPrint({
-            print(tmp$loadings)
+            print(tmp)
             
           })
           
@@ -1677,9 +1720,9 @@ observe({
           }
           
           if(options$type == 'compositions'){
-            if(options$clr){
-              temdata <- cenLR(data)
-              temdata <- temdata$x.clr
+            if(options$ilr){
+              temdata <- isomLR(data)
+              temdata <- as.data.frame(temdata)
             }
             else{
               temdata <- data
@@ -1699,13 +1742,12 @@ observe({
               temdata <- as.data.frame(temdata)
             }
           }
-          
-          if(length(which(names(data)==options$x))==0){
-            data[options$x] <- dataAll[which(names(dataAll)==options$x)]
-          }
-          if(length(which(names(data)==options$y))==0){
-            data[options$y] <- dataAll[which(names(dataAll)==options$y)]
-          }
+          tableData <- data[1]
+          tableData <- tableData[-c(1)]
+          tableData['Row.Names'] <- row.names(data)
+          tableData[options$x] <- dataAll[which(names(dataAll)==options$x)]
+          tableData[options$y] <- dataAll[which(names(dataAll)==options$y)]
+
         }, error = function(cond){
           sendPopUpMessage(paste0('Error in data-input or transformation:  ',as.character(cond$message)))
           return(NULL)})
@@ -1717,11 +1759,11 @@ observe({
               tmpclust <- hclust(dist(temdata), method = options$method)
               clustdata <- cutree(tmpclust,options$numberOfClusters)
               
-              data['Classification.HClust']<- clustdata
+              tableData['Classification.HClust']<- clustdata
               
               output$clust.Plot <- renderPlot({
                 
-                eval(parse(text = paste0('ggplot((data), aes( ', options$x ,',',options$y,')) + geom_point(colour = clustdata)')))
+                eval(parse(text = paste0('ggplot((tableData), aes( ', options$x ,',',options$y,')) + geom_point(colour = clustdata)')))
               })
               
               output$clust.Dendrogram <- renderPlot({
@@ -1732,40 +1774,38 @@ observe({
             else if(options$func == 'Kmeans'){
               
               tmpclust <- kmeans(temdata,options$numberOfClusters)
-              data['Classification.Kmeans']<-tmpclust$cluster
+              tableData['Classification.Kmeans']<-tmpclust$cluster
               
               
               output$clust.Plot <- renderPlot({
-                eval(parse(text = paste0('ggplot((data), aes( ', options$x ,',',options$y,')) + geom_point(colour = tmpclust$cluster)')))
+                eval(parse(text = paste0('ggplot((tableData), aes( ', options$x ,',',options$y,')) + geom_point(colour = tmpclust$cluster)')))
                 #ggplot((as.data.frame(olives_scale)), aes(palmitoleic,palmitic)) + geom_point(aes(colour = map(tmpclust$cluster))) +     scale_colour_gradientn(colours=rainbow(options$numberOfClusters))
               })
               
             }
             else if(options$func == 'MClust'){
               
-              tmpclust <- Mclust(temdata,options$numberOfClusters)
+              tmpclust <- Mclust(temdata,1:options$numberOfClusters)
               tmpclust_Dr = MclustDR(tmpclust)
-              tmpclust_mclustFull <- Mclust(temdata)
-              tmpclust_mclustFull_Dr = MclustDR(tmpclust_mclustFull)
               
-              data['Classification.MClust']<-map(tmpclust$z)
+              tableData['Classification.MClust']<-map(tmpclust$z)
               
               output$clust.Plot <- renderPlot({
-              eval(parse(text = paste0('ggplot((data), aes( ', options$x ,',',options$y,')) + geom_point(colour = tmpclust_Dr$class)')))
+              eval(parse(text = paste0('ggplot((tableData), aes( ', options$x ,',',options$y,')) + geom_point(colour = tmpclust_Dr$class)')))
               #ggplot((as.data.frame(olives_scale)), aes(palmitoleic,palmitic)) + geom_point(aes(colour = map(tmpclust$z))) +     scale_colour_gradientn(colours=rainbow(options$numberOfClusters))
               })
               
               output$clust.BicPlot <- renderPlot({
-                plot(tmpclust_mclustFull$BIC)
+                plot(tmpclust$BIC)
               })
               
               output$clust.OptimalCluster <- renderPrint({
-                print(summary(tmpclust_mclustFull$BIC))
+                print(summary(tmpclust$BIC))
                 
               })
               
               output$clust.ClusterVector <- renderPrint({
-                print(summary(tmpclust_mclustFull_Dr))
+                print(summary(tmpclust_Dr))
                 
               })
               
@@ -1781,7 +1821,7 @@ observe({
         
 
         output$clust.click_info <- renderDataTable({
-          nearPoints(data, input$clust.Plot_click)
+          nearPoints(tableData, input$clust.Plot_click)
         },options=list(
           paging = FALSE,
           searching = FALSE))
@@ -1789,7 +1829,7 @@ observe({
 
         output$clust.brush_info <- renderDataTable({
           
-          brushedPoints(data, input$clust.Plot_brush) 
+          brushedPoints(tableData, input$clust.Plot_brush) 
         })
         
         #output$clustDownloadCluster <- downloadHandler(
@@ -1813,7 +1853,7 @@ observe({
             paste('filteredData', '.csv', sep='') 
           },
           content = function(file) {
-            write.csv(brushedPoints(data, input$clust.Plot_brush), file,row.names = FALSE)
+            write.csv(brushedPoints(tableData, input$clust.Plot_brush), file,row.names = FALSE)
           }
         )
         

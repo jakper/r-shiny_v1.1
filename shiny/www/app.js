@@ -2258,6 +2258,16 @@ createPCADialog = function(){
         pcaContainer.appendChild(createH4Title('PCA can\'t be applied on transformed data!'));
     } else if (typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
 
+        if (typeOfSelectedVariableGroup == 'externals') {
+            h2 = document.createElement("h4");
+            h2.textContent = "PCA - prcomp";
+            pcaContainer.appendChild(h2);
+        } else {
+            h2 = document.createElement("h4");
+            h2.textContent = "PCA - pcaCoDa";
+            pcaContainer.appendChild(h2);
+        }
+
         pcaContainer.appendChild(createHr());
         pcaContainer.appendChild(createDiv('', '', 'Method'));
         var selector = createSelect('', 'pcaMethodSelect');
@@ -2265,8 +2275,6 @@ createPCADialog = function(){
         selector.appendChild(createOption('', 'robust', 'robust'));
         selector.appendChild(createOption('', 'standard', 'standard'));		
 		pcaContainer.appendChild(createBr());
-		pcaContainer.appendChild(createDiv('', '', 'Show Scores'));
-		pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaShowScoresCheckBox', 'Show Scores'));
 		if (typeOfSelectedVariableGroup == 'externals') {
 		    pcaContainer.appendChild(createBr());
 		    pcaContainer.appendChild(createDiv('', '', 'log'));
@@ -2277,25 +2285,20 @@ createPCADialog = function(){
 			pcaContainer.appendChild(createDiv('', '', 'Scale'));
 			pcaContainer.appendChild(createCheckBox('plotDialogElement', 'pcaScaleCheckBox', 'Scale'));
 		}
-		else {
-		    pcaContainer.appendChild(createBr());
-		    pcaContainer.appendChild(createDiv('', '', 'clr'));
-		    var cb = createCheckBox('pcaClrCheckBox', 'pcaClrCheckBox', 'clr');
-		    cb.checked = true;
-		    pcaContainer.appendChild(cb);
-		}
 
 		pcaContainer.appendChild(createHr());
 		var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
+		xAxis.setAttribute('title', 'which principal component should be represented on the x axis');
 		var xTextField = createTextField('plotDialogElement', 'pcaXTextField', '1');
 		pcaContainer.appendChild(xAxis);
-		xTextField.setAttribute('placeholder', 'eg: 1');
+		xTextField.setAttribute('title', 'which principal component should be represented on the x axis');
 		pcaContainer.appendChild(xTextField);
 		pcaContainer.appendChild(createDiv('', '', ''));
 		var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
+		yAxis.setAttribute('title', 'which principal component should be represented on the y axis');
 		var yTextField = createTextField('plotDialogElement', 'pcaYTextField', '2');
 		pcaContainer.appendChild(yAxis);
-		yTextField.setAttribute('placeholder', 'eg: 2');
+		yTextField.setAttribute('title', 'which principal component should be represented on the y axis');
 		pcaContainer.appendChild(yTextField);
 
 		pcaContainer.appendChild(createHr());
@@ -2374,7 +2377,6 @@ getPCAOptions = function () {
 
     var options = {
         method: document.getElementById('pcaMethodSelect').value,
-        showScores: document.getElementById('pcaShowScoresCheckBox').checked,
         x: document.getElementById('pcaXTextField').value,
         y: document.getElementById('pcaYTextField').value,
         variablesdName: variablesdName
@@ -2383,9 +2385,6 @@ getPCAOptions = function () {
 	if(typeOfSelectedVariableGroup == 'externals'){
 	    options["scale"] = document.getElementById('pcaScaleCheckBox').checked;
 	    options['log'] = document.getElementById('pcaLogCheckBox').checked;
-	}
-	else {
-	    options['clr'] = document.getElementById('pcaClrCheckBox').checked;
 	}
 
 	options["groupData"] = currentVariablesGroup;
@@ -2429,11 +2428,7 @@ createPFADialog = function(){
         pfaContainer.appendChild(createTextField('', 'numberOfFactorsTextField', '2'));
 
         if (typeOfSelectedVariableGroup == 'compositions') {
-            pfaContainer.appendChild(createBr());
-            pfaContainer.appendChild(createDiv('', '', 'clr'));
-            var cb = createCheckBox('pfaClrCheckBox', 'pfaClrCheckBox', 'clr');
-            cb.checked = true;
-            pfaContainer.appendChild(cb);
+
         }
         else {
             pfaContainer.appendChild(createBr());
@@ -2560,7 +2555,7 @@ getPFAOptions = function () {
     };
 
     if (typeOfSelectedVariableGroup == 'compositions') {
-        options['clr'] = document.getElementById('pfaClrCheckBox').checked;
+
     }
     else {
         options['log'] = document.getElementById('pfaLogCheckBox').checked;
@@ -2671,8 +2666,8 @@ createDAFunctionWell = function (selectedOptions) {
 
 		if (typeOfSelectedVariableGroup == 'compositions') {
 		    clustContainer.appendChild(createBr());
-		    clustContainer.appendChild(createDiv('', '', 'clr'));
-		    var cb = createCheckBox('clustClrCheckBox', 'clustClrCheckBox', 'clr');
+		    clustContainer.appendChild(createDiv('', '', 'ilr'));
+		    var cb = createCheckBox('clustIlrCheckBox', 'clustIlrCheckBox', 'ilr');
 		    cb.checked = true;
 		    clustContainer.appendChild(cb);
 		}
@@ -2815,7 +2810,7 @@ createDAFunctionWell = function (selectedOptions) {
      options['variablesdName'] = variablesdName;
 
      if (typeOfSelectedVariableGroup == 'compositions') {
-         options['clr'] = document.getElementById('clustClrCheckBox').checked;
+         options['ilr'] = document.getElementById('clustIlrCheckBox').checked;
      }
      else {
          options['log'] = document.getElementById('clustLogCheckBox').checked;
