@@ -157,8 +157,9 @@ shinyUI(navbarPage("i-CoDa",
                            ))
             ),
             downloadButton('pcaDownloadScors', 'Download Scors'),
-            downloadButton('pcaDownloadFilteredData', 'Download filtered Data'),
             downloadButton('pcaDownloadLoadings', 'Download Loadings'),
+            downloadButton('pcaDownloadFilteredData', 'Download filtered Data'),
+            
             fluidRow(
               column(width = 12, h4("Points near click"),
                      dataTableOutput("pca.click_info")
@@ -174,17 +175,28 @@ shinyUI(navbarPage("i-CoDa",
             h4("Loadings"),
             dataTableOutput("pca.Loadings")
         ),
+        
+        
         tabPanel('Factor Analysis',
             HTML('
                 <div class="well workingWell" id="pfaWell"></div>
                 <div  id="pfaOutput">
             '),
-            plotOutput("pfa.BiPlot",width = "400px", height = "400px",
-                       click = "pfa.Plot_click",
-                       brush = brushOpts(
-                         id = "pfa.Plot_brush"
-                       )),
+            
+            
+            fluidRow(
+              column(width = 6,
+                     plotOutput("pfa.BiPlot",width = "400px", height = "400px",
+                                click = "pfa.Plot_click",
+                                brush = brushOpts(
+                                  id = "pfa.Plot_brush"
+                                ))),
+              column(width = 6,
+                     plotOutput("pfa.BiPlotNoInteraction",width = "400px", height = "400px"
+                     ))
+            ),
             downloadButton('downloadScors', 'Download Scors'),
+            downloadButton('pfaDownloadLoadings', 'Download Loadings'),
             downloadButton('downloadFilteredData', 'Download filtered Data'),
             fluidRow(
               column(width = 12, h4("Points near click"),
@@ -202,11 +214,15 @@ shinyUI(navbarPage("i-CoDa",
                 </div>
                  ')
         ),
+        
+        
         tabPanel('Discriminant Analysis',
             HTML('
                 <div class="well workingWell", id="daWell"></div>
             ')
         ),
+        
+        
         tabPanel('Cluster',
             HTML('
                 <div class="well workingWell" id="clustWell"></div>
@@ -240,6 +256,8 @@ shinyUI(navbarPage("i-CoDa",
                 <pre id="clust.ClusterVector" class = "shiny-text-output"></pre>
             ')
         ),
+        
+        
         tabPanel('Regression',
             HTML('
                 <div class="well workingWell" id="regressionWell"></div>
@@ -270,6 +288,8 @@ shinyUI(navbarPage("i-CoDa",
           plotOutput("regression.QQ")
             
         ),
+        
+        
         tabPanel('Outlier Detection',
             HTML('
                 <div class="well workingWell" id="outlierWell"></div>

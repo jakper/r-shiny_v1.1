@@ -1343,6 +1343,7 @@ observe({
               total <- temdata[1]
               total <- total[-c(1)]
               total<- merge(total,as.data.frame(tmp$princompOutputClr$scores), by="row.names")
+              total <- transform(total, Row.names = as.numeric(Row.names))
               
             }
             else if(options$type == 'externals'){
@@ -1361,6 +1362,7 @@ observe({
               total <- temdata[1]
               total <- total[-c(1)]
               total<- merge(total,as.data.frame(tmp$x), by="row.names")
+              total <- transform(total, Row.names = as.numeric(Row.names))
               
             }
             else{
@@ -1388,7 +1390,7 @@ observe({
               })
               
               output$pca.BiPlotNoInteraction <- renderPlot({
-                biplot(tmp$princompOutputClr)
+                biplot(tmp$princompOutputClr, choices = c(as.numeric(options$x),as.numeric(options$y)))
               })
               
               output$pca.ScreePlot <- renderPlot({
@@ -1424,7 +1426,7 @@ observe({
               })
               
               output$pca.BiPlotNoInteraction <- renderPlot({
-                biplot(tmp)
+                biplot(tmp, choices = c(as.numeric(options$x),as.numeric(options$y)))
               })
               
               output$pca.ScreePlot <- renderPlot({
@@ -1596,13 +1598,25 @@ observe({
               }
             }
             else if(options$func == 'factanal'){
-              tmp=factanal(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation)
+              if(options$pfaRobust == 'robust'){
+                x.mcd=covMcd(temdata,cor=TRUE) 
+                x.rsc=scale(temdata,x.mcd$cent,sqrt(diag(x.mcd$cov))) 
+                #TODO: change to robust version
+                tmp=factanal(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation)
+                
+              }
+              else{
+                tmp=factanal(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation)
+              }
             }
             else{
               sendPopUpMessage(paste0('ERROR: function "', options$func, '" is not supported' ))
             }
-            #add factors to data ==> needed for nearPoints and brushedPoints function
-            total<- merge(temdata,as.data.frame(tmp$scores), by="row.names")
+            #add rownames to factors 
+            total <- temdata[1]
+            total <- total[-c(1)]
+            total <- merge(total,as.data.frame(tmp$scores), by="row.names")
+            total <- transform(total, Row.names = as.numeric(Row.names))
             
           }, error = function(cond){
             sendPopUpMessage(paste0('Error applying function ',options$func ,':  ',as.character(cond$message)))
@@ -1617,6 +1631,10 @@ observe({
             biplot
           })
           
+          output$pfa.BiPlotNoInteraction <- renderPlot({
+            biplot(tmp$scores, tmp$loadings[,c(as.numeric(options$x),as.numeric(options$y))], xlab=paste('Factor',options$x),  ylab=paste('Factor',options$y))
+          })
+          
           output$pfa.Loadplot <- renderPlot({
             loadplot(tmp,crit=0.3) 
           })
@@ -1628,14 +1646,26 @@ observe({
           
           
           output$pfa.click_info <- renderDataTable({
-            nearPoints(total, input$pfa.Plot_click,paste0('Factor', options$x),paste0('Factor', options$y))
-          },options=list(
+            tmpInFoTable <- round_df(nearPoints(total, input$pfa.Plot_click,paste0('Factor', options$x),paste0('Factor', options$y)),3)
+            if(length(tmpInFoTable[1,])>9){
+              tmpInFoTable[,c(1:9)]
+            }
+            else{
+              tmpInFoTable
+            }
+            },options=list(
             paging = FALSE,
             searching = FALSE))
           
           
           output$pfa.brush_info <- renderDataTable({
-            filteredData() 
+            tmpBrushTable <- round_df(filteredData(),3)
+            if(length(tmpBrushTable[1,])>9){
+              tmpBrushTable[,c(1:9)]
+            }
+            else{
+              tmpBrushTable
+            }
           })
           
           
@@ -1653,16 +1683,18 @@ observe({
               paste('filteredData', '.csv', sep='') 
             },
             content = function(file) {
-              fData <- filteredData()
-              fOutputData <- fData[1]
-              fOutputData <- fOutputData[-c(1)]
-              for ( i in 1:(length(temdata)) ) {
-                fOutputData[names(temdata[i])] <- fData[i+1]
-              }
-              write.csv(fOutputData, file,row.names = FALSE)
+              write.csv(filteredData(), file,row.names = FALSE)
             }
           )
           
+          output$pfaDownloadLoadings <- downloadHandler(
+            filename = function() { 
+              paste('loadings', '.csv', sep='') 
+            },
+            content = function(file) {
+                write.csv(tmp$loadings, file,row.names = FALSE)
+            }
+          )
           
           filteredData <- reactive({
             brushedPoints(total, input$pfa.Plot_brush,paste0('Factor', options$x),paste0('Factor', options$y))

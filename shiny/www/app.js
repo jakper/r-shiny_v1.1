@@ -2414,30 +2414,28 @@ createPFADialog = function(){
         pfaContainer.appendChild(createH4Title('PFA can\'t be applied on transformed data!'));
     } else if (typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
 
-        pfaContainer.appendChild(createHr());
+        pfaContainer.appendChild(createHr());        
         pfaContainer.appendChild(createDiv('variablesType', '', 'Function'));
         var functionSelector = createSelect('', 'pfaFunctionSelector');
         functionSelector.setAttribute('onclick', 'createPfaFunctionWell(selectedOptions)');
         var firstFunctionOption = createOption('pfaFunctionOption', 'pfa', 'pfa');
         firstFunctionOption.setAttribute('selected', 'selected');
         functionSelector.appendChild(firstFunctionOption);
-        functionSelector.appendChild(createOption('pfaFunctionOption', 'factanal', 'factanal'));
+        if (typeOfSelectedVariableGroup == 'externals') {
+            functionSelector.appendChild(createOption('pfaFunctionOption', 'factanal', 'factanal'));
+        }
         pfaContainer.appendChild(functionSelector);
-        pfaContainer.appendChild(createBr());
+        pfaContainer.appendChild(createBr());        
         pfaContainer.appendChild(createDiv('', '', 'Number of Factors'));
         pfaContainer.appendChild(createTextField('', 'numberOfFactorsTextField', '2'));
 
-        if (typeOfSelectedVariableGroup == 'compositions') {
-
-        }
-        else {
+        if (typeOfSelectedVariableGroup == 'externals') {
             pfaContainer.appendChild(createBr());
             pfaContainer.appendChild(createDiv('', '', 'log'));
             var cb = createCheckBox('pfaLogCheckBox', 'pfaLogCheckBox', 'log');
             cb.checked = false;
             pfaContainer.appendChild(cb);
-        }
-        
+        }        
 
         pfaContainer.appendChild(createHr());
         pfaContainer.appendChild(createDiv('createPfaFunctionDiv', 'createPfaFunctionDiv', ''));
@@ -2445,15 +2443,17 @@ createPFADialog = function(){
 
         pfaContainer.appendChild(createHr());
         var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
+        xAxis.setAttribute('title', 'which factor should be represented on the x axis');
         var xTextField = createTextField('plotDialogElement', 'pfaXTextField', '1');
+        xTextField.setAttribute('title', 'which factor should be represented on the x axis');
         pfaContainer.appendChild(xAxis);
-        xTextField.setAttribute('placeholder', 'eg: 1');
         pfaContainer.appendChild(xTextField);
         pfaContainer.appendChild(createDiv('', '', ''));
         var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
+        yAxis.setAttribute('title', 'which factor should be represented on the y axis');
         var yTextField = createTextField('plotDialogElement', 'pfaYTextField', '2');
+        yTextField.setAttribute('title', 'which factor should be represented on the y axis');
         pfaContainer.appendChild(yAxis);
-        yTextField.setAttribute('placeholder', 'eg: 2');
         pfaContainer.appendChild(yTextField);
 
         pfaContainer.appendChild(createHr());
@@ -2551,7 +2551,8 @@ getPFAOptions = function () {
         score: document.getElementById('pfaScoreSelector').value,
         rotation: document.getElementById('pfaRotationSelector').value,
         variablesdName: variablesdName,
-        type: typeOfSelectedVariableGroup
+        type: typeOfSelectedVariableGroup,
+        pfaRobust : document.getElementById('pfaRobustSelector').value
     };
 
     if (typeOfSelectedVariableGroup == 'compositions') {
@@ -2560,15 +2561,6 @@ getPFAOptions = function () {
     else {
         options['log'] = document.getElementById('pfaLogCheckBox').checked;
     }
-
-    if (func == 'pfa') {
-        options['pfaRobust'] = document.getElementById('pfaRobustSelector').value;
-    }
-    else if (func == 'factanal') {
-
-    }
-
-
     if (pfaAllowed) {
         //showElement('div#pfaOutput');
         Shiny.onInputChange('pfa.in', options);
@@ -2600,19 +2592,13 @@ createPfaFunctionWell = function (selectedOptions) {
     rotationSelector.appendChild(createOption('pfaRotationOption', 'none', 'none'));
     pfaContainer.appendChild(rotationSelector);
 
-    if (selectedOptions[0].value == 'pfa') {
-        
-        pfaContainer.appendChild(createDiv('variablesType', '', 'Type'));
-        var robustSelector = createSelect('', 'pfaRobustSelector');
-        var firstRobustOption = createOption('pfaRobustOption', 'robust', 'robust');
-        firstRobustOption.setAttribute('selected', 'selected');
-        robustSelector.appendChild(firstRobustOption);
-        robustSelector.appendChild(createOption('pfaRobustOption', 'standard', 'standard'));
-        pfaContainer.appendChild(robustSelector);
-    }
-    else if (selectedOptions[0].value == 'factanal') {
-
-    }
+    pfaContainer.appendChild(createDiv('variablesType', '', 'Type'));
+    var robustSelector = createSelect('', 'pfaRobustSelector');
+    var firstRobustOption = createOption('pfaRobustOption', 'robust', 'robust');
+    firstRobustOption.setAttribute('selected', 'selected');
+    robustSelector.appendChild(firstRobustOption);
+    robustSelector.appendChild(createOption('pfaRobustOption', 'standard', 'standard'));
+    pfaContainer.appendChild(robustSelector);
 };
 
 
