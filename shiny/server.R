@@ -1598,16 +1598,8 @@ observe({
               }
             }
             else if(options$func == 'factanal'){
-              if(options$pfaRobust == 'robust'){
-                x.mcd=covMcd(temdata,cor=TRUE) 
-                x.rsc=scale(temdata,x.mcd$cent,sqrt(diag(x.mcd$cov))) 
-                #TODO: change to robust version
-                tmp=factanal(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation)
                 
-              }
-              else{
                 tmp=factanal(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation)
-              }
             }
             else{
               sendPopUpMessage(paste0('ERROR: function "', options$func, '" is not supported' ))
@@ -1718,11 +1710,109 @@ observe({
     #
     
     #http://www.statistik.tuwien.ac.at/StatDA/R-scripts/
-    #lda
-    #https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/lda.html
     
-    #qda
-    #https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/qda.html
+    
+    
+    observe({
+      
+      options <- input$da.in
+      if(!is.null(options)){
+        
+        dataAll <- variablesEnv$currentData
+        temdata <- dataAll[which(names(dataAll)==options$groupingVariable)]
+        
+        
+        for ( i in 1:(length(names(dataAll))) ) {
+          if(length(which(names(dataAll)==options$variablesdName[i]))>0){
+            if((options$type == 'externals') && (options$variablesdNameLogTransf[i] == TRUE)) {
+              temdata[options$variablesdName[[i]]] <- log((dataAll[which(names(dataAll)==options$variablesdName[i])]))
+            }
+            else{
+              temdata[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+              
+            }
+          }
+        }
+        
+        
+        
+        
+        
+        
+        
+        output$da.Plot <- renderPlot({
+          ggplot(data = total, aes(fitted.values ,y)) + geom_point()
+        })
+        
+        
+        #renderPrint
+        output$da.click_info <- renderDataTable({
+          nearPoints(total, input$da.Plot_click)
+        },options=list(
+          paging = FALSE,
+          searching = FALSE))
+        
+        #renderPrint
+        output$da.brush_info <- renderDataTable({
+          
+          brushedPoints(total, input$da.Plot_brush) 
+        })
+        
+        output$da.print <- renderPrint({
+          print(tmp)
+        })
+        
+        
+        output$daDownloadScors <- downloadHandler(
+          filename = function() { 
+            paste('residuals', '.csv', sep='') 
+          },
+          content = function(file) {
+            if(options$regressionMethod == 'lm' || options$regressionMethod == 'lmrob'){
+              write.csv(tmp$residuals, file,row.names = FALSE)
+            }
+            else{
+              write.csv(tmp$lm$residuals, file,row.names = FALSE)
+            }
+            
+          }
+        )
+        
+        output$daDownloadLoadings <- downloadHandler(
+          filename = function() { 
+            paste('fitted values', '.csv', sep='') 
+          },
+          content = function(file) {
+            if(options$regressionMethod == 'lm' || options$regressionMethod == 'lmrob'){
+              write.csv(tmp$fitted.values, file,row.names = FALSE)
+            }
+            else{
+              write.csv(tmp$lm$fitted.values, file,row.names = FALSE)
+            }
+            
+          }
+        )
+        
+        output$daDownloadPredict <- downloadHandler(
+          filename = function() { 
+            paste('fitted values', '.csv', sep='') 
+          },
+          content = function(file) {
+            if(options$regressionMethod == 'lm' || options$regressionMethod == 'lmrob'){
+              write.csv(tmp$fitted.values, file,row.names = FALSE)
+            }
+            else{
+              write.csv(tmp$lm$fitted.values, file,row.names = FALSE)
+            }
+            
+          }
+        )
+        
+        
+        
+      }
+      
+    })  
     
     
     
@@ -1904,67 +1994,68 @@ observe({
       options <- input$regression.in
       if(!is.null(options)){
         
-        #
         dataAll <- variablesEnv$currentData
-        variablesEnv$currentVariableGroup <- (as.numeric(unlist(options$groupData)) + 1)
-        if(length(options$groupData) != 0){
-          dataAll <- dataAll[variablesEnv$currentVariableGroup]
+
+        if(options$logDependentVariable){
+          temdata <- log(dataAll[which(names(dataAll)==options$dependentVariable)])
+        }
+        else{
+          temdata <- dataAll[which(names(dataAll)==options$dependentVariable)]
         }
         
-        data <- dataAll[which(names(dataAll)==options$dependentVariable)]
         for ( i in 1:(length(names(dataAll))) ) {
             if(length(which(names(dataAll)==options$variablesdName[i]))>0){
-              data[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+              if((options$type == 'externals') && (options$variablesdNameLogTransf[i] == TRUE)) {
+                temdata[options$variablesdName[[i]]] <- log((dataAll[which(names(dataAll)==options$variablesdName[i])]))
+              }
+              else{
+                temdata[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+                
+              }
             }
         }
 
         
-        #eval(parse(text = paste0('data <- data[c(data', options$dependentVariable,',',paste(options$variablesdName,collapse=","),')]')))
-        
-        if(options$log){
-          temdata <- log(data)
-        }
-        else{
-          temdata <- data
-        }
-        temdata <- rapply( unclass(temdata), f=function(x) ifelse(is.infinite(x),0,x), how="replace" )
-        temdata <- as.data.frame(temdata)
-
-        #dependentVariable
-        #variablesdName
-        #which(names(ice)=="x2")
-        
         variablesdName <- paste(options$variablesdName,collapse="+")
-        
+        total <- temdata[1]
+        total <- total[-c(1)]
         
         if(options$regressionMethod == 'lm'){
           #eval(parse(text = paste0('tmp <- lm(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))
-          try <- tryCatch({eval(parse(text = paste0('tmp <- lm(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))},
-                         error = function(cond){return(NULL)})
+          eval(parse(text = paste0('tmp <- lm(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))
+          total <- merge(as.data.frame(tmp$fitted.values),as.data.frame(temdata[which(names(temdata)==options$dependentVariable)]), by="row.names")
           
         }
         
         else if(options$regressionMethod == 'lmrob'){
-          try <- tryCatch({eval(parse(text = paste0('tmp <- lmrob(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))},
-                          error = function(cond){return(NULL)})
+          eval(parse(text = paste0('tmp <- lmrob(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))
+          total <- merge(as.data.frame(tmp$fitted.values),as.data.frame(temdata[which(names(temdata)==options$dependentVariable)]), by="row.names")
+          
         }
         
-        else if(options$regressionMethod == 'ltsReg'){
-          try <- tryCatch({eval(parse(text = paste0('tmp <- ltsReg(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))},
-                          error = function(cond){return(NULL)})
+        else if(options$regressionMethod == 'lmCoDaX'){
+          if(options$lmCoDaX_RobustSelector == "robust"){
+            tmp <- lmCoDaX(temdata[,1], temdata[,-1], method = "robust")
+            #eval(parse(text = paste0('tmp <- lmCoDaX(unclass(temdata)[,1], unclass(temdata)[,-1], method = "robust")')))
+          }
+          else{
+            tmp <- lmCoDaX(temdata[,1], temdata[,-1], method = "classical")
+            #eval(parse(text = paste0('tmp <- lmCoDaX(unclass(temdata)[,1] , unclass(temdata)[,-1], method = "classical")')))
+          }
+          total <- merge(as.data.frame(tmp$lm$fitted.values),as.data.frame(temdata[which(names(temdata)==options$dependentVariable)]), by="row.names")
+          
         }
-        
-        
-        
+        colnames(total)[2] <- "fitted.values"
+        colnames(total)[3] <- "y"
         
         output$regression.Plot <- renderPlot({
-          eval(parse(text = paste0('ggplot((temdata), aes( ', options$x ,',',options$y,')) + geom_point()  + geom_abline(intercept=',tmp$coefficients[1] ,', slope=',tmp$coefficients[which(names(tmp$coefficients)==options$x)],' )')))
+          ggplot(data = total, aes(fitted.values ,y)) + geom_point()
         })
         
         
         #renderPrint
         output$click_info <- renderDataTable({
-          nearPoints(temdata, input$regression.Plot_click)
+          nearPoints(total, input$regression.Plot_click)
         },options=list(
           paging = FALSE,
           searching = FALSE))
@@ -1972,41 +2063,98 @@ observe({
         #renderPrint
         output$brush_info <- renderDataTable({
           
-          brushedPoints(temdata, input$regression.Plot_brush) 
+          brushedPoints(total, input$regression.Plot_brush) 
         })
         
         output$render.tes <- renderPrint({
           print(summary(tmp))
         })
         
-        output$regression.Res_Fitt <- renderPlot({
+        
+        output$regression.diagnostic1 <- renderPlot({
           if(options$regressionMethod == 'lm'){
-            ggplot(tmp, aes(.fitted, .resid))+geom_point() + stat_smooth(method="loess")+geom_hline(yintercept=0, col="red", linetype="dashed") +xlab("Fitted values")+ylab("Residuals")+ggtitle("Residual vs Fitted Plot")+theme_bw()
+            plot(tmp, which = 1)          
+            }
+          else if(options$regressionMethod == 'lmrob'){
+            plot(tmp, which = 1)
           }
-           else if(options$regressionMethod == 'lmrob'){
-             plot(tmp, which = 3)
-          }
-          else if(options$regressionMethod == 'ltsReg'){
-            rid <- tmp$residuals/tmp$scale
-            plot(tmp$fitted,rid,cex.lab=1.2,xlab="Fitted values",ylab="Standardised LTS residuals",type="n")
-            points(tmp$fitted[tmp$lts.wt==0],rid[tmp$lts.wt==0],cex=0.8,pch=3)
-            points(tmp$fitted[tmp$lts.wt==1],rid[tmp$lts.wt==1],cex=0.8,pch=1)
-            abline(h=0,col="grey",lty=2)
-            abline(h=c(-2.5,2.5),lty=3,cex=1.1) 
+          else if(options$regressionMethod == 'lmCoDaX'){
+            plot(tmp$lm, which = 1)
           }
         })
         
-        output$regression.QQ <- renderPlot({
+        output$regression.diagnostic2 <- renderPlot({
           if(options$regressionMethod == 'lm'){
-            ggplot(tmp, aes(qqnorm(.stdresid)[[1]], .stdresid))+geom_point(na.rm = TRUE)+geom_abline(aes(qqline(.stdresid)))+xlab("Theoretical Quantiles")+ylab("Standardized Residuals")+ggtitle("Normal Q-Q")+theme_bw()
+            plot(tmp, which = 2)          
           }
           else if(options$regressionMethod == 'lmrob'){
             plot(tmp, which = 2)
           }
-          else if(options$regressionMethod == 'ltsReg'){
-            plot(tmp, which = "rqq")
+          else if(options$regressionMethod == 'lmCoDaX'){
+            plot(tmp$lm, which = 2)
           }
         })
+        
+        output$regression.diagnostic3 <- renderPlot({
+          if(options$regressionMethod == 'lm'){
+            plot(tmp, which = 3)          
+          }
+          else if(options$regressionMethod == 'lmrob'){
+            plot(tmp, which = 3)
+          }
+          else if(options$regressionMethod == 'lmCoDaX'){
+            plot(tmp$lm, which = 3)
+          }
+        })
+        
+        output$regression.diagnostic4 <- renderPlot({
+          if(options$regressionMethod == 'lm'){
+            plot(tmp, which = 4)          
+          }
+          else if(options$regressionMethod == 'lmrob'){
+            plot(tmp, which = 4)
+          }
+          else if(options$regressionMethod == 'lmCoDaX'){
+            plot(tmp$lm, which = 4)
+          }
+        })
+        
+        output$regression.diagnostic5 <- renderPlot({
+          if(options$regressionMethod == 'lmrob'){
+            plot(tmp, which = 5)
+          }
+        })
+        
+        
+        output$regressionDownloadResiduals <- downloadHandler(
+          filename = function() { 
+            paste('residuals', '.csv', sep='') 
+          },
+          content = function(file) {
+            if(options$regressionMethod == 'lm' || options$regressionMethod == 'lmrob'){
+              write.csv(as.data.frame(tmp$residuals), file,row.names = FALSE)
+            }
+            else{
+              write.csv(as.data.frame(tmp$lm$residuals), file,row.names = FALSE)
+            }
+            
+          }
+        )
+        
+        output$regressionDownloadFittedValues <- downloadHandler(
+          filename = function() { 
+            paste('fitted values', '.csv', sep='') 
+          },
+          content = function(file) {
+            if(options$regressionMethod == 'lm' || options$regressionMethod == 'lmrob'){
+              write.csv(as.data.frame(tmp$fitted.values), file,row.names = FALSE)
+            }
+            else{
+              write.csv(as.data.frame(tmp$lm$fitted.values), file,row.names = FALSE)
+            }
+            
+          }
+        )
         
       }
       

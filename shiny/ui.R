@@ -180,7 +180,6 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Factor Analysis',
             HTML('
                 <div class="well workingWell" id="pfaWell"></div>
-                <div  id="pfaOutput">
             '),
             
             
@@ -211,7 +210,6 @@ shinyUI(navbarPage("i-CoDa",
             plotOutput("pfa.Loadplot"),
             HTML('
                 <pre id="pfa.Loadings" class = "shiny-text-output"></pre>
-                </div>
                  ')
         ),
         
@@ -219,6 +217,31 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Discriminant Analysis',
             HTML('
                 <div class="well workingWell", id="daWell"></div>
+            '),
+            
+            plotOutput("da.Plot", width = "400px", height = "400px",
+                         # Equivalent to: click = clickOpts(id = "plot_click")
+                         click = "da.Plot_click",
+                         brush = brushOpts(
+                           id = "da.Plot_brush"
+                         )),
+
+            downloadButton('daDownloadScors', 'Download Scors'),
+            downloadButton('daDownloadLoadings', 'Download Loadings'),
+            downloadButton('daDownloadPredict', 'Download predicted Data'),
+            fluidRow(
+              column(width = 12, h4("Points near click"),
+                     #verbatimTextOutput("click_info")
+                     dataTableOutput("da.click_info")
+              ),
+              column(width = 12, h4("Brushed points"),
+                     #verbatimTextOutput("brush_info")
+                     dataTableOutput("da.brush_info")
+              )
+            ),
+            HTML('
+                <pre id="da.print" class = "shiny-text-output"></pre>
+                
             ')
         ),
         
@@ -262,19 +285,21 @@ shinyUI(navbarPage("i-CoDa",
             HTML('
                 <div class="well workingWell" id="regressionWell"></div>
             '), 
-            plotOutput("regression.Plot", height = 300,
+            plotOutput("regression.Plot", width = "400px", height = "400px",
                        # Equivalent to: click = clickOpts(id = "plot_click")
                        click = "regression.Plot_click",
                        brush = brushOpts(
                          id = "regression.Plot_brush"
                        )),
+            downloadButton('regressionDownloadFittedValues', 'Download Fitted Values'),
+            downloadButton('regressionDownloadResiduals', 'Download Residuals'),
           fluidRow(
-             column(width = 6,
+             column(width = 12,
                     h4("Points near click"),
                     #verbatimTextOutput("click_info")
                     dataTableOutput("click_info")
              ),
-             column(width = 6,
+             column(width = 12,
                     h4("Brushed points"),
                     #verbatimTextOutput("brush_info")
                     dataTableOutput("brush_info")
@@ -284,8 +309,11 @@ shinyUI(navbarPage("i-CoDa",
                 <pre id="render.tes" class = "shiny-text-output"></pre>
                 
             '),
-          plotOutput("regression.Res_Fitt"),
-          plotOutput("regression.QQ")
+          plotOutput("regression.diagnostic1"),
+          plotOutput("regression.diagnostic2"),
+          plotOutput("regression.diagnostic3"),
+          plotOutput("regression.diagnostic4"),
+          plotOutput("regression.diagnostic5")
             
         ),
         

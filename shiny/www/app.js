@@ -2592,13 +2592,21 @@ createPfaFunctionWell = function (selectedOptions) {
     rotationSelector.appendChild(createOption('pfaRotationOption', 'none', 'none'));
     pfaContainer.appendChild(rotationSelector);
 
-    pfaContainer.appendChild(createDiv('variablesType', '', 'Type'));
-    var robustSelector = createSelect('', 'pfaRobustSelector');
-    var firstRobustOption = createOption('pfaRobustOption', 'robust', 'robust');
-    firstRobustOption.setAttribute('selected', 'selected');
-    robustSelector.appendChild(firstRobustOption);
-    robustSelector.appendChild(createOption('pfaRobustOption', 'standard', 'standard'));
-    pfaContainer.appendChild(robustSelector);
+
+
+    if (selectedOptions[0].value == 'pfa') {
+
+        pfaContainer.appendChild(createDiv('variablesType', '', 'Type'));
+        var robustSelector = createSelect('', 'pfaRobustSelector');
+        var firstRobustOption = createOption('pfaRobustOption', 'robust', 'robust');
+        firstRobustOption.setAttribute('selected', 'selected');
+        robustSelector.appendChild(firstRobustOption);
+        robustSelector.appendChild(createOption('pfaRobustOption', 'standard', 'standard'));
+        pfaContainer.appendChild(robustSelector);
+    }
+    else if (selectedOptions[0].value == 'factanal') {
+
+    }
 };
 
 
@@ -2608,18 +2616,165 @@ createPfaFunctionWell = function (selectedOptions) {
 createDADialog = function () {
     cleanModalDialog('daWell');
     var daContainer = document.getElementById('daWell');
-    if (currentData.data != null && currentData.data != undefined) {
+    if(typeOfSelectedVariableGroup == 'transformations'){
+        daContainer.appendChild(createH4Title('Discriminant Analysis can\'t be applied on transformed data!'));
+    } else if (typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
+
+        h2 = document.createElement("h4");
+        h2.textContent = "Discriminant Analysis - daFisher";
+        daContainer.appendChild(h2);
+
+        daContainer.appendChild(createDiv('variablesType', '', 'Type'));
+        var robustDaSelector = createSelect('', 'daRobustSelector');
+        var firstDaRobustOption = createOption('daRobustOption', 'robust', 'robust');
+        firstDaRobustOption.setAttribute('selected', 'selected');
+        robustDaSelector.appendChild(firstDaRobustOption);
+        robustDaSelector.appendChild(createOption('daRobustOption', 'standard', 'standard'));
+        daContainer.appendChild(robustDaSelector);
+
         daContainer.appendChild(createHr());
-        daContainer.appendChild(createDiv('', '', 'Function'));
-        var functionSelector = createSelect('', 'daFunctionSelector');
-        functionSelector.setAttribute('onclick', 'createDAFunctionWell(selectedOptions)');
-        functionSelector.appendChild(createOption('daFunctionOption', 'lda', 'lda'));
-        functionSelector.appendChild(createOption('daFunctionOption', 'qda', 'qda'));
-        daContainer.appendChild(functionSelector);
+        var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
+        xAxis.setAttribute('title', 'which score should be represented on the x axis');
+        var xTextField = createTextField('plotDialogElement', 'daXTextField', '1');
+        daContainer.appendChild(xAxis);
+        xTextField.setAttribute('title', 'which score should be represented on the x axis');
+        daContainer.appendChild(xTextField);
+        daContainer.appendChild(createDiv('', '', ''));
+        var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
+        yAxis.setAttribute('title', 'which score should be represented on the y axis');
+        var yTextField = createTextField('plotDialogElement', 'daYTextField', '2');
+        daContainer.appendChild(yAxis);
+        yTextField.setAttribute('title', 'which score should be represented on the y axis');
+        daContainer.appendChild(yTextField);
+        daContainer.appendChild(createHr());
+
+        daContainer.appendChild(createDiv('', '', 'Grouping Variable'));
+        var groupingVariableSelector = createSelect('', 'groupingVariableSelector');
+        groupingVariableSelector.setAttribute('onclick', 'createDaVariablesDiv(selectedOptions)');
+        var tmpNames;
+        if (typeOfSelectedVariableGroup == 'compositions') {
+            tmpNames = Object.create(currentData.names);
+            for (var i = currentVariablesGroup.length - 1; i >= 0 ; i--) {
+                tmpNames.splice(currentVariablesGroup[i], 1);
+            }
+        }
+        else {
+            tmpNames = currentData.names;
+        }
+        for (var i = 0; i < tmpNames.length; i++) {
+            groupingVariableSelector.appendChild(createOption('daMethodOption', tmpNames[i], tmpNames[i]));
+        }
+        daContainer.appendChild(groupingVariableSelector);
+        daContainer.appendChild(createHr());
+
+        daContainer.appendChild(createDiv('daVariablesDiv', 'daVariablesDiv', ''));
+        createDaVariablesDiv(groupingVariableSelector.selectedOptions);
+
+        daContainer.appendChild(createHr());
+        daContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getDaOptions()'));
+
     }
 };
 
-createDAFunctionWell = function (selectedOptions) {
+getDaOptions = function () {
+    var daAllowed = true;
+    var tmpNames;
+    var tmpVariablesTypes;
+    var variablesdName = [];
+    var variablesdNameLogTransf = [];
+    var x = document.getElementById('daXTextField').value;
+    var y = document.getElementById('daYTextField').value;
+
+
+    try {
+        x = parseInt(x);
+        y = parseInt(y);
+    }
+    catch (err) {
+        return;
+    }
+
+    if (!(Number.isInteger(x))) {
+        popUpMessage('ERROR: Invalid value for x axis!');
+        return;
+    }
+
+    if (!(Number(y) === y && y % 1 === 0)) {
+        popUpMessage('ERROR: Invalid value for y axis!');
+        return;
+    }
+
+    if (typeOfSelectedVariableGroup != "allGroups") {
+        tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup);
+        tmpVariablesTypes = getDataFromGivenIndexes(currentData.variablesTypes, currentVariablesGroup);
+    }
+    else {
+        tmpNames = currentData.names;
+        tmpVariablesTypes = currentData.variablesTypes;
+    }
+    var j = 0;
+    for (var i = 0; i < tmpNames.length; i++) {
+        var variablesElement = document.getElementById('da_' + tmpNames[i]);
+        if (variablesElement != null && document.getElementById('da_' + tmpNames[i]).checked) {
+            if (tmpVariablesTypes[i] != 'numeric') {
+                regressionAllowed = false;
+            }
+            variablesdName[j] = variablesElement.value;
+
+            var variablesElementLogTransf = document.getElementById('da_' + tmpNames[i] + '_LogTransf');
+            if (typeOfSelectedVariableGroup == 'externals' && variablesElementLogTransf != null) {
+                variablesdNameLogTransf[j] = variablesElementLogTransf.checked;
+            }
+
+            j++;
+        }
+    }
+
+
+    var options = {
+        robust: document.getElementById('daRobustSelector').value,
+        x: document.getElementById('pfaXTextField').value,
+        y: document.getElementById('pfaYTextField').value,
+        groupingVariable: document.getElementById('groupingVariableSelector').value,
+        variablesdName: variablesdName,
+        variablesdNameLogTransf:variablesdNameLogTransf,
+        type: typeOfSelectedVariableGroup
+    };
+
+    if (pfaAllowed) {
+        Shiny.onInputChange('da.in', options);
+
+    }
+    else {
+        popUpMessage('ERROR: Factor analysis can\'t be applied on chosen data!');
+    }
+}
+
+createDaVariablesDiv = function (selectedOptions) {
+    cleanModalDialog('daVariablesDiv');
+
+    var container = document.getElementById('daVariablesDiv');
+    container.appendChild(createDiv('', '', 'Non Grouping Variable'));
+    container.appendChild(createDiv('', '', 'Log'));
+    var tmpNames;
+    if (typeOfSelectedVariableGroup != "allGroups") {
+        tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
+    }
+    else {
+        tmpNames = currentData.names;
+    }
+    for (var i = 0; i < tmpNames.length; i++) {
+        if (tmpNames[i] != selectedOptions[0].value) {
+            container.appendChild(createDiv('names', '', tmpNames[i]));
+            var cb = createCheckBox('daVariablesCheckBox', 'da_' + tmpNames[i], tmpNames[i]);
+            //cb.checked = true;
+            container.appendChild(cb);
+            if (typeOfSelectedVariableGroup == 'externals') {
+                container.appendChild(createCheckBox('daVariablesLogTransfCheckBox', 'da_' + tmpNames[i] + '_LogTransf', ''));
+            }
+            container.appendChild(createBr());
+        }
+    }
 
 };
 
@@ -2845,52 +3000,56 @@ createRegressionDialog = function(){
 	hideElement('div#regressionVariablesDiv');
 	var regressionContainer = document.getElementById('regressionWell');
 		
-	if(currentData.data != null && currentData.data != undefined){  
+	if (typeOfSelectedVariableGroup == 'transformations') {
+	    pfaContainer.appendChild(createH4Title('PFA can\'t be applied on transformed data!'));
+	} else if (typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
 		regressionContainer.appendChild(createHr());
         regressionContainer.appendChild(createDiv('variablesType','', 'Method'));
-		var methodSelector = createSelect('', 'regressionMethodSelector');
-		var firstOption = createOption('regressionMethodOption', 'lm', 'lm');
-		firstOption.setAttribute('selected','selected');
-        methodSelector.appendChild(firstOption);
-        methodSelector.appendChild(createOption('regressionMethodOption', 'lmrob', 'lmrob'));
-		methodSelector.appendChild(createOption('regressionMethodOption', 'ltsReg', 'ltsReg'));
-        regressionContainer.appendChild(methodSelector);
-        regressionContainer.appendChild(createBr());
-        regressionContainer.appendChild(createDiv('names', '', 'log'));
-		var cb = createCheckBox('regressionLogCheckBox','regressionLogCheckBox', 'log');
-		cb.checked = false;
-		regressionContainer.appendChild(cb);
-		regressionContainer.appendChild(createBr());
-		regressionContainer.appendChild(createHr());
-				
-		var xAxis = createDiv('variablesType', 'xAxisDiv', 'x - axis');
-		var xTextField = createTextField('plotDialogElement', 'regressionXTextField', '');
-		regressionContainer.appendChild(xAxis);
-		xTextField.setAttribute('placeholder', 'eg: ' + currentData.names[Math.ceil(currentData.names.length/2)]);
-		regressionContainer.appendChild(xTextField);
-		regressionContainer.appendChild(createDiv('', '', ''));
-		var yAxis = createDiv('variablesType', 'yAxisDiv', 'y - axis');
-		var yTextField = createTextField('plotDialogElement', 'regressionYTextField', '');
-		regressionContainer.appendChild(yAxis);
-		yTextField.setAttribute('placeholder', 'eg: ' + currentData.names[0]);
-		regressionContainer.appendChild(yTextField);
-		regressionContainer.appendChild(createHr());
-		
+        var methodSelector = createSelect('', 'regressionMethodSelector');
+        if (typeOfSelectedVariableGroup == 'compositions') {
+            var firstOption = createOption('regressionMethodOption', 'lmCoDaX', 'lmCoDaX');
+            firstOption.setAttribute('selected', 'selected');
+            methodSelector.appendChild(firstOption);
+            regressionContainer.appendChild(methodSelector);
+
+            regressionContainer.appendChild(createBr());
+            regressionContainer.appendChild(createDiv('variablesType', '', 'Type'));
+            var regressionRobustSelector = createSelect('', 'regressionRobustSelector');
+            var regressionFirstRobustOption = createOption('regressionRobustOption', 'robust', 'robust');
+            regressionFirstRobustOption.setAttribute('selected', 'selected');
+            regressionRobustSelector.appendChild(regressionFirstRobustOption);
+            regressionRobustSelector.appendChild(createOption('regressionRobustOption', 'classical', 'standard'));
+            regressionContainer.appendChild(regressionRobustSelector);
+        }
+        else {
+            var firstOption = createOption('regressionMethodOption', 'lm', 'lm');
+            firstOption.setAttribute('selected', 'selected');
+            methodSelector.appendChild(firstOption);
+            methodSelector.appendChild(createOption('regressionMethodOption', 'lmrob', 'lmrob'));
+            regressionContainer.appendChild(methodSelector);
+        }	
 		regressionContainer.appendChild(createDiv('','', 'Dependent Variable'));
 		var dependentVariableSelector = createSelect('', 'dependentVariableSelector');
 		dependentVariableSelector.setAttribute('onclick','createRegressionVariablesDiv(selectedOptions)');
 		var tmpNames;
-		if(typeOfSelectedVariableGroup != "allGroups"){
-			tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
+		if (typeOfSelectedVariableGroup == 'compositions') {
+		    tmpNames = Object.create(currentData.names);
+		    for (var i = currentVariablesGroup.length-1; i >=0 ; i--) {
+		        tmpNames.splice(currentVariablesGroup[i], 1);		        
+		    }
 		}
-		else{
+		else {
 			tmpNames = currentData.names;
 		}
 		for(var i = 0; i < tmpNames.length; i++){
 			dependentVariableSelector.appendChild(createOption('regressionMethodOption', tmpNames[i], tmpNames[i]));
 		}
 		regressionContainer.appendChild(dependentVariableSelector);
-		regressionContainer.appendChild(createDiv('', '', ''));
+		regressionContainer.appendChild(createDiv('names', '', 'log'));
+		var cb = createCheckBox('regressionDependentVariableLogCheckBox', 'regressionDependentVariableLogCheckBox', 'log');
+		regressionContainer.appendChild(cb);
+		regressionContainer.appendChild(createBr());
+		regressionContainer.appendChild(createHr());
 		
 		regressionContainer.appendChild(createDiv('regressionVariablesDiv','regressionVariablesDiv', ''));
 		regressionContainer.appendChild(createHr());
@@ -2898,7 +3057,7 @@ createRegressionDialog = function(){
         regressionContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getRegression();'));
 	}
 	else{
-	    regressionContainer.appendChild(createH4Title('Regression analysis can\'t be applied without data!'));
+	    regressionContainer.appendChild(createH4Title('Regression analysis can\'t be applied with this data!'));
 	}
  };
 
@@ -2907,27 +3066,12 @@ createRegressionDialog = function(){
 	var dependentVariables = {};
 	var regressionMethod = document.getElementById('regressionMethodSelector').value;
 	var dependentVariable = document.getElementById('dependentVariableSelector').value;
-    var variablesdName = [];
+	var variablesdName = [];
+	var variablesdNameLogTransf = [];
 	var regressionAllowed = true;	
 	var tmpNames;
 	var tmpVariablesTypes;	
-	var x = document.getElementById('regressionXTextField').value;
-	var y = document.getElementById('regressionYTextField').value;
-	var log = document.getElementById('regressionLogCheckBox').checked;
-	
-    if(x == "" && y == ""){
-        popUpMessage('ERROR: all textfields are empty!');
-        return;
-    }
-	if(!doesGivenVariableExist(x)){
-        popUpMessage('ERROR: variable "' + x + '" does not exist on this data-set!');
-        return;
-    }
-
-    if(!doesGivenVariableExist(y)){
-		popUpMessage('ERROR: variable "' + y + '" does not exist on this data-set!');
-		return;
-    }
+	var logDependentVariable = document.getElementById('regressionDependentVariableLogCheckBox').checked;
     
 	
 	if(typeOfSelectedVariableGroup != "allGroups"){
@@ -2946,6 +3090,12 @@ createRegressionDialog = function(){
 				regressionAllowed = false;
 			}
 			variablesdName[j] = variablesElement.value;
+
+			var variablesElementLogTransf = document.getElementById('regression_' + tmpNames[i] + '_LogTransf');
+			if (typeOfSelectedVariableGroup == 'externals' && variablesElementLogTransf != null) {
+			    variablesdNameLogTransf[j] = variablesElementLogTransf.checked;
+			}
+			 
 			j++;
         }
     }
@@ -2954,19 +3104,21 @@ createRegressionDialog = function(){
             regressionMethod: regressionMethod,
 			dependentVariable: dependentVariable,
 			variablesdName: variablesdName,
-			x:x,
-			y:y,
-			log:log
+			variablesdNameLogTransf: variablesdNameLogTransf,
+			logDependentVariable: logDependentVariable,
+			type: typeOfSelectedVariableGroup
         };
         options['group'] = currentVariablesGroupName;
 	
 	if(regressionMethod == 'lm'){
-
+	    cleanModalDialog('regression.diagnostic5');
 	}
 	else if(regressionMethod == 'lmrob'){
         
     }
-	else if(regressionMethod == 'ltsReg'){
+	else if (regressionMethod == 'lmCoDaX') {
+	    options['lmCoDaX_RobustSelector'] = document.getElementById('regressionRobustSelector').value;
+	    cleanModalDialog('regression.diagnostic5');
        
     }
 	if(regressionAllowed){
@@ -2979,12 +3131,12 @@ createRegressionDialog = function(){
  };
  
  
- createRegressionVariablesDiv = function(selectedOption){
+ createRegressionVariablesDiv = function(selectedOptions){
 	cleanModalDialog('regressionVariablesDiv');
-	document.getElementById('regressionYTextField').value = selectedOption[0].value;
 	
     var container = document.getElementById('regressionVariablesDiv');
-    container.appendChild(createDiv('','', 'Regression Coefficients'));
+    container.appendChild(createDiv('', '', 'Independent Variables'));
+    container.appendChild(createDiv('', '', 'Log'));
 	var tmpNames;
 	if(typeOfSelectedVariableGroup != "allGroups"){
 		tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
@@ -2993,11 +3145,14 @@ createRegressionDialog = function(){
 		tmpNames = currentData.names;
 	}
 	for(var i = 0; i < tmpNames.length; i++){
-		if(tmpNames[i] != selectedOption[0].value){
+		if(tmpNames[i] != selectedOptions[0].value){
 			container.appendChild(createDiv('names', '', tmpNames[i]));
 			var cb = createCheckBox('regressionVariablesCheckBox', 'regression_' + tmpNames[i],tmpNames[i]);
 			//cb.checked = true;
 			container.appendChild(cb);
+			if (typeOfSelectedVariableGroup == 'externals') {
+                container.appendChild(createCheckBox('regressionVariablesLogTransfCheckBox', 'regression_' + tmpNames[i] + '_LogTransf',''));
+			}
 			container.appendChild(createBr());
 		}
     }

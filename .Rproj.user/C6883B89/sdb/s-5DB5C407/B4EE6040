@@ -1,0 +1,17 @@
+{
+    "contents" : "library(shiny)\n\nshinyServer(function(input, output) {\n\n    Dataset <- reactive({\n        df <- mtcars\n        # If the dataframe used to create the DataTable\n        # happens to contain NA values, they need to\n        # be replaced with an empty string. This ensures\n        # that the array returned from the datatables\n        # underscore method (i.e. the data contained in\n        # input$filtered_table) contains an entry in every\n        # cell. Otherwise the ProcessedFilteredData routine\n        # will result in corrupted data\n        return(df)\n    })\n\n    output$data_table <- renderDataTable({\n        Dataset()\n    }, options = list(sDom = \"ilftpr\"))\n\n    ProcessedFilteredData <- reactive({\n        v <- input$filtered_table\n        # This code assumes that there is an entry for every\n        # cell in the table (see note above about replacing\n        # NA values with the empty string).\n        col_names <- names(Dataset())\n        n_cols <- length(col_names)\n        n_row <- length(v)/n_cols\n        m <- matrix(v, ncol = n_cols, byrow = TRUE)\n        df <- data.frame(m)\n        names(df) <- col_names\n        return(df)\n    })\n\n    output$downloadData <- downloadHandler(\n        filename = function() { 'filtered_data.csv' }, content = function(file) {\n            write.csv(ProcessedFilteredData(), file, row.names = FALSE)\n        }\n    )\n})\n",
+    "created" : 1445686711148.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3819911595",
+    "id" : "B4EE6040",
+    "lastKnownWriteTime" : 1445687652,
+    "path" : "C:/Users/Jakob/shiny/Tests/reactivity/test1/server.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
