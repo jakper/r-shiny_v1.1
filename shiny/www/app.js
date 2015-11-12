@@ -2733,8 +2733,8 @@ getDaOptions = function () {
 
     var options = {
         robust: document.getElementById('daRobustSelector').value,
-        x: document.getElementById('pfaXTextField').value,
-        y: document.getElementById('pfaYTextField').value,
+        x: document.getElementById('daXTextField').value,
+        y: document.getElementById('daYTextField').value,
         groupingVariable: document.getElementById('groupingVariableSelector').value,
         variablesdName: variablesdName,
         variablesdNameLogTransf:variablesdNameLogTransf,

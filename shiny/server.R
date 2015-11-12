@@ -1384,7 +1384,7 @@ observe({
             if(options$type == 'compositions'){
               output$pca.BiPlot <- renderPlot({
                 #ggbiplot(tmp$princompOutputClr, scale = 0, labels.size = 3)
-                biplot <- autoplot(tmp$princompOutputClr, data = total,loadings = TRUE, loadings.colour = 'blue',loadings.label = TRUE, loadings.label.size = 3)
+                biplot <- autoplot(tmp$princompOutputClr, data = total)
                 eval(parse(text = paste0('biplot <- biplot + aes( Comp.', options$x ,', Comp.',options$y,')')))
                 biplot
               })
@@ -1420,7 +1420,7 @@ observe({
             else{
               output$pca.BiPlot <- renderPlot({
                 #ggbiplot(tmp, labels =  rownames(tmp),scale = 0)
-                biplot <- autoplot(tmp, data = total,loadings = TRUE, loadings.colour = 'blue',loadings.label = TRUE, loadings.label.size = 3)
+                biplot <- autoplot(tmp, data = total)
                 eval(parse(text = paste0('biplot <- biplot + aes( PC', options$x ,', PC',options$y,')')))
                 biplot
               })
@@ -1586,16 +1586,32 @@ observe({
         if(!is.null(try)){
           try <- tryCatch({
             if(options$func == 'pfa'){
-              if(options$pfaRobust == 'robust'){
-                x.mcd=covMcd(temdata,cor=TRUE) 
-                x.rsc=scale(temdata,x.mcd$cent,sqrt(diag(x.mcd$cov))) 
-                #res1 <- pfa(x, factors=1, covmat="covMcd")
-                tmp=pfa(x.rsc,factors=as.numeric(options$numberOfFactorsTextField),covmat=x.mcd,scores=options$score,rotation=options$rotation) 
+              if(options$type == 'compositions'){
                 
+                if(options$pfaRobust == 'robust'){
+                  x.mcd=covMcd(temdata,cor=TRUE) 
+                  x.rsc=scale(temdata,x.mcd$cent,sqrt(diag(x.mcd$cov))) 
+                  #res1 <- pfa(x, factors=1, covmat="covMcd")
+                  tmp=StatDA::pfa(x.rsc,factors=as.numeric(options$numberOfFactorsTextField),covmat=x.mcd,scores=options$score,rotation=options$rotation) 
+                  
+                }
+                else{
+                  tmp=StatDA::pfa(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation) 
+                }
               }
               else{
-                tmp=pfa(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation) 
+                if(options$pfaRobust == 'robust'){
+                  x.mcd=covMcd(temdata,cor=TRUE) 
+                  x.rsc=scale(temdata,x.mcd$cent,sqrt(diag(x.mcd$cov))) 
+                  #res1 <- pfa(x, factors=1, covmat="covMcd")
+                  tmp=robCompositions::pfa(x.rsc,factors=as.numeric(options$numberOfFactorsTextField),covmat=x.mcd,scores=options$score,rotation=options$rotation) 
+                  
+                }
+                else{
+                  tmp=robCompositions::pfa(scale(temdata),factors=as.numeric(options$numberOfFactorsTextField),scores=options$score,rotation=options$rotation) 
+                }
               }
+              
             }
             else if(options$func == 'factanal'){
                 
@@ -1618,7 +1634,7 @@ observe({
         if(!is.null(try)){
           try <- tryCatch({
           output$pfa.BiPlot <- renderPlot({
-            biplot <- autoplot(tmp, data = temdata,loadings = TRUE, loadings.colour = 'blue',loadings.label = TRUE, loadings.label.size = 3)
+            biplot <- autoplot(tmp, data = temdata)
             eval(parse(text = paste0('biplot <- biplot + aes( Factor', options$x ,', Factor',options$y,')')))
             biplot
           })
@@ -1736,12 +1752,34 @@ observe({
         
         
         
+        if(options$type == 'compositions'){
+          if(options$robust == 'robust'){
+            tmp <- daFisher(X,grp=grp,method="robust",coda=TRUE)
+          }
+          else{
+            tmp <- daFisher(X,grp=grp,method="classical",coda=TRUE)
+          }
+        }
+        else{
+          if(options$robust == 'robust'){
+            tmp <- daFisher(X,grp=grp,method="robust",coda=FALSE)
+          }
+          else{
+            tmp <- daFisher(X,grp=grp,method="classical",coda=FALSE)
+          }
+        }
         
+        
+        total <- temdata[,1]
+        colnames(total)[1] <- "group"
+        total['predicted'] <- predict(tmp)
+        total<- merge(total,as.data.frame(tmp$scores), by="row.names")
         
         
         
         output$da.Plot <- renderPlot({
-          ggplot(data = total, aes(fitted.values ,y)) + geom_point()
+          eval(parse(text = paste0('ggplot(data = total, aes( V', options$x ,',V',options$y,')) + geom_point(colour = group,shape = predicted)')))
+          #ggplot(data = total, aes(V1 ,V2)) + geom_point(colour = group,shape = predicted)
         })
         
         
@@ -1765,46 +1803,31 @@ observe({
         
         output$daDownloadScors <- downloadHandler(
           filename = function() { 
-            paste('residuals', '.csv', sep='') 
+            paste('scores', '.csv', sep='') 
           },
           content = function(file) {
-            if(options$regressionMethod == 'lm' || options$regressionMethod == 'lmrob'){
-              write.csv(tmp$residuals, file,row.names = FALSE)
-            }
-            else{
-              write.csv(tmp$lm$residuals, file,row.names = FALSE)
-            }
+              write.csv(tmp$scores, file,row.names = FALSE)
+            
             
           }
         )
         
         output$daDownloadLoadings <- downloadHandler(
           filename = function() { 
-            paste('fitted values', '.csv', sep='') 
+            paste('loadings', '.csv', sep='') 
           },
           content = function(file) {
-            if(options$regressionMethod == 'lm' || options$regressionMethod == 'lmrob'){
-              write.csv(tmp$fitted.values, file,row.names = FALSE)
-            }
-            else{
-              write.csv(tmp$lm$fitted.values, file,row.names = FALSE)
-            }
+            write.csv(tmp$loadings, file,row.names = FALSE)
             
           }
         )
         
         output$daDownloadPredict <- downloadHandler(
           filename = function() { 
-            paste('fitted values', '.csv', sep='') 
+            paste('predicted', '.csv', sep='') 
           },
           content = function(file) {
-            if(options$regressionMethod == 'lm' || options$regressionMethod == 'lmrob'){
-              write.csv(tmp$fitted.values, file,row.names = FALSE)
-            }
-            else{
-              write.csv(tmp$lm$fitted.values, file,row.names = FALSE)
-            }
-            
+            write.csv(predict(tmp), file,row.names = FALSE)
           }
         )
         
@@ -2021,7 +2044,6 @@ observe({
         total <- total[-c(1)]
         
         if(options$regressionMethod == 'lm'){
-          #eval(parse(text = paste0('tmp <- lm(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))
           eval(parse(text = paste0('tmp <- lm(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))
           total <- merge(as.data.frame(tmp$fitted.values),as.data.frame(temdata[which(names(temdata)==options$dependentVariable)]), by="row.names")
           
@@ -2047,15 +2069,16 @@ observe({
         }
         colnames(total)[2] <- "fitted.values"
         colnames(total)[3] <- "y"
+        total <- transform(total, Row.names = as.numeric(Row.names))
         
         output$regression.Plot <- renderPlot({
-          ggplot(data = total, aes(fitted.values ,y)) + geom_point()
+          ggplot(data = total, aes(fitted.values ,y)) + geom_point() + geom_abline(intercept = 0, colour = "red")
         })
         
         
         #renderPrint
         output$click_info <- renderDataTable({
-          nearPoints(total, input$regression.Plot_click)
+          round_df(nearPoints(total, input$regression.Plot_click),3)
         },options=list(
           paging = FALSE,
           searching = FALSE))
@@ -2063,11 +2086,17 @@ observe({
         #renderPrint
         output$brush_info <- renderDataTable({
           
-          brushedPoints(total, input$regression.Plot_brush) 
+          round_df(brushedPoints(total, input$regression.Plot_brush),3)
         })
         
         output$render.tes <- renderPrint({
-          print(summary(tmp))
+          if(options$regressionMethod == 'lm' || options$regressionMethod == 'lmrob'){
+            print(summary(tmp))
+          }
+          else{
+            print(summary(tmp$lm))
+          }
+          
         })
         
         
@@ -2079,7 +2108,13 @@ observe({
             plot(tmp, which = 1)
           }
           else if(options$regressionMethod == 'lmCoDaX'){
-            plot(tmp$lm, which = 1)
+            if(options$lmCoDaX_RobustSelector == "robust"){
+              plot(tmp$lm, which = "rqq")
+            }
+            else{
+              plot(tmp$lm, which = 1)
+            }
+            
           }
         })
         
@@ -2091,7 +2126,12 @@ observe({
             plot(tmp, which = 2)
           }
           else if(options$regressionMethod == 'lmCoDaX'){
-            plot(tmp$lm, which = 2)
+            if(options$lmCoDaX_RobustSelector == "robust"){
+              plot(tmp$lm, which = "rindex")
+            }
+            else{
+              plot(tmp$lm, which = 2)
+            }
           }
         })
         
@@ -2103,7 +2143,12 @@ observe({
             plot(tmp, which = 3)
           }
           else if(options$regressionMethod == 'lmCoDaX'){
-            plot(tmp$lm, which = 3)
+            if(options$lmCoDaX_RobustSelector == "robust"){
+              plot(tmp$lm, which = "rfit")
+            }
+            else{
+              plot(tmp$lm, which = 3)
+            }
           }
         })
         
@@ -2115,7 +2160,12 @@ observe({
             plot(tmp, which = 4)
           }
           else if(options$regressionMethod == 'lmCoDaX'){
-            plot(tmp$lm, which = 4)
+            if(options$lmCoDaX_RobustSelector == "robust"){
+              plot(tmp$lm, which = "rdiag")
+            }
+            else{
+              plot(tmp$lm, which = 4)
+            }
           }
         })
         
