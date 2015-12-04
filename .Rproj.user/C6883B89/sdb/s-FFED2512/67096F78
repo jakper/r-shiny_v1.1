@@ -1,0 +1,25 @@
+{
+    "contents" : "",
+    "created" : 1449232254747.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "67096F78",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "owp7dykybk",
+        "caption" : "wine.test.classVec",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=wine.test.classVec&cache_key=owp7dykybk",
+        "displayedObservations" : 458,
+        "environment" : "",
+        "object" : "wine.test.classVec",
+        "totalObservations" : 458,
+        "variables" : 1
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}

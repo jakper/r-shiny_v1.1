@@ -321,7 +321,9 @@ shinyUI(navbarPage("i-CoDa",
         tabPanel('Outlier Detection',
             HTML('
                 <div class="well workingWell" id="outlierWell"></div>
-            ')
+                <pre id="od.summary" class = "shiny-text-output"></pre>
+            '),
+            plotOutput("od.DDPlot",width = "400px", height = "400px")
         )
     ),
 #    navbarMenu('Tests'

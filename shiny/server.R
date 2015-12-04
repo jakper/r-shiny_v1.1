@@ -1734,7 +1734,11 @@ observe({
       options <- input$da.in
       if(!is.null(options)){
         
+        
+        try <- tryCatch({
         dataAll <- variablesEnv$currentData
+        
+
         temdata <- dataAll[which(names(dataAll)==options$groupingVariable)]
         
         
@@ -1749,51 +1753,124 @@ observe({
             }
           }
         }
+        temdata[,-1] <- sapply(temdata[,-1], as.numeric)
+        
+        total <- temdata[1]
+        total <- total[-c(1)]
+        
+        }, error = function(cond){
+          sendPopUpMessage(paste0('Error in data-input or transformation:  ',as.character(cond$message)))
+          return(NULL)})
         
         
+        if(!is.null(try)){
+          try <- tryCatch({
+        total['group'] <- as.factor(temdata[,1])
         
-        if(options$type == 'compositions'){
-          if(options$robust == 'robust'){
-            tmp <- daFisher(X,grp=grp,method="robust",coda=TRUE)
+        
+        if(options$func == 'daFisher'){
+          if(length(levels(factor(total[,1])))<=2){
+            sendPopUpMessage('ERROR: Grouping Variable has not enough factors daFischer (at least 3)!')
+            return(NULL)
+          }
+          if(options$type == 'compositions'){
+            if(options$robust == 'robust'){
+              tmp <- daFisher(temdata[,-1],grp=temdata[,1],method="robust",coda=TRUE)
+            }
+            else{
+              tmp <- daFisher(temdata[,-1],grp=temdata[,1],method="classical",coda=TRUE)
+            }
           }
           else{
-            tmp <- daFisher(X,grp=grp,method="classical",coda=TRUE)
+            if(options$robust == 'robust'){
+              tmp <- daFisher(temdata[,-1],grp=temdata[,1],method="robust",coda=FALSE)
+            }
+            else{
+              tmp <- daFisher(temdata[,-1],grp=temdata[,1],method="classical",coda=FALSE)
+            }
           }
+          total['predicted'] <- predict(tmp)
+          total<- merge(total,as.data.frame(tmp$scores), by="row.names")
         }
+        
+        else if(options$func == 'LDA'){
+          if(options$type == 'compositions'){
+            X <- isomLR(temdata[,-1])
+            if(options$robust == 'robust'){
+              tmp <- Linda(X,temdata[,1],alpha=0.75)
+            }
+            else{
+              tmp <- LdaClassic(X,temdata[,1])
+            }
+          }
+          else{
+            if(options$robust == 'robust'){
+              tmp <- Linda(temdata[,-1],temdata[,1],alpha=0.75)
+            }
+            else{
+              tmp <- LdaClassic(temdata[,-1],temdata[,1])
+            }
+          }
+          total['predicted'] <- as.numeric(predict(tmp)@classification)
+        }
+        
+        else if(options$func == 'QDA'){
+          if(options$type == 'compositions'){
+            X <- isomLR(temdata[,-1])
+            if(options$robust == 'robust'){
+              tmp <- QdaCov(X,temdata[,1])
+            }
+            else{
+              tmp <- QdaClassic(X,temdata[,1])
+            }
+          }
+          else{
+            if(options$robust == 'robust'){
+              tmp <- QdaCov(temdata[,-1],temdata[,1])
+            }
+            else{
+              tmp <- QdaClassic(temdata[,-1],temdata[,1])
+            }
+          }
+          total['predicted'] <- as.numeric(predict(tmp)@classification)
+        }
+        
         else{
-          if(options$robust == 'robust'){
-            tmp <- daFisher(X,grp=grp,method="robust",coda=FALSE)
-          }
-          else{
-            tmp <- daFisher(X,grp=grp,method="classical",coda=FALSE)
-          }
+          sendPopUpMessage(paste0('ERROR: function "', options$func, '" is not supported' ))
+        }
+        
+          }, error = function(cond){
+            sendPopUpMessage(paste0('Error applying function ',options$func ,':  ',as.character(cond$message)))
+            return(NULL)})
         }
         
         
-        total <- temdata[,1]
-        colnames(total)[1] <- "group"
-        total['predicted'] <- predict(tmp)
-        total<- merge(total,as.data.frame(tmp$scores), by="row.names")
         
-        
+        if(!is.null(try)){
+          try <- tryCatch({
         
         output$da.Plot <- renderPlot({
-          eval(parse(text = paste0('ggplot(data = total, aes( V', options$x ,',V',options$y,')) + geom_point(colour = group,shape = predicted)')))
-          #ggplot(data = total, aes(V1 ,V2)) + geom_point(colour = group,shape = predicted)
+          if(options$func == 'daFisher'){
+            eval(parse(text = paste0('ggplot(data = total, aes( V', options$x ,',V',options$y,')) + geom_point(colour = as.numeric(total$group),shape = total$predicted)')))
+            #ggplot(data = total, aes(V1 ,V2)) + geom_point(shape = total$group)
+          }
         })
         
         
         #renderPrint
         output$da.click_info <- renderDataTable({
-          nearPoints(total, input$da.Plot_click)
+          if(options$func == 'daFisher'){
+            nearPoints(total, input$da.Plot_click)
+          }
         },options=list(
           paging = FALSE,
           searching = FALSE))
         
         #renderPrint
         output$da.brush_info <- renderDataTable({
-          
-          brushedPoints(total, input$da.Plot_brush) 
+          if(options$func == 'daFisher'){
+            brushedPoints(total, input$da.Plot_brush) 
+          }
         })
         
         output$da.print <- renderPrint({
@@ -1827,10 +1904,14 @@ observe({
             paste('predicted', '.csv', sep='') 
           },
           content = function(file) {
-            write.csv(predict(tmp), file,row.names = FALSE)
+            write.csv(total$predicted , file,row.names = FALSE)
           }
         )
-        
+          }, error = function(cond){
+            
+            sendPopUpMessage(paste0('Error while creating plots:  ',as.character(cond$message)))
+            return(NULL)})
+        }
         
         
       }
@@ -1898,7 +1979,7 @@ observe({
           return(NULL)})
         
 
-        #if(!is.null(try)){
+        if(!is.null(try)){
           try <- tryCatch({
             if(options$func == 'HClust'){
               tmpclust <- hclust(dist(temdata), method = options$method)
@@ -1961,7 +2042,7 @@ observe({
           }, error = function(cond){
             sendPopUpMessage(paste0('Error applying function ',options$func ,':  ',as.character(cond$message)))
             return(NULL)})
-        #}
+        }
         
         
 
@@ -1977,21 +2058,6 @@ observe({
           brushedPoints(tableData, input$clust.Plot_brush) 
         })
         
-        #output$clustDownloadCluster <- downloadHandler(
-        #  filename = function() { 
-        #    paste('cluster', '.csv', sep='') 
-        #  },
-        #  content = function(file) {
-        #    if(options$func == 'HClust'){
-        #    }
-        #    else if(options$func == 'Kmeans'){
-        #    }
-        #    else if(options$func == 'MClust'){
-        #    }
-        #    
-        #    write.csv(tmp$scores, file,row.names = FALSE)
-        #  }
-        #)
         
         output$clustDownloadFilteredData <- downloadHandler(
           filename = function() { 
@@ -2016,6 +2082,8 @@ observe({
       
       options <- input$regression.in
       if(!is.null(options)){
+        
+        try <- tryCatch({
         
         dataAll <- variablesEnv$currentData
 
@@ -2042,6 +2110,13 @@ observe({
         variablesdName <- paste(options$variablesdName,collapse="+")
         total <- temdata[1]
         total <- total[-c(1)]
+        
+        }, error = function(cond){
+          sendPopUpMessage(paste0('Error in data-input or transformation:  ',as.character(cond$message)))
+          return(NULL)})
+        
+        if(!is.null(try)){
+          try <- tryCatch({
         
         if(options$regressionMethod == 'lm'){
           eval(parse(text = paste0('tmp <- lm(', options$dependentVariable,' ~ ',variablesdName,', data = unclass(temdata))')))
@@ -2070,6 +2145,14 @@ observe({
         colnames(total)[2] <- "fitted.values"
         colnames(total)[3] <- "y"
         total <- transform(total, Row.names = as.numeric(Row.names))
+        
+          }, error = function(cond){
+            sendPopUpMessage(paste0('Error applying function ',options$regressionMethod ,':  ',as.character(cond$message)))
+            return(NULL)})
+        }
+        
+        if(!is.null(try)){
+          try <- tryCatch({
         
         output$regression.Plot <- renderPlot({
           ggplot(data = total, aes(fitted.values ,y)) + geom_point() + geom_abline(intercept = 0, colour = "red")
@@ -2206,6 +2289,12 @@ observe({
           }
         )
         
+          }, error = function(cond){
+            
+            sendPopUpMessage(paste0('Error while creating plots:  ',as.character(cond$message)))
+            return(NULL)})
+        }
+        
       }
       
     })  
@@ -2215,14 +2304,74 @@ observe({
     
     #data(Animals, package ="MASS")
     #brain <- Animals[c(1:24, 26:25, 27:28),]
-    #mcd <- covMcd(log(brain))
     
-    #plot(mcd, which = "distance", classic = TRUE)# 2 plots
-    #plot(mcd, which = "dd")
-    #plot(mcd, which = "tolEllipsePlot", classic = TRUE)
-    #op <- par(mfrow = c(2,3))
-    #plot(mcd) ## -> which = "all" (5 plots)
-    #par(op)
+    observe({
+      
+      options <- input$od.in
+      if(!is.null(options)){
+        try <- tryCatch({
+        
+          dataAll <- variablesEnv$currentData
+          temdata <- dataAll[1]
+          temdata <- temdata[-c(1)]
+          
+          for ( i in 1:(length(names(dataAll))) ) {
+            if(length(which(names(dataAll)==options$variablesdName[i]))>0){
+              if((options$type == 'externals') && (options$variablesdNameLogTransf[i] == TRUE)) {
+                temdata[options$variablesdName[[i]]] <- log((dataAll[which(names(dataAll)==options$variablesdName[i])]))
+              }
+              else{
+                temdata[options$variablesdName[[i]]] <- (dataAll[which(names(dataAll)==options$variablesdName[i])])
+                
+              }
+            }
+          }
+        }, error = function(cond){
+          sendPopUpMessage(paste0('Error in data-input or transformation:  ',as.character(cond$message)))
+          return(NULL)})
+        
+        
+            try <- tryCatch({
+                if(options$type == 'compositions'){
+                  tmp <- outCoDa(x =temdata , quantile = as.numeric(options$quantile), h = as.numeric(options$h), coda =TRUE )
+                  temdata <-isomlr(temdata)
+                  
+                  
+                }
+                else{
+                  tmp <- outCoDa(x =temdata , quantile = as.numeric(options$quantile), h = as.numeric(options$h), coda =FALSE )
+                }
+                md <- sqrt(mahalanobis(temdata, colMeans(temdata), var(temdata), tol = 1e-07))
+                rd <- sqrt(mahalanobis(temdata, covMcd(temdata)$center, covMcd(temdata)$cov, tol = 1e-07))
+                cutoff <- sqrt(qchisq(0.975, ncol(temdata)))
+                id.n <- length(which(rd > cutoff))
+            }, error = function(cond){
+            sendPopUpMessage(paste0('Error applying function:  ',as.character(cond$message)))
+            return(NULL)})
+        
+        
+        
+          try <- tryCatch({
+            output$od.summary <- renderPrint({
+                print(tmp)
+            })
+            
+            
+            output$od.DDPlot <- renderPlot({
+              xlab <- "Mahalanobis distance"
+              ylab <- "Robust distance"
+              plot(md, tmp$mahalDist, type = "p", xlab = xlab, ylab = ylab, main = "Distance-Distance Plot")
+              abline(0, 1, lty = 2)
+              abline(v = cutoff, h = cutoff)
+            })
+          }, error = function(cond){
+            
+            sendPopUpMessage(paste0('Error while creating plots:  ',as.character(cond$message)))
+            return(NULL)})
+        }
+      
+      
+    })  
     
 
 #######################################################################################################################################

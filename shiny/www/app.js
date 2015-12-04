@@ -2551,8 +2551,7 @@ getPFAOptions = function () {
         score: document.getElementById('pfaScoreSelector').value,
         rotation: document.getElementById('pfaRotationSelector').value,
         variablesdName: variablesdName,
-        type: typeOfSelectedVariableGroup,
-        pfaRobust : document.getElementById('pfaRobustSelector').value
+        type: typeOfSelectedVariableGroup
     };
 
     if (typeOfSelectedVariableGroup == 'compositions') {
@@ -2560,6 +2559,9 @@ getPFAOptions = function () {
     }
     else {
         options['log'] = document.getElementById('pfaLogCheckBox').checked;
+        if (func == 'pfa') {
+              options['pfaRobust'] = document.getElementById('pfaRobustSelector').value;
+        }
     }
     if (pfaAllowed) {
         //showElement('div#pfaOutput');
@@ -2620,9 +2622,14 @@ createDADialog = function () {
         daContainer.appendChild(createH4Title('Discriminant Analysis can\'t be applied on transformed data!'));
     } else if (typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
 
-        h2 = document.createElement("h4");
-        h2.textContent = "Discriminant Analysis - daFisher";
-        daContainer.appendChild(h2);
+        daContainer.appendChild(createHr());
+        daContainer.appendChild(createDiv('', '', 'Function'));
+        var functionSelector = createSelect('', 'daFunctionSelector');
+        functionSelector.setAttribute('onclick', 'createDaFunctionWell(selectedOptions)');
+        functionSelector.appendChild(createOption('daFunctionOption', 'daFisher', 'daFisher'));
+        functionSelector.appendChild(createOption('daFunctionOption', 'LDA', 'LDA'));
+        functionSelector.appendChild(createOption('daFunctionOption', 'QDA', 'QDA'));
+        daContainer.appendChild(functionSelector);
 
         daContainer.appendChild(createDiv('variablesType', '', 'Type'));
         var robustDaSelector = createSelect('', 'daRobustSelector');
@@ -2684,7 +2691,7 @@ getDaOptions = function () {
     var variablesdNameLogTransf = [];
     var x = document.getElementById('daXTextField').value;
     var y = document.getElementById('daYTextField').value;
-
+    var func = document.getElementById('daFunctionSelector').value;
 
     try {
         x = parseInt(x);
@@ -2717,7 +2724,7 @@ getDaOptions = function () {
         var variablesElement = document.getElementById('da_' + tmpNames[i]);
         if (variablesElement != null && document.getElementById('da_' + tmpNames[i]).checked) {
             if (tmpVariablesTypes[i] != 'numeric') {
-                regressionAllowed = false;
+                daAllowed = false;
             }
             variablesdName[j] = variablesElement.value;
 
@@ -2738,15 +2745,29 @@ getDaOptions = function () {
         groupingVariable: document.getElementById('groupingVariableSelector').value,
         variablesdName: variablesdName,
         variablesdNameLogTransf:variablesdNameLogTransf,
-        type: typeOfSelectedVariableGroup
+        type: typeOfSelectedVariableGroup,
+        func: func
     };
 
-    if (pfaAllowed) {
+    if (func != 'daFisher') {
+        hideElement('#da.Plot');
+        hideElement('#daDownloadScors');
+        hideElement('#daDownloadLoadings');
+
+    }
+    else {
+        showElement('#da.Plot');
+        showElement('#daDownloadScors');
+        showElement('#daDownloadLoadings');
+    }
+
+
+    if (daAllowed) {
         Shiny.onInputChange('da.in', options);
 
     }
     else {
-        popUpMessage('ERROR: Factor analysis can\'t be applied on chosen data!');
+        popUpMessage('ERROR: Discriminant Analysis can\'t be applied on chosen data!');
     }
 }
 
@@ -2942,7 +2963,7 @@ createDaVariablesDiv = function (selectedOptions) {
          var variablesElement = document.getElementById('cluster_' + tmpNames[i]);
          if (variablesElement != null && document.getElementById('cluster_' + tmpNames[i]).checked) {
              if (tmpVariablesTypes[i] != 'numeric') {
-                 clustAllowed = true;
+                 clustAllowed = false;
              }
              variablesdName[j] = variablesElement.value;
              j++;
@@ -3168,20 +3189,129 @@ createRegressionDialog = function(){
  createODDialog = function () {
      cleanModalDialog('outlierWell');
      var odContainer = document.getElementById('outlierWell');
-     if (currentData.data != null && currentData.data != undefined) {
+     if (typeOfSelectedVariableGroup == 'transformations') {
+         daContainer.appendChild(createH4Title('Outlier Detection can\'t be applied on transformed data!'));
+     } else if (typeOfSelectedVariableGroup == 'compositions' || typeOfSelectedVariableGroup == 'externals') {
+
+         h2 = document.createElement("h4");
+         h2.textContent = "Outlier Detection - outCoDa";
+         odContainer.appendChild(h2);
+
+
          odContainer.appendChild(createHr());
-         odContainer.appendChild(createDiv('', '', 'Function'));
-         var functionSelector = createSelect('', 'odFunctionSelector');
-         functionSelector.setAttribute('onclick', 'createODFunctionWell(selectedOptions)');
-         functionSelector.appendChild(createOption('odFunctionOption', 'lda', 'lda'));
-         functionSelector.appendChild(createOption('odFunctionOption', 'qda', 'qda'));
-         odContainer.appendChild(functionSelector);
+         var oDQuantile = createDiv('variablesType', 'oDQuantile', 'quantile');
+         oDQuantile.setAttribute('title', 'corresponding to a significance level, is used as a cut-off value for outlier identification');
+         var oDQuantileTextField = createTextField('plotDialogElement', 'oDQuantileTextField', '0.975');
+         odContainer.appendChild(oDQuantile);
+         oDQuantileTextField.setAttribute('title', '0 < quantile <= 1');
+         odContainer.appendChild(oDQuantileTextField);
+         odContainer.appendChild(createDiv('', '', ''));
+         var oDH = createDiv('variablesType', 'oDH', 'h');
+         oDH.setAttribute('title', 'the size of the subsets for the robust covariance estimation according the MCDestimator for which the determinant is minimized');
+         var oDHTextField = createTextField('plotDialogElement', 'oDHTextField', '0.5');
+         odContainer.appendChild(oDH);
+         oDHTextField.setAttribute('title', '0 < h <= 1');
+         odContainer.appendChild(oDHTextField);
+         odContainer.appendChild(createHr());
+
+         odContainer.appendChild(createDiv('', '', 'Used variables for Outlier Detection'));
+         odContainer.appendChild(createDiv('', '', 'Log'));
+         var tmpNames;
+         if (typeOfSelectedVariableGroup != "allGroups") {
+             tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup)
+         }
+         else {
+             tmpNames = currentData.names;
+         }
+         for (var i = 0; i < tmpNames.length; i++) {
+                 odContainer.appendChild(createDiv('names', '', tmpNames[i]));
+                 var cb = createCheckBox('oDVariablesCheckBox', 'od_' + tmpNames[i], tmpNames[i]);
+                 odContainer.appendChild(cb);
+                 if (typeOfSelectedVariableGroup == 'externals') {
+                     odContainer.appendChild(createCheckBox('oDVariablesLogTransfCheckBox', 'od_' + tmpNames[i] + '_LogTransf', ''));
+                 }
+                 odContainer.appendChild(createBr());
+             
+         }
+
+         odContainer.appendChild(createHr());
+         odContainer.appendChild(createButton('btn', 'buttonVariable', 'OK', 'getoDOptions()'));
+
      }
  };
 
- createODFunctionWell = function (selectedOptions) {
+ getoDOptions = function () {
+     var oDAllowed = true;
+     var tmpNames;
+     var tmpVariablesTypes;
+     var variablesdName = [];
+     var variablesdNameLogTransf = [];
+     var quantile = document.getElementById('oDQuantileTextField').value;
+     var h = document.getElementById('oDHTextField').value;
 
- };
+     
+     try {
+         quantile = parseFloat(quantile);
+         h = parseFloat(h);
+     }
+     catch (err) {
+         return;
+     }
+     
+     if (quantile <= 0 || quantile >=1) {
+         popUpMessage('ERROR: Invalid value for quantile!');
+         return;
+     }
+
+     if (h <= 0 || h >= 1) {
+         popUpMessage('ERROR: Invalid value for h!');
+         return;
+     }
+     
+     if (typeOfSelectedVariableGroup != "allGroups") {
+         tmpNames = getDataFromGivenIndexes(currentData.names, currentVariablesGroup);
+         tmpVariablesTypes = getDataFromGivenIndexes(currentData.variablesTypes, currentVariablesGroup);
+     }
+     else {
+         tmpNames = currentData.names;
+         tmpVariablesTypes = currentData.variablesTypes;
+     }
+     var j = 0;
+     for (var i = 0; i < tmpNames.length; i++) {
+         var variablesElement = document.getElementById('od_' + tmpNames[i]);
+         if (variablesElement != null && document.getElementById('od_' + tmpNames[i]).checked) {
+             if (tmpVariablesTypes[i] != 'numeric') {
+                 oDAllowed = false;
+             }
+             variablesdName[j] = variablesElement.value;
+
+             var variablesElementLogTransf = document.getElementById('od_' + tmpNames[i] + '_LogTransf');
+             if (typeOfSelectedVariableGroup == 'externals' && variablesElementLogTransf != null) {
+                 variablesdNameLogTransf[j] = variablesElementLogTransf.checked;
+             }
+
+             j++;
+         }
+     }
+
+
+     var options = {
+         quantile: document.getElementById('oDQuantileTextField').value,
+         h: document.getElementById('oDHTextField').value,
+         variablesdName: variablesdName,
+         variablesdNameLogTransf: variablesdNameLogTransf,
+         type: typeOfSelectedVariableGroup
+     };
+
+     if (oDAllowed) {
+         Shiny.onInputChange('od.in', options);
+
+     }
+     else {
+         popUpMessage('ERROR: Outlier Detection can\'t be applied on chosen data!');
+     }
+ }
+
 
 
 /**********************************************************************************
